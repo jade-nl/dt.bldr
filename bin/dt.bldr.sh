@@ -22,6 +22,7 @@
 # Changes      : nov 07 2019  First build / outline              1.0.0-alpha
 #              : nov 10 2019  Options processing and help      1.0.0-alpha.1
 #              : nov 18 2019  Start setting up main functions  1.0.0-alpha.2
+#              : nov 19 2019  Fixed install and build functions   1.0.0-beta
 # -------------------------------------------------------------------------- #
 # Copright     : Jacques Dekker
 #              : CC BY-NC-SA 4.0
@@ -34,7 +35,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-alpha.2"
+scriptVersion="1.0.0-beta"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -47,20 +48,21 @@ usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
 cfgChkr="${binDir}/dt.cfg.sh -c"
 # colours
 clrRST=$(tput sgr0)    # reset
-clrBLK=$(tput setaf 0) # black
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
 clrBLU=$(tput setaf 4) # blue
 # script misc
 lrgDvdr=" ------------------------------------------------------------------ "
-instMthd="LOC"
+sudoToken=""
+gitVrsn="n/a"
+curVrsn="n/a"
+totBldTime="0"
 # input options
 optBuild="0"
 optClone="0"
 optInstall="0"
 optPull="0"
 optStop="0"
-sameVrsn=""
 
 # -------------------------------------------------------------------------- #
 # --- Functions ---
@@ -72,23 +74,20 @@ sameVrsn=""
 # ------------------------------------------------------------------ #
 function _gitDtClone ()
 {
-  echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
   # remove current files/dirs first
   [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
   # clone dt
   cd ${baseGitDir}
   git clone git://github.com/darktable-org/darktable.git >/dev/null  2>&1 &
-  prcssPid="$!" ; txtStrng="clone - cloning into darktable"
+  prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # initialize rawspeed
-  printf "\r  clone - initializing and updating rawspeed .. "
+  printf "\r          - initializing and updating rawspeed .. "
   cd ${dtGitDir}
   git submodule init >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
   git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule update"
-  printf "\r  clone - initializing and updating rawspeed ${clrGRN}OK${clrRST}\n"
-  # version info
-  vrsnInfo="cloned version          :"
+  printf "\r          - initializing and updating rawspeed ${clrGRN}OK${clrRST}\n"
   _getDtVrsn
 }
 
@@ -100,18 +99,15 @@ function _gitDtClone ()
 # ------------------------------------------------------------------ #
 function _gitDtPull ()
 {
-  echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
   cd ${dtGitDir}
   # pull dt
   git pull >/dev/null 2>&1 &
-  prcssPid="$!" ; txtStrng="pull - incorporating remote changes"
+  prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
   _shwPrgrs
   # update rawspeed
-  printf "\r  pull - updating rawspeed .. "
+  printf "\r          - updating rawspeed .. "
   git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtPull" "submodule update"
-  printf "\r  pull - updating rawspeed ${clrGRN}OK${clrRST}\n"
-  # version info
-  vrsnInfo="pulled version          :"
+  printf "\r          - updating rawspeed ${clrGRN}OK${clrRST}\n"
   _getDtVrsn
 }
 
@@ -122,16 +118,23 @@ function _gitDtPull ()
 # ------------------------------------------------------------------ #
 function _gitDtBuild ()
 {
-  echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
   cd ${dtGitDir}
+  # check same versions if optStop is set
+  if [ "${optStop}" == "1" ]
+  then
+    _getDtVrsn
+    [ "${curVrsn}" == "${gitVrsn}" ]
+    echo "  build   - installed and git version are the same"
+    return
+  fi
   # create and enter clean build environment
   rm -rf build > /dev/null 2>&1
   mkdir build
-  cd ${dtGitDir}/build
+  cd build
   # start timer
   strtBldTime=$(date +%s)
   # run cmake
-  cmake -DCMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}" \
+  cmake -DCMAKE_INSTALL_PREFIX="${CMAKE_PREFIX_PATH}" \
         -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
         -DUSE_CAMERA_SUPPORT="${USE_CAMERA_SUPPORT}" \
         -DUSE_COLORD="${USE_COLORD}" \
@@ -167,21 +170,16 @@ function _gitDtBuild ()
         CMAKE_CXX_FLAGS="${CMAKE_FLAGS}" \
         -G "${cmakeGen}" \
         .. >> ${scrptLog} 2>&1 &
-  prcssPid="$!" ; txtStrng="build - running cmake"
+  prcssPid="$!" ; txtStrng="build   - configuring darktable using cmake"
   _shwPrgrs
   # run make/ninja
   ${makeBin} ${makeOpts} >> ${scrptLog} 2>&1 &
-  prcssPid="$!" ; txtStrng="build - running ${makeBin}"
+  prcssPid="$!" ; txtStrng="        - compiling darktable using ${makeBin}"
   _shwPrgrs
   # stop timer
   endBldTime=$(date +%s)
   totBldTime=$(($endBldTime - $strtBldTime))
-  
-  
-  # version info
-  vrsnInfo="build version           :"
   _getDtVrsn
-
 }
 
 # ------------------------------------------------------------------ #
@@ -191,7 +189,25 @@ function _gitDtBuild ()
 # ------------------------------------------------------------------ #
 function _gitDtInstall ()
 {
-  echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
+  if [ "${optStop}" == "1" ]
+  then
+    _getDtVrsn
+    [ "${curVrsn}" == "${gitVrsn}" ]
+    echo "  install - installed and git version are the same"
+    return
+  fi
+  cd ${dtGitDir}/build || _errHndlr "_gitDtInstall" "${dtGitDir}/build: directory doesn't exist"
+  printf "\r  install - installing darktable using ${makeBin} .. "
+  # remove previously installed version.
+  [ -d ${CMAKE_PREFIX_PATH} ] && ${sudoToken} rm -rf ${CMAKE_PREFIX_PATH}/*
+  # set normal permissions if system install
+  [ ! -z ${sudoToken} ] && umask 022
+  # install using make/ninja
+  ${sudoToken} ${makeBin} install >> ${scrptLog} 2>&1 || _errHndlr "_gitDtInstall" "${sudoToken} ${makeBin} install"
+  printf "\r  install - installing darktable using ${makeBin} ${clrGRN}OK${clrRST}\n"
+  # restore restricted mode if system install
+  [ ! -z ${sudoToken} ] && umask 026
+  _getDtVrsn
 }
 
 # ------------------------------------------------------------------ #
@@ -200,9 +216,8 @@ function _gitDtInstall ()
 # ------------------------------------------------------------------ #
 function _getDtVrsn ()
 {
-  newVrsn=$( cd ${dtGitDir} ; git describe | sed -e 's/release-//' -e 's/[~+]/-/g' )
-  vrsnInfo="${vrsnInfo}"
-  [ "${curVrsn}" == "${newVrsn}" ] && sameVrsn="1"
+  gitVrsn=$( cd ${dtGitDir}
+  git describe | sed -e 's/release-//' -e 's/[~+]/-/g' )
 }
 
 # ------------------------------------------------------------------ #
@@ -245,8 +260,9 @@ function _errHndlr ()
   # To screen
   echo " ${clrRED}A fatal error occured.${clrRST}
 
-     Problem : ${errorLocation}
-     Error   : ${errorMessage}
+     Script      : ${scriptName} (${scriptVersion})
+     Problem     : ${errorLocation}
+     Description : ${errorMessage}
 
    Exiting now.
 ${lrgDvdr}${clrRED}$(date '+%H:%M:%S') --${clrRST}
@@ -406,7 +422,7 @@ echo "crsAprch      ${crsAprch}"
 echo "makeOpts      ${makeOpts}"  
 echo ""
 echo "curVrsn       ${curVrsn}"
-echo "newVrsn       ${newVrsn}"
+echo "gitVrsn       ${gitVrsn}"
 echo ""
 echo "optClone      ${optClone}"
 echo "optPull       ${optPull}"
@@ -414,7 +430,7 @@ echo "optStop       ${optStop}"
 echo "optBuild      ${optBuild}"
 echo "optInstall    ${optInstall}"
 echo ""
-echo "instMthd      ${instMthd}"
+echo "sudoToken     ${sudoToken}"
 }
 
 
@@ -424,6 +440,8 @@ echo "instMthd      ${instMthd}"
 clear
 echo ""
 strRunTime=$(date +%s)
+echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
+[ "$EUID" -eq 0 ] && _errHndlr "Main" "Do not run script as root user."
 # -------------------------------------------------------------------------- #
 # parse configuration file
 # ------------------------------------------------------------------ #
@@ -441,7 +459,7 @@ ${cfgChkr} >/dev/null 2>&1
 # ------------------------------------------------------------------ #
 dtGitDir="${baseGitDir}/darktable"
 scrptLog="${logDir}/dt.script.log"
-[[ "${CMAKE_PREFIX_PATH}" != "$HOME"* ]] && instMthd="SYS"
+[[ "${CMAKE_PREFIX_PATH}" != "$HOME"* ]] && sudoToken="sudo"
 echo "$(date '+%H:%M:%S') - Script starts" > "${scrptLog}"
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
@@ -466,11 +484,9 @@ fi
 nmbrCores="$(printf %.0f $(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc ))"
 makeOpts="-j ${nmbrCores}"
 # -------------------------------------------------------------------------- #
-# get/set dt version information
+# get/set darktable version information
 # ------------------------------------------------------------------ #
-newVrsn=""
-curVrsn="n/a"
-# set current darktable version if available
+# set currently installed darktable version if available
 [ -e ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
   [ -x ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
     curVrsn="$(${CMAKE_PREFIX_PATH}/bin/darktable --version | \
@@ -511,31 +527,25 @@ fi
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
 [ "${optPull}"    = "1" ] && _gitDtPull
-# -------------------------------------------------------- #
-# skip build/install if -s is set and versions are the same
-if [[ "${optStop}" == "1" && "${sameVrsn}" == "1" ]]
-then
-  echo "$(date '+%H:%M:%S')   Versions are the same: Skipping Build/Install"
-else
-  [ "${optBuild}"   = "1" ] && _gitDtBuild
-  [ "${optInstall}" = "1" ] && _gitDtInstall
-fi
+[ "${optBuild}"   = "1" ] && _gitDtBuild
+[ "${optInstall}" = "1" ] && _gitDtInstall
 
 # -------------------------------------------------------- #
 # show some information
 endRunTime=$(date +%s) ; totRunTime=$(( $endRunTime - $strRunTime ))
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
-[ ${optBuild} -eq "1" ] && printf '%27s%02d:%02d:%02d\n' "  total build time        : " $(($totBldTime/3600)) $(($totBldTime%3600/60)) $(($totBldTime%60))
-printf '%27s%02d:%02d:%02d\n' "  total runtime           : " $(($totRunTime/3600)) $(($totRunTime%3600/60)) $(($totRunTime%60))
-echo "  installed version       : ${curVrsn}"
-echo "  ${vrsnInfo} ${newVrsn}"
+[ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $(($totBldTime/3600)) $(($totBldTime%3600/60)) $(($totBldTime%60))
+printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($totRunTime/3600)) $(($totRunTime%3600/60)) $(($totRunTime%60))
+
+echo "  installed version  ${curVrsn}"
+echo "  git version        ${gitVrsn}"
 
 # -------------------------------------------------------- #
 # --- Cleanup ---
 echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
 
-_SHOWINFO ; exit # <-- temporary check + exit
+#_SHOWINFO ; exit # <-- temporary check + exit
 
 exit 0
 # -------------------------------------------------------------------------- #
