@@ -1,0 +1,47 @@
+# -------------------------------------------------------------------------- #
+# Information about: installer.sh
+# -------------------------------------------------------------------------- #
+
+You can create the directories and copy the 3 files needed by hand or use the
+simple installer that is supplied.
+
+# -------------------------------------------------------- #
+# by hand
+
+If you want to do this by hand do the following as root or by using sudo from
+the location you cloned dt.bldr:
+
+- mkdir -pm 755 /opt/dt.bldr/{bin,cfg}
+- cp bin/*.sh /opt/dt.bldr/bin
+- chmod 755 /opt/dt.bldr/bin/*sh
+- cp cfg/dt.bldr.cfg /opt/dt.bldr/cfg/
+- chmod 444 /opt/dt.bldr/cfg/cfg/dt.bldr.cfg 
+
+# -------------------------------------------------------- #
+# using the script
+
+This installer script needs root permissions to do its thing, using sudo it
+can be run as follows:
+
+  sudo sh installer.sh
+  
+The installer.sh script will do the following:
+
+- Remove, forcefully, the content of /opt/dt.bldr,
+- Create /opt/dt.bldr/bin and copy both scripts to that location,
+- Create /opt/dt.bldr/cfg and copy the system-wide configuration file 
+  to that location.
+- Set the correct permissions for the created directories and copied files.
+
+# -------------------------------------------------------------------------- #
+
+The installer does not create or copy the local configuration file that might
+be wanted/needed.
+
+The two configuration files in examples are just guides to set up your own
+local configuration.
+
+Have a look at the README.configuration and README.examples files.
+
+# -------------------------------------------------------------------------- #
+# End
