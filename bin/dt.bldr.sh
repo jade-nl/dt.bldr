@@ -31,6 +31,7 @@
 #                             Fixed skip issue
 #              : dec 04 2019  First release candidate             1.0.0-rc.0
 #              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
+#              : dec 10 2019  Fixed sudo progress meter issue     1.0.0-rc.2
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -42,7 +43,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-rc.1"
+scriptVersion="1.0.0-rc.2"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -61,6 +62,7 @@ clrBLU=$(tput setaf 4) # blue
 # script misc
 lrgDvdr=" ------------------------------------------------------------------ "
 sudoToken=""
+instToken=""
 gitVrsn="n/a"
 curVrsn="n/a"
 totBldTime="0"
@@ -104,8 +106,8 @@ function _gitDtClone ()
 # ------------------------------------------------------------------ #
 function _gitDtPull ()
 {
-  cd ${dtGitDir} 2>/dev/null || _errHndlr "_gitDtPull" "No such directory."
-  [ "$(ls -A)" ] || _errHndlr "_gitDtPull" "git directory is empty (clone first?)"
+  cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtPull" "No such directory."
+  [ "$(ls -A)" ] || _errHndlr "_gitDtPull" "git directory is empty"
   # pull dt
   git pull >/dev/null 2>&1 &
   prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
@@ -205,17 +207,19 @@ function _gitDtInstall ()
     fi
   fi
   cd ${dtGitDir}/build || _errHndlr "_gitDtInstall" "${dtGitDir}/build: directory doesn't exist"
-  printf "\r  install - installing darktable using ${makeBin} .. "
+#  printf "\r  install - installing darktable using ${makeBin} .. "
   # remove previously installed version.
   [ -d ${CMAKE_PREFIX_PATH} ] && ${sudoToken} rm -rf ${CMAKE_PREFIX_PATH}/*
-  # set normal permissions if system install
-  [ ! -z ${sudoToken} ] && umask 022
+  # set normal permissions and token if system install
+  [ ! -z ${sudoToken} ] && umask 022 && instToken="sudo"
   # install using make/ninja
-  ${sudoToken} ${makeBin} install >> ${scrptLog} 2>&1 || _errHndlr "_gitDtInstall" "${sudoToken} ${makeBin} install"
-  printf "\r  install - installing darktable using ${makeBin} ${clrGRN}OK${clrRST}\n"
-  # restore restricted mode if system install
-  [ ! -z ${sudoToken} ] && umask 026
+  ${sudoToken} ${makeBin} install >/dev/null 2>&1 &
+  prcssPid="$!" ; txtStrng="install - installing darktable using make"
+  _shwPrgrs
+  # restore if system install
+  [ ! -z ${sudoToken} ] && umask 026 && instToken=""
   _getDtGitVrsn
+
 }
 
 # ------------------------------------------------------------------ #
@@ -235,12 +239,13 @@ function _getDtGitVrsn ()
 function _shwPrgrs ()
 {
   spinParts="-\|/" ; cntr="0" ; ccld="0"
-  while kill -0 $prcssPid 2>/dev/null
+  while ${instToken} kill -0 $prcssPid 2>/dev/null
   do
     cntr=$(( (cntr+1) %4 ))
     printf "\r  ${txtStrng} ${clrGRN}${spinParts:$cntr:1}${clrRST}  "
     sleep .3 ; ((ccld++))
   done
+#set -x
   wait ${prcssPid}
   if [[ "$?" != "0" || "${ccld}" -le "1" ]]
   then
