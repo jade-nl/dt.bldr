@@ -20,14 +20,14 @@ the location you cloned dt.bldr:
 # -------------------------------------------------------- #
 # using the script
 
-This installer script needs root permissions to do its thing, using sudo it
-can be run as follows:
+This installer script, install.sh, needs root permissions to do its thing,
+using sudo it can be run as follows:
 
   sudo sh installer.sh
   
-The installer.sh script will do the following:
+The installer script will do the following:
 
-- Remove, forcefully, the content of /opt/dt.bldr,
+- Remove, forcefully, the current content of /opt/dt.bldr,
 - Create /opt/dt.bldr/bin and copy both scripts to that location,
 - Create /opt/dt.bldr/cfg and copy the system-wide configuration file 
   to that location.
