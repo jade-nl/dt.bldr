@@ -24,6 +24,11 @@
 #              : nov 18 2019  Start setting up main functions  1.0.0-alpha.2
 #              : nov 19 2019  Fixed install and build functions   1.0.0-beta
 #              : dec 02 2019  Added partial git url flexibility 1.0.0-beta.1
+#              : dec 03 2019  Code cleanup                      1.0.0-beta.2
+#                             Changed some variable names
+#                             Fixed some minor layout issue's
+#                             Changed wording output to screen
+#                             Fixed skip issue
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -35,7 +40,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-beta.1"
+scriptVersion="1.0.0-beta.2"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -76,7 +81,7 @@ function _gitDtClone ()
   # remove current files/dirs first
   [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
   # clone dt
-  cd ${baseGitDir}
+  cd ${baseRepDir}
   git clone git://github.com/darktable-org/darktable.git >/dev/null  2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
@@ -120,14 +125,17 @@ function _gitDtBuild ()
   if [ "${optStop}" == "1" ]
   then
     _getDtGitVrsn
-    [ "${curVrsn}" == "${gitVrsn}" ]
-    echo "  build   - installed and git version are the same"
-    return
+    if [ "${curVrsn}" == "${gitVrsn}" ]
+    then
+      echo "  build   - ${clrBLU}skipping${clrRST} : installed and repo version are the same"
+      return
+    fi
   fi
   # create and enter clean build environment
   rm -rf build > /dev/null 2>&1
   mkdir build
   cd build
+set +x
   # start timer
   strtBldTime=$(date +%s)
   # run cmake
@@ -171,7 +179,7 @@ function _gitDtBuild ()
   _shwPrgrs
   # run make/ninja
   ${makeBin} ${makeOpts} >> ${scrptLog} 2>&1 &
-  prcssPid="$!" ; txtStrng="        - compiling darktable using ${makeBin}"
+  prcssPid="$!" ; txtStrng="        - building darktable using ${makeBin}"
   _shwPrgrs
   # stop timer
   endBldTime=$(date +%s)
@@ -188,9 +196,11 @@ function _gitDtInstall ()
   if [ "${optStop}" == "1" ]
   then
     _getDtGitVrsn
-    [ "${curVrsn}" == "${gitVrsn}" ]
-    echo "  install - installed and git version are the same"
-    return
+    if [ "${curVrsn}" == "${gitVrsn}" ]
+    then
+      echo "  install - ${clrBLU}skipping${clrRST} : installed and repo version are the same"
+      return
+    fi
   fi
   cd ${dtGitDir}/build || _errHndlr "_gitDtInstall" "${dtGitDir}/build: directory doesn't exist"
   printf "\r  install - installing darktable using ${makeBin} .. "
@@ -282,7 +292,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   : dt.bldr.sh <options>
  ------------------------------------------------------------------------------
  Options
-  : -c     Clone files from repository to ${baseGitDir}
+  : -c     Clone files from repository to ${baseRepDir}
   : -p     Pull updates from repository to ${dtGitDir}
   : -s     Stop processing if installed version and cloned
             or pulled versions are the same.
@@ -302,7 +312,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   - GIT
 
     URL ......................... ${urlGit}
-    Base git directory .......... ${baseGitDir}
+    Base git directory .......... ${baseRepDir}
     darktable git directory ..... ${dtGitDir}
 
   - Build and Install
@@ -360,7 +370,7 @@ exit 0
 function _SHOWINFO ()
 {
 echo "urlGit                     ${urlGit}"
-echo "baseGitDir                 ${baseGitDir}"
+echo "baseRepDir                 ${baseRepDir}"
 echo "dtGitDir                   ${dtGitDir}"
 echo "logDir                     ${logDir}"
 echo "scrptLog                   ${scrptLog}"
@@ -408,7 +418,7 @@ echo "dfltPull      ${dfltPull}"
 echo "dfltStop      ${dfltStop}"
 echo "dfltBuild     ${dfltBuild}"
 echo "dfltInstall   ${dfltInstall}"
-echo "dfltCmake     ${dfltCmake}"
+echo "dfltNinja     ${dfltNinja}"
 echo ""
 echo "ninjaIsUsed   ${ninjaIsUsed}"
 echo "cmakeGen      ${cmakeGen}"
@@ -453,7 +463,7 @@ ${cfgChkr} >/dev/null 2>&1
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
-dtGitDir="${baseGitDir}/darktable"
+dtGitDir="${baseRepDir}/darktable"
 scrptLog="${logDir}/dt.script.log"
 [[ "${CMAKE_PREFIX_PATH}" != "$HOME"* ]] && sudoToken="sudo"
 echo "$(date '+%H:%M:%S') - Script starts" > "${scrptLog}"
@@ -462,7 +472,7 @@ echo "$(date '+%H:%M:%S') - Script starts" > "${scrptLog}"
 # ------------------------------------------------------------------ #
 if  [ `which ninja` ]
 then
-  if [ "${dfltCmake}" -eq "0" ]
+  if [ "${dfltNinja}" -eq "1" ]
   then
     echo " - ninja will be used" >> "${scrptLog}"
     ninjaIsUsed="YES" ; cmakeGen="Ninja" ; makeBin="ninja"
