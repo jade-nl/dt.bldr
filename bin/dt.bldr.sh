@@ -19,7 +19,8 @@
 #              : git Version Control Systems needs to be installed
 #              : sudo, if used for system wide installation
 # -------------------------------------------------------------------------- #
-# Changes      : nov 07 2019 - First build / outline             1.0.0-alpha
+# Changes      : nov 07 2019  First build / outline              1.0.0-alpha
+#              : nov 08 2019  Options processing and help      1.0.0-alpha.1
 # -------------------------------------------------------------------------- #
 # Copright     : Jacques Dekker
 #              : CC BY-NC-SA 4.0
@@ -32,36 +33,32 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-alpha"
+scriptVersion="1.0.0-alpha.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
 binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
+# -> logUserDir : parsed from cfg file
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
-usrCfgFile="$HOME/.config/dt.bldr/dt.bldr.cfg"
+usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
+cfgChkr="${binDir}/dt.cfg.sh -c"
 # colours
 clrRST=$(tput sgr0)    # reset
 clrBLK=$(tput setaf 0) # black
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
-
-## script misc
-#cfgIsValid="1"
-#ccacheIsUsed="no"
+# script misc
+lrgDvdr=" ------------------------------------------------------------------ "
+# input options
+optBuild="0"
+optClone="0"
+optInstall="0"
+optPull="0"
+optStop="0"
 #sameVers="0"
-#lrgDvdr=" ------------------------------------------------------------------ "
 #smlDvdr=" -------------------------------------------------------------"
-## input options
-#argFetch="0"
-#optBuild="0"
-#optClone="0"
-#optFetch="0"
-#optInstall="0"
-#optPull="0"
-#optRemove="0"
-#optStop="0"
 
 # -------------------------------------------------------------------------- #
 # --- Functions ---
@@ -127,19 +124,103 @@ function _errHndlr ()
   errorMessage="$2"
   #----------
   # To screen
-  echo "
-    ${clrRED}A fatal error occured.${clrRST}
+  echo "   ${clrRED}A fatal error occured.${clrRST}
 
-      Function : ${errorLocation}
-      Error    : ${errorMessage}
+     Problem : ${errorLocation}
+     Error   : ${errorMessage}
 
-    Exiting now.
+   Exiting now.
 ${lrgDvdr}$(date '+%H:%M:%S') --
 "
   exit 255
 }
 
+# ------------------------------------------------------------------ #
+# Function : Show help and exit
+# Syntax   : _shwHelp
+# ------------------------------------------------------------------ #
+function _shwHelp ()
+{
+  clear
+  cat <<EOF
+${lrgDvdr}$(date '+%H:%M:%S') -- 
+ Version : ${scriptVersion}
+ ------------------------------------------------------------------------------
+ Syntax
+  : dt.bldr.sh <options>
+ ------------------------------------------------------------------------------
+ Options
+  : -c     Clone files from repository to ${baseGitDir}
+  : -p     Pull updates from repository to ${dktbGitDir}
+  : -s     Stop processing if installed version and cloned
+            or pulled versions are the same.
+  : -b     Build darktable (see General below)
+  : -i     Install darktable to ${CMAKE_PREFIX_PATH}
+  : -h/-?  Show this output
+ ------------------------------------------------------------------------------
+ Current settings are:
 
+  - General
+
+    Script base directory ....... ${scriptDir} 
+    Default Cfg file ............ ${defCfgFile}
+    USer Cfg file ............... ${usrCfgFile}
+    Script log file ............. ${logUserDir}
+    Build logfile ............... ${cmkBldLog}
+
+  - GIT
+
+    Base git directory .......... ${baseGitDir}
+    darktable git directory ..... ${dktbGitDir}
+
+  - Build and Install
+
+    Prefix (install) path ....... ${CMAKE_PREFIX_PATH}
+
+    CMAKE_BUILD_TYPE ............ ${CMAKE_BUILD_TYPE}
+
+    CMAKE_C_FLAGS ............... ${CMAKE_FLAGS}
+    CMAKE_CXX_FLAGS ............. ${CMAKE_FLAGS}
+    CUSTOM_CFLAGS  .............. ${CUSTOM_CFLAGS}
+
+    USE_CAMERA_SUPPORT .......... ${USE_CAMERA_SUPPORT}
+    USE_COLORD .................. ${USE_COLORD}
+    USE_DARKTABLE_PROFILING ..... ${USE_DARKTABLE_PROFILING}
+    USE_FLICKR .................. ${USE_FLICKR}
+    USE_GRAPHICSMAGICK .......... ${USE_GRAPHICSMAGICK}
+    USE_KWALLET ................. ${USE_KWALLET}
+    USE_LENSFUN ................. ${USE_LENSFUN}
+    USE_LIBSECRET ............... ${USE_LIBSECRET}
+    USE_LUA ..................... ${USE_LUA}
+    DONT_USE_INTERNAL_LUA ....... ${DONT_USE_INTERNAL_LUA}
+    USE_MAP ..................... ${USE_MAP}
+    USE_NLS ..................... ${USE_NLS}
+    USE_OPENCL .................. ${USE_OPENCL}
+    USE_OPENEXR ................. ${USE_OPENEXR}
+    USE_OPENJPEG ................ ${USE_OPENJPEG}
+    USE_OPENMP .................. ${USE_OPENMP}
+    USE_UNITY ................... ${USE_UNITY}
+    USE_WEBP .................... ${USE_WEBP}
+    USE_XMLLINT ................. ${USE_XMLLINT}
+
+    BUILD_BATTERY_INDICATOR ..... ${BUILD_BATTERY_INDICATOR}
+    BUILD_CMSTEST ............... ${BUILD_CMSTEST}
+    BUILD_CURVE_TOOLS ........... ${BUILD_CURVE_TOOLS}
+    BUILD_NOISE_TOOLS ........... ${BUILD_NOISE_TOOLS}
+    BUILD_PRINT ................. ${BUILD_PRINT}
+    BUILD_RS_IDENTIFY ........... ${BUILD_RS_IDENTIFY}
+    BUILD_TESTS ................. ${BUILD_TESTS}
+    BUILD_USERMANUAL ............ ${BUILD_USERMANUAL}
+
+    BINARY_PACKAGE_BUILD ........ ${BINARY_PACKAGE_BUILD}
+    TESTBUILD_OPENCL_PROGRAMS.... ${TESTBUILD_OPENCL_PROGRAMS}
+
+    Use ninja ................... ${ninjaIsUsed}
+
+EOF
+exit 0
+
+}
 
 
 
@@ -149,8 +230,11 @@ ${lrgDvdr}$(date '+%H:%M:%S') --
 # temp function
 function _SHOWINFO ()
 {
-echo "logUserDir                 ${logUserDir}"
 echo "baseGitDir                 ${baseGitDir}"
+echo "dktbGitDir                 ${dktbGitDir}"
+echo "logUserDir                 ${logUserDir}"
+echo "cmkBldLog                  ${cmkBldLog}"
+echo "scrptLog                   ${scrptLog}"
 echo ""
 echo "CMAKE_PREFIX_PATH          ${CMAKE_PREFIX_PATH}"
 echo "USE_CAMERA_SUPPORT         ${USE_CAMERA_SUPPORT}"
@@ -195,17 +279,22 @@ echo "dfltBuild     ${dfltBuild}"
 echo "dfltInstall   ${dfltInstall}"
 echo "dfltCmake     ${dfltCmake}"
 echo ""
+echo "ninjaIsUsed   ${ninjaIsUsed}"
+echo "cmakeGen      ${cmakeGen}"
+echo ""
 echo "crsAprch      ${crsAprch}"
-echo "makeOpts      ${makeOpts}"
+echo "makeOpts      ${makeOpts}"  
+echo ""
+echo "curVers       ${curVers}"
 echo ""
 echo "optClone      ${optClone}"
 echo "optPull       ${optPull}"
 echo "optStop       ${optStop}"
 echo "optBuild      ${optBuild}"
 echo "optInstall    ${optInstall}"
-echo "optFetch      ${optFetch}"
-echo "argFetch      ${argFetch}"
 }
+
+
 # -------------------------------------------------------------------------- #
 # --- Main ---
 # -------------------------------------------------------------------------- #
@@ -215,95 +304,45 @@ echo "${lrgDvdr}$(date '+%H:%M:%S') -- "
 # -------------------------------------------------------------------------- #
 # parse configuration file
 # ------------------------------------------------------------------ #
-echo "$(date '+%H:%M:%S') - Setting up environment." > "${logScriptFile}"
-# parse sensible default configuration file
-echo " - parsing sensible defaults" >> "${logScriptFile}"
-. ${cfgScriptFile}
+# check config file(s)
+${cfgChkr} >/dev/null 2>&1
+[ "$?" -eq "0" ] || \
+  _errHndlr "Configuration file(s)" \
+            "Content not valid.  Run dt.cfg.sh -c for details"
+# parse default configuration file
+. ${defCfgFile}
 # check and parse user defined configuration file
-if [ -f "${HOME}/.config/dt.bldr/dt.bldr.cfg" ]
-then
-  # parse user defined
-  . $HOME/.config/dt.bldr/dt.bldr.cfg
-  # perform basic checks checks
-  lineCnt="$(egrep -cv "^#" $HOME/.config/dt.bldr/dt.bldr.cfg)"
-  [ "${lineCnt}" -eq "42" ] || cfgIsValid="0"
-  # check and possibly create base directories
-  # log directory
-  if [ ! -d "${logUserDir}" ]
-  then
-    # create logUserDir?
-    read -p "${logUserDir} not found!  Create? " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ "${REPLY}" =~ ^[Yy]$ ]]
-    then
-      mkdir -m 750 "${logUserDir}"
-      cfgIsValid="0"
-    fi  
-  fi
-  # git directory
-  if [ ! -d "${baseGitDir}" ]
-  then
-    # create baseGitDir?
-    read -p "${logUserDir} not found!  Create? " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ "${REPLY}" =~ ^[Yy]$ ]]
-    then
-      mkdir -m 750 "${logUserDir}"
-      cfgIsValid="0"
-    fi
-  fi
-  # are we good?
-  if [ "${cfgIsValid}" -eq "1" ]
-  then 
-    # valid user defined configuration file found
-    cfgScriptFile="${HOME}/.config/dt.bldr/dt.bldr.cfg"
-    echo " - parsed user defined" >> "${logScriptFile}"
-  else
-    # no valid user defined configuration file found
-    echo " - user defined cfg file isn't valid" >> "${logScriptFile}"
-    echo "  User defined configuration file is invalid!"
-    echo "  Using sensible and safe defaults instead."
-    # parse to overwrite possible invalid user file entries
-    . ${cfgScriptFile}
-  fi
-else
-  # no user defined configuration file found
-  echo " - no user defined cfg file found" >> "${logScriptFile}"
-  echo "  No personalized configuration file found."
-  echo "  Using sensible and safe defaults instead."
-fi
+[ -f "${usrCfgFile}" ] && . ${usrCfgFile}
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
 dktbGitDir="${baseGitDir}/darktable"
-cmkBldLog="${logUserDir}/dt.bldr.log"
+cmkBldLog="${logUserDir}/dt.build.log"
+scrptLog="${logUserDir}/dt.script.log"
+[ "${CMAKE_FLAGS}" = "" ] && CMAKE_FLAGS="[not set]"
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
 # ------------------------------------------------------------------ #
-echo "$(date '+%H:%M:%S') - Is ninja available" >> "${logScriptFile}"
+echo "$(date '+%H:%M:%S') - Is ninja available" > "${scrptLog}"
 if  [ `which ninja` ]
 then
   if [ "${dfltCmake}" -eq "0" ]
   then
-    echo " - ninja will be used" >> "${logScriptFile}"
-    cmakeGen="Ninja"
-    ninjaIsUsed="yes"
+    echo " - ninja will be used" >> "${scrptLog}"
+    ninjaIsUsed="yes" ; cmakeGen="Ninja"
   else
-    echo " - cmake is forced, ninja will not be used" >> "${logScriptFile}"
-    cmakeGen="Unix Makefiles"
-    ninjaIsUsed="no"
-    echo "  cmake is forced, not using ninja."
+    echo " - cmake forced, ninja will not be used" >> "${scrptLog}"
+    ninjaIsUsed="no" ; cmakeGen="Unix Makefiles"
   fi
 else
-  echo " - cmake will be used" >> "${logScriptFile}"
-  cmakeGen="Unix Makefiles"
-  ninjaIsUsed="no"
+  echo " - cmake will be used" >> "${scrptLog}"
+  ninjaIsUsed="no" ; cmakeGen="Unix Makefiles"
 fi
 # -------------------------------------------------------------------------- #
 # --- set amount of cores ---
 # ------------------------------------------------------------------ #
-numberCores="$(printf %.0f $(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc ))"
-makeOpts="-j ${numberCores}"   # use all but one cores
+nmbrCores="$(printf %.0f $(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc ))"
+makeOpts="-j ${nmbrCores}"
 # -------------------------------------------------------------------------- #
 # get/set dt version information
 # ------------------------------------------------------------------ #
@@ -317,18 +356,19 @@ curVers="n/a"
 # -------------------------------------------------------------------------- #
 # process options, if any
 # ------------------------------------------------------------------ #
-_SHOWINFO
-echo "$(date '+%H:%M:%S') - Options processing" >> "${logScriptFile}"
+echo "$(date '+%H:%M:%S') - Options processing" >> "${scrptLog}"
 # any options give
-if [ "${#}" -ne "0" ]
+if [ "$#" -eq "0" ]
 then
-  echo " - options are found" >> "${logScriptFile}"
-  # yes -> reset possibles to 0
-  optClone="0"
-  optPull="0"
-  optStop="0"
-  optBuild="0"
-  optInstall="0"
+  echo " - no options are found" >> "${scrptLog}"
+  # use default from cfg
+  optClone="${dfltClone}"
+  optPull="${dfltPull}"
+  optStop="${dfltStop}"
+  optBuild="${dfltBuild}"
+  optInstall="${dfltInstall}"
+else
+  echo " - options are found" >> "${scrptLog}"
   # process options
   while getopts ":cpsbih" OPTION
   do
@@ -339,16 +379,14 @@ then
       s) optStop="1" ;;
       b) optBuild="1" ;;
       i) optInstall="1" ;;
-      h) echo "Do help" ;;
-     \?) echo "Do help" ;;
-      :) echo "Error: -${OPTARG} requires an argument."
-         exit 128 ;;
+      h) _shwHelp ;;
+     \?) _shwHelp ;;
     esac
   done
-else
-  echo " - no options are found" >> "${logScriptFile}"
 fi
-_SHOWINFO # <-- temporary check
+
+_SHOWINFO ; exit # <-- temporary check + exit
+
 # -------------------------------------------------------- #
 # lets go already
 [ "${optClone}"   = "1" ] && _gitClone
@@ -362,7 +400,9 @@ else
   [ "${optBuild}"   = "1" ] && _dtBuild
   [ "${optInstall}" = "1" ] && _dtInstall
 fi
-[ "${optFetch}"   = "1" ] && _dtFetch "${argFetch}"
 
+
+echo -e "${lrgDvdr}$(date '+%H:%M:%S') -- \n\n"
+exit 0
 # -------------------------------------------------------------------------- #
 # End
