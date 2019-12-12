@@ -17,6 +17,7 @@
 #              : nov 05 2019 Check data / set exit status         1.0.0-beta
 #              : nov 18 2019 Minor chnages to layout            1.0.0-beta.1
 #              : dec 02 2019 added partial git url flexibility  1.0.0-beta.2
+#              : dec 03 2019 Changed variable name              1.0.0-beta.3
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -28,7 +29,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.0.0-beta.2"
+scriptVersion="1.0.0-beta.3"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -47,7 +48,7 @@ declare -A optsDFT
 declare -A optsCRS
 # colours
 clrRST=$(tput sgr0)    # reset
-clrBLK=$(tput setaf 1) # red
+clrBLK=$(tput setaf 0) # black
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
 clrBLU=$(tput setaf 4) # blue
@@ -71,7 +72,7 @@ function _doCheck ()
 #      { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
     printf "  %-28s%-18s%s\n" "urlGit" "${STATUS}" "${optsGIT[urlGit]}"
   echo " -------------------------------------------------------------- directories --- "
-  for ITEM in baseGitDir logDir
+  for ITEM in baseRepDir logDir
   do
     STATUS="${clrGRN}OK${clrRST}"
     eval [ ! -d "${optsDRS[$ITEM]}" ] && \
@@ -90,7 +91,7 @@ function _doCheck ()
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="253" ; }
   printf "  %-28s%-18s%s\n" "CMAKE_BUILD_TYPE" "${STATUS}" "${optsCMK[CMAKE_BUILD_TYPE]}"
   # CMAKE_FLAGS not checked
-  STATUS="${clrBLK}--     --${clrRST}"
+  STATUS="${clrBLK}not checked${clrRST}"
   printf "  %-28s%-18s%s\n" "CMAKE_FLAGS" "${STATUS}" "${optsCMK[CMAKE_FLAGS]}"
   echo " -------------------------------------------------------------- use options --- "
   for key in "${!optsUSE[@]}"
