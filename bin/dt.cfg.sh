@@ -11,15 +11,15 @@
 # -------------------------------------------------------------------------- #
 # Dependencies : default config file : /opt/dt.bldr/cfg/dt.bldr.cfg
 # -------------------------------------------------------------------------- #
-# Changes      : oct 28 2019 - First build                       1.0.0-alpha
-#              : oct 31 2019 - Import data                     1.0.0-alpha.1
-#              : nov 02 2019 - Show data                       1.0.0-alpha.2
-#              : nov 05 2019 - Check data / set exit status       1.0.0-beta
-#              : nov 18 2019 - Minor chnages to layout          1.0.0-beta.1
+# Changes      : oct 28 2019 First build                         1.0.0-alpha
+#              : oct 31 2019 Import data                       1.0.0-alpha.1
+#              : nov 02 2019 Show data                         1.0.0-alpha.2
+#              : nov 05 2019 Check data / set exit status         1.0.0-beta
+#              : nov 18 2019 Minor chnages to layout            1.0.0-beta.1
+#              : dec 02 2019 added partial git url flexibility  1.0.0-beta.2
 # -------------------------------------------------------------------------- #
-# Copright     : Jacques Dekker
-#              : CC BY-NC-SA 4.0
-#              : https://creativecommons.org/licenses/by-nc-sa/4.0/
+# Copright     : GNU General Public License v3.0
+#              : https://www.gnu.org/licenses/gpl-3.0.txt
 # -------------------------------------------------------------------------- #
 #set -xv
 set -u
@@ -28,7 +28,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.0.0-beta.1"
+scriptVersion="1.0.0-beta.2"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -38,6 +38,7 @@ cfgDir="${scriptDir}/cfg"
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
 # arrays
+declare -A optsGIT
 declare -A optsDRS
 declare -A optsCMK
 declare -A optsUSE
@@ -62,15 +63,21 @@ exitSTTS="0"
 # ------------------------------------------------------------------ #
 function _doCheck ()
 {
+  echo " ---------------------------------------------------------------------- git --- "
+    STATUS="${clrGRN}OK${clrRST}"
+    [[ "${optsGIT[urlGit]}" =~ ^(git@github.com:|git://github.com/|https://github.com/) ]] || \
+      { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
+#    eval [ ! -d "${optsGIT[$ITEM]}" ] && \
+#      { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
+    printf "  %-28s%-18s%s\n" "urlGit" "${STATUS}" "${optsGIT[urlGit]}"
   echo " -------------------------------------------------------------- directories --- "
-  for ITEM in  baseGitDir logDir
+  for ITEM in baseGitDir logDir
   do
     STATUS="${clrGRN}OK${clrRST}"
     eval [ ! -d "${optsDRS[$ITEM]}" ] && \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
     printf "  %-28s%-18s%s\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
   done
-
   echo " ------------------------------------------------------------ cmake options --- "
   # CMAKE_PREFIX_PATH
   STATUS="${clrGRN}OK${clrRST}"
@@ -133,6 +140,10 @@ function _doCheck ()
 # ------------------------------------------------------------------ #
 function _doShow ()
 {
+  echo " ---------------------------------------------------------------------- git --- "
+  for key in "${!optsGIT[@]}"; do
+      printf "  %-28s%-5s%s\n" ${key} ${optsGIT[$key]}
+  done | sort
   echo " -------------------------------------------------------------- directories --- "
   for key in "${!optsDRS[@]}"; do
       printf "  %-28s%-5s%s\n" ${key} ${optsDRS[$key]}
@@ -209,6 +220,7 @@ do
   cfgOPT=${OPTVAL%=*}   # select all before = (inclusive)
   cfgVal=${OPTVAL#*=}   # select all after = (inclusive)
   # store opt + val pair in appropriate array
+  [[ ${cfgOPT} =~ urlGit ]]      && optsGIT[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ Dir ]]         && optsDRS[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ ^CMAKE_ ]]     && optsCMK[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ ^USE_ ]]       && optsUSE[${cfgOPT}]=${cfgVal}
