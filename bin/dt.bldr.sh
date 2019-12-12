@@ -29,6 +29,7 @@
 #                             Fixed some minor layout issue's
 #                             Changed wording output to screen
 #                             Fixed skip issue
+#              : dec 04 2019  First release candidate             1.0.0-rc.0
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -40,7 +41,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-beta.2"
+scriptVersion="1.0.0-rc.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -135,7 +136,6 @@ function _gitDtBuild ()
   rm -rf build > /dev/null 2>&1
   mkdir build
   cd build
-set +x
   # start timer
   strtBldTime=$(date +%s)
   # run cmake
@@ -363,82 +363,6 @@ EOF
 exit 0
 
 }
-
-
-
-# START # # # temp function # # # START #
-function _SHOWINFO ()
-{
-echo "urlGit                     ${urlGit}"
-echo "baseRepDir                 ${baseRepDir}"
-echo "dtGitDir                   ${dtGitDir}"
-echo "logDir                     ${logDir}"
-echo "scrptLog                   ${scrptLog}"
-echo ""
-echo "CMAKE_PREFIX_PATH          ${CMAKE_PREFIX_PATH}"
-echo "USE_CAMERA_SUPPORT         ${USE_CAMERA_SUPPORT}"
-echo "USE_COLORD                 ${USE_COLORD}"
-echo "USE_DARKTABLE_PROFILING    ${USE_DARKTABLE_PROFILING}"
-echo "USE_FLICKR                 ${USE_FLICKR}"
-echo "USE_GRAPHICSMAGICK         ${USE_GRAPHICSMAGICK}"
-echo "USE_KWALLET                ${USE_KWALLET}"
-echo "USE_LENSFUN                ${USE_LENSFUN}"
-echo "USE_LIBSECRET              ${USE_LIBSECRET}"
-echo "USE_MAP                    ${USE_MAP}"
-echo "USE_NLS                    ${USE_NLS}"
-echo "USE_OPENEXR                ${USE_OPENEXR}"
-echo "USE_OPENJPEG               ${USE_OPENJPEG}"
-echo "USE_OPENMP                 ${USE_OPENMP}"
-echo "USE_UNITY                  ${USE_UNITY}"
-echo "USE_WEBP                   ${USE_WEBP}"
-echo "USE_XMLLINT                ${USE_XMLLINT}"
-echo "USE_LUA                    ${USE_LUA}"
-echo "DONT_USE_INTERNAL_LUA      ${DONT_USE_INTERNAL_LUA}"
-echo "USE_OPENCL                 ${USE_OPENCL}"
-echo ""
-echo "TESTBUILD_OPENCL_PROGRAMS  ${TESTBUILD_OPENCL_PROGRAMS}"
-echo "CUSTOM_CFLAGS              ${CUSTOM_CFLAGS}"
-echo "BINARY_PACKAGE_BUILD       ${BINARY_PACKAGE_BUILD}"
-echo "BUILD_BATTERY_INDICATOR    ${BUILD_BATTERY_INDICATOR}"
-echo "BUILD_CMSTEST              ${BUILD_CMSTEST}"
-echo "BUILD_CURVE_TOOLS          ${BUILD_CURVE_TOOLS}"
-echo "BUILD_NOISE_TOOLS          ${BUILD_NOISE_TOOLS}"
-echo "BUILD_PRINT                ${BUILD_PRINT}"
-echo "BUILD_RS_IDENTIFY          ${BUILD_RS_IDENTIFY}"
-echo "BUILD_TESTS                ${BUILD_TESTS}"
-echo "BUILD_USERMANUAL           ${BUILD_USERMANUAL}"
-echo ""
-echo "CMAKE_BUILD_TYPE           ${CMAKE_BUILD_TYPE}"
-[ "${CMAKE_FLAGS}" = "" ] && S_CMAKE_FLAGS="[not set]"
-echo "CMAKE_FLAGS                ${S_CMAKE_FLAGS}"
-echo "CMAKE_CXX_FLAGS            ${S_CMAKE_FLAGS}"
-echo ""
-echo "dfltClone     ${dfltClone}"
-echo "dfltPull      ${dfltPull}"
-echo "dfltStop      ${dfltStop}"
-echo "dfltBuild     ${dfltBuild}"
-echo "dfltInstall   ${dfltInstall}"
-echo "dfltNinja     ${dfltNinja}"
-echo ""
-echo "ninjaIsUsed   ${ninjaIsUsed}"
-echo "cmakeGen      ${cmakeGen}"
-echo ""
-echo "crsAprch      ${crsAprch}"
-echo "makeOpts      ${makeOpts}"  
-echo ""
-echo "curVrsn       ${curVrsn}"
-echo "gitVrsn       ${gitVrsn}"
-echo ""
-echo "optClone      ${optClone}"
-echo "optPull       ${optPull}"
-echo "optStop       ${optStop}"
-echo "optBuild      ${optBuild}"
-echo "optInstall    ${optInstall}"
-echo ""
-echo "sudoToken     ${sudoToken}"
-}
-# END # # # temp function # # # END #
-
 
 # -------------------------------------------------------------------------- #
 # --- Main ---

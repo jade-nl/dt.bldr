@@ -18,6 +18,7 @@
 #              : nov 18 2019 Minor chnages to layout            1.0.0-beta.1
 #              : dec 02 2019 added partial git url flexibility  1.0.0-beta.2
 #              : dec 03 2019 Changed variable name              1.0.0-beta.3
+#              : dec 04 2019 First relese candidate               1.0.0-rc.0
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -29,7 +30,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.0.0-beta.3"
+scriptVersion="1.0.0-rc.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
