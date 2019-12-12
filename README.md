@@ -1,6 +1,6 @@
 ## dt.bldr
 
-This project was initially created to automate the darktable cloning, building and installing process.
+This project was initially created to automate the darktable clone, configure, build and install process.
 
 The first script was never put on-line, it worked but wasn't flexible enough and became bloated with stuff that wasn't part of the core idea. This version is back to its leaner form and hopefully flexible enough for future ideas.
 
