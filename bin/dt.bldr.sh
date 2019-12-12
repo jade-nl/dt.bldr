@@ -1,6 +1,6 @@
 #!/bin/bash
 # -------------------------------------------------------------------------- #
-# Author       : Jacques Dekker / Jade_NL
+# Author       : Jacques D. / Jade_NL
 # -------------------------------------------------------------------------- #
 # Syntax       : dt.bldr.sh <options>
 # Options      : -c          Clone files from git repository
@@ -12,7 +12,7 @@
 # -------------------------------------------------------------------------- #
 # Purpose      : 1) Clone or pull darktable from git repository
 #              : 2) Build darktable
-#              : 3) Build darktable
+#              : 3) Install darktable
 # -------------------------------------------------------------------------- #
 # Dependencies : /opt/dt.bldr/cfg/dt.bldr.cfg  (default cfg file)
 #              : /opt/dt.bldr/bin/dt.cfg.sh    (cfg file checker)
@@ -23,10 +23,10 @@
 #              : nov 10 2019  Options processing and help      1.0.0-alpha.1
 #              : nov 18 2019  Start setting up main functions  1.0.0-alpha.2
 #              : nov 19 2019  Fixed install and build functions   1.0.0-beta
+#              : dec 02 2019  Added partial git url flexibility 1.0.0-beta.1
 # -------------------------------------------------------------------------- #
-# Copright     : Jacques Dekker
-#              : CC BY-NC-SA 4.0
-#              : https://creativecommons.org/licenses/by-nc-sa/4.0/
+# Copright     : GNU General Public License v3.0
+#              : https://www.gnu.org/licenses/gpl-3.0.txt
 # -------------------------------------------------------------------------- #
 #set -x
 set -u
@@ -35,7 +35,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-beta"
+scriptVersion="1.0.0-beta.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -70,7 +70,6 @@ optStop="0"
 # Function : Clone darktable
 # Purpose  : 1) Clone darktable remote repository into local directory
 #            2) Initialize and update submodule (rawspeed)
-# Syntax   : _gitDtClone
 # ------------------------------------------------------------------ #
 function _gitDtClone ()
 {
@@ -88,14 +87,13 @@ function _gitDtClone ()
   # update rawspeed
   git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule update"
   printf "\r          - initializing and updating rawspeed ${clrGRN}OK${clrRST}\n"
-  _getDtVrsn
+  _getDtGitVrsn
 }
 
 # ------------------------------------------------------------------ #
 # Function : Pull darktable
 # Purpose  : 1) Incorporate changes from remote repository into local branch
 #            2) Update submodules (rawspeed)
-# Syntax   : _gitDtPull
 # ------------------------------------------------------------------ #
 function _gitDtPull ()
 {
@@ -108,13 +106,12 @@ function _gitDtPull ()
   printf "\r          - updating rawspeed .. "
   git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtPull" "submodule update"
   printf "\r          - updating rawspeed ${clrGRN}OK${clrRST}\n"
-  _getDtVrsn
+  _getDtGitVrsn
 }
 
 # ------------------------------------------------------------------ #
 # Function : Build darktable
 # Purpose  : Building darktable, as normal user
-# Syntax   : _gitDtBuild
 # ------------------------------------------------------------------ #
 function _gitDtBuild ()
 {
@@ -122,7 +119,7 @@ function _gitDtBuild ()
   # check same versions if optStop is set
   if [ "${optStop}" == "1" ]
   then
-    _getDtVrsn
+    _getDtGitVrsn
     [ "${curVrsn}" == "${gitVrsn}" ]
     echo "  build   - installed and git version are the same"
     return
@@ -179,19 +176,18 @@ function _gitDtBuild ()
   # stop timer
   endBldTime=$(date +%s)
   totBldTime=$(($endBldTime - $strtBldTime))
-  _getDtVrsn
+  _getDtGitVrsn
 }
 
 # ------------------------------------------------------------------ #
 # Function : Install darktable
 # Purpose  : Install darktable locally or system-wide depending on cfg
-# Syntax   : _gitDtInstall
 # ------------------------------------------------------------------ #
 function _gitDtInstall ()
 {
   if [ "${optStop}" == "1" ]
   then
-    _getDtVrsn
+    _getDtGitVrsn
     [ "${curVrsn}" == "${gitVrsn}" ]
     echo "  install - installed and git version are the same"
     return
@@ -207,14 +203,14 @@ function _gitDtInstall ()
   printf "\r  install - installing darktable using ${makeBin} ${clrGRN}OK${clrRST}\n"
   # restore restricted mode if system install
   [ ! -z ${sudoToken} ] && umask 026
-  _getDtVrsn
+  _getDtGitVrsn
 }
 
 # ------------------------------------------------------------------ #
 # Function : Get darktable version
-# Syntax   : _getDtVrsn
+# Purpose  : Get dt version from local git repository
 # ------------------------------------------------------------------ #
-function _getDtVrsn ()
+function _getDtGitVrsn ()
 {
   gitVrsn=$( cd ${dtGitDir}
   git describe | sed -e 's/release-//' -e 's/[~+]/-/g' )
@@ -222,7 +218,7 @@ function _getDtVrsn ()
 
 # ------------------------------------------------------------------ #
 # Function : Show progress
-# Syntax   : _shwPrgrs
+# Purpose  : Show an indicator to indicate progress is being made
 # ------------------------------------------------------------------ #
 function _shwPrgrs ()
 {
@@ -248,7 +244,7 @@ function _shwPrgrs ()
 
 # ------------------------------------------------------------------ #
 # Function : Show error and exit
-# Syntax   : _errHndlr
+# Purpose  : Print error message to screen and exit
 # ------------------------------------------------------------------ #
 function _errHndlr ()
 {
@@ -272,7 +268,7 @@ ${lrgDvdr}${clrRED}$(date '+%H:%M:%S') --${clrRST}
 
 # ------------------------------------------------------------------ #
 # Function : Show help and exit
-# Syntax   : _shwHelp
+# Purpose  : Show help and exit
 # ------------------------------------------------------------------ #
 function _shwHelp ()
 {
@@ -305,6 +301,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
 
   - GIT
 
+    URL ......................... ${urlGit}
     Base git directory .......... ${baseGitDir}
     darktable git directory ..... ${dtGitDir}
 
@@ -359,12 +356,10 @@ exit 0
 
 
 
-
-
-
-# temp function
+# START # # # temp function # # # START #
 function _SHOWINFO ()
 {
+echo "urlGit                     ${urlGit}"
 echo "baseGitDir                 ${baseGitDir}"
 echo "dtGitDir                   ${dtGitDir}"
 echo "logDir                     ${logDir}"
@@ -432,6 +427,7 @@ echo "optInstall    ${optInstall}"
 echo ""
 echo "sudoToken     ${sudoToken}"
 }
+# END # # # temp function # # # END #
 
 
 # -------------------------------------------------------------------------- #
@@ -450,9 +446,9 @@ ${cfgChkr} >/dev/null 2>&1
 [ "$?" -eq "0" ] || \
   _errHndlr "Configuration file(s)" \
             "Content not valid.  Run dt.cfg.sh -c for details"
-# parse default configuration file
+# parse default system wide configuration file
 . ${defCfgFile}
-# check and parse user defined configuration file
+# parse user defined configuration file
 [ -f "${usrCfgFile}" ] && . ${usrCfgFile}
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
@@ -484,7 +480,7 @@ fi
 nmbrCores="$(printf %.0f $(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc ))"
 makeOpts="-j ${nmbrCores}"
 # -------------------------------------------------------------------------- #
-# get/set darktable version information
+# get/set darktable version information (installed version)
 # ------------------------------------------------------------------ #
 # set currently installed darktable version if available
 [ -e ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
@@ -522,30 +518,24 @@ else
     esac
   done
 fi
-
 # -------------------------------------------------------- #
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
 [ "${optPull}"    = "1" ] && _gitDtPull
 [ "${optBuild}"   = "1" ] && _gitDtBuild
 [ "${optInstall}" = "1" ] && _gitDtInstall
-
 # -------------------------------------------------------- #
 # show some information
 endRunTime=$(date +%s) ; totRunTime=$(( $endRunTime - $strRunTime ))
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 [ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $(($totBldTime/3600)) $(($totBldTime%3600/60)) $(($totBldTime%60))
 printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($totRunTime/3600)) $(($totRunTime%3600/60)) $(($totRunTime%60))
-
 echo "  installed version  ${curVrsn}"
 echo "  git version        ${gitVrsn}"
-
 # -------------------------------------------------------- #
 # --- Cleanup ---
 echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
-
-#_SHOWINFO ; exit # <-- temporary check + exit
 
 exit 0
 # -------------------------------------------------------------------------- #
