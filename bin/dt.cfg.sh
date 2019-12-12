@@ -15,6 +15,7 @@
 #              : oct 31 2019 - Import data                     1.0.0-alpha.1
 #              : nov 02 2019 - Show data                       1.0.0-alpha.2
 #              : nov 05 2019 - Check data / set exit status       1.0.0-beta
+#              : nov 18 2019 - Minor chnages to layout          1.0.0-beta.1
 # -------------------------------------------------------------------------- #
 # Copright     : Jacques Dekker
 #              : CC BY-NC-SA 4.0
@@ -27,7 +28,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.0.0-beta"
+scriptVersion="1.0.0-beta.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -35,7 +36,7 @@ binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
-usrCfgFile="$HOME/.config/dt.bldr/dt.bldr.cfg"
+usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
 # arrays
 declare -A optsDRS
 declare -A optsCMK
@@ -45,9 +46,10 @@ declare -A optsDFT
 declare -A optsCRS
 # colours
 clrRST=$(tput sgr0)    # reset
-clrBLK=$(tput setaf 0) # black
+clrBLK=$(tput setaf 1) # red
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
+clrBLU=$(tput setaf 4) # blue
 # general
 doChkFile="0"
 doShwFile="0"
@@ -60,69 +62,69 @@ exitSTTS="0"
 # ------------------------------------------------------------------ #
 function _doCheck ()
 {
-  echo "# -------------------------------------------------- directories --- #"
-  for ITEM in  baseGitDir logUserDir
+  echo " -------------------------------------------------------------- directories --- "
+  for ITEM in  baseGitDir logDir
   do
     STATUS="${clrGRN}OK${clrRST}"
     eval [ ! -d "${optsDRS[$ITEM]}" ] && \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
-    printf "# %-28s%-18s%s\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
+    printf "  %-28s%-18s%s\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
   done
 
-  echo "# ------------------------------------------------ cmake options --- #"
+  echo " ------------------------------------------------------------ cmake options --- "
   # CMAKE_PREFIX_PATH
   STATUS="${clrGRN}OK${clrRST}"
   eval [ ! -d "${optsCMK[CMAKE_PREFIX_PATH]}" ] && \
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="254" ; }
-  printf "# %-28s%-18s%s\n" "CMAKE_PREFIX_PATH" "${STATUS}" "${optsCMK[CMAKE_PREFIX_PATH]}"
+  printf "  %-28s%-18s%s\n" "CMAKE_PREFIX_PATH" "${STATUS}" "${optsCMK[CMAKE_PREFIX_PATH]}"
   # CMAKE_BUILD_TYPE="RelWithDebInfo"   -> Debug | Release | RelWithDebInfo
   STATUS="${clrGRN}OK${clrRST}"
   [[ "${optsCMK[CMAKE_BUILD_TYPE]}" =~ ^(Debug|Release|RelWithDebInfo)$ ]] || \
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="253" ; }
-  printf "# %-28s%-18s%s\n" "CMAKE_BUILD_TYPE" "${STATUS}" "${optsCMK[CMAKE_BUILD_TYPE]}"
+  printf "  %-28s%-18s%s\n" "CMAKE_BUILD_TYPE" "${STATUS}" "${optsCMK[CMAKE_BUILD_TYPE]}"
   # CMAKE_FLAGS not checked
-  STATUS="${clrBLK}--   ${clrRST}"
-  printf "# %-28s%-18s%s\n" "CMAKE_FLAGS" "${STATUS}" "${optsCMK[CMAKE_FLAGS]}"
-  echo "# -------------------------------------------------- use options --- #"
+  STATUS="${clrBLK}--     --${clrRST}"
+  printf "  %-28s%-18s%s\n" "CMAKE_FLAGS" "${STATUS}" "${optsCMK[CMAKE_FLAGS]}"
+  echo " -------------------------------------------------------------- use options --- "
   for key in "${!optsUSE[@]}"
   do
     STATUS="${clrGRN}OK${clrRST}"
     ITEM="${optsUSE[$key]}"
     [[ "${ITEM,,}" =~ ^on$ ]] ||  [[ "${ITEM,,}" =~ ^off$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="252" ; }
-    printf "# %-28s%-18s%s\n" ${key} ${STATUS} ${optsUSE[$key]}
+    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsUSE[$key]}
   done
   
-  echo "# ------------------------------------------------ build options --- #"
+  echo " ------------------------------------------------------------ build options --- "
   for key in "${!optsBLD[@]}"
   do
     STATUS="${clrGRN}OK${clrRST}"
     ITEM="${optsBLD[$key]}"
     [[ "${ITEM,,}" =~ ^on$ ]] ||  [[ "${ITEM,,}" =~ ^off$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="251" ; }
-    printf "# %-28s%-18s%s\n" ${key} ${STATUS} ${optsBLD[$key]}
+    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsBLD[$key]}
   done
   
-  echo "# ------------------------------------------------- run defaults --- #"
+  echo " ------------------------------------------------------------- run defaults --- "
   for key in "${!optsDFT[@]}"
   do
     STATUS="${clrGRN}OK${clrRST}"
     ITEM="${optsDFT[$key]}"
     [[ "${ITEM,,}" =~ ^[01]$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="250" ; }
-    printf "# %-28s%-18s%s\n" ${key} ${STATUS} ${optsDFT[$key]}
+    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsDFT[$key]}
   done
   
-  echo "# -------------------------------------------------- cpu options --- #"
+  echo " -------------------------------------------------------------- cpu options --- "
   for key in "${!optsCRS[@]}"
   do
     STATUS="${clrGRN}OK${clrRST}"
     ITEM="${optsCRS[$key]}"
     [[ "${ITEM,,}" =~ ^([1-9][0-9]{1}|1[0-9]{2}|200)$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="249" ; }
-    printf "# %-28s%-18s%s\n" ${key} ${STATUS} ${optsCRS[$key]}
+    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsCRS[$key]}
   done
-  echo "# -------------------------------------------------------- $(date '+%H:%M') --- #"
+  echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
 }
 
 # ------------------------------------------------------------------ #
@@ -131,31 +133,31 @@ function _doCheck ()
 # ------------------------------------------------------------------ #
 function _doShow ()
 {
-  echo "# -------------------------------------------------- directories --- #"
+  echo " -------------------------------------------------------------- directories --- "
   for key in "${!optsDRS[@]}"; do
-      printf "#  %-28s%-5s%s\n" ${key} ${optsDRS[$key]}
+      printf "  %-28s%-5s%s\n" ${key} ${optsDRS[$key]}
   done | sort
-  echo "# ------------------------------------------------ cmake options --- #"
+  echo " ------------------------------------------------------------ cmake options --- "
   for key in "${!optsCMK[@]}"; do
-      printf "#  %-28s%-5s%s\n" ${key} ${optsCMK[$key]}
+      printf "  %-28s%-5s%s\n" ${key} ${optsCMK[$key]}
   done | sort
-  echo "# -------------------------------------------------- use options --- #"
+  echo " -------------------------------------------------------------- use options --- "
   for key in "${!optsUSE[@]}"; do
-      printf "#  %-28s%-5s%s\n" ${key} ${optsUSE[$key]}
+      printf "  %-28s%-5s%s\n" ${key} ${optsUSE[$key]}
   done | sort
-  echo "# ------------------------------------------------ build options --- #"
+  echo " ------------------------------------------------------------ build options --- "
   for key in "${!optsBLD[@]}"; do
-      printf "#  %-28s%-5s%s\n" ${key} ${optsBLD[$key]}
+      printf "  %-28s%-5s%s\n" ${key} ${optsBLD[$key]}
   done | sort
-  echo "# ------------------------------------------------- run defaults --- #"
+  echo " ------------------------------------------------------------- run defaults --- "
   for key in "${!optsDFT[@]}"; do
-      printf "#  %-28s%-5s%s\n" ${key} ${optsDFT[$key]}
+      printf "  %-28s%-5s%s\n" ${key} ${optsDFT[$key]}
   done | sort
-  echo "# -------------------------------------------------- cpu options --- #"
+  echo " -------------------------------------------------------------- cpu options --- "
   for key in "${!optsCRS[@]}"; do
-      printf "#  %-28s%-5s%s\n" ${key} ${optsCRS[$key]}
+      printf "  %-28s%-5s%s\n" ${key} ${optsCRS[$key]}
   done | sort
-  echo "# -------------------------------------------------------- $(date '+%H:%M') --- #"
+  echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
 }
 
 # ------------------------------------------------------------------ #
@@ -169,16 +171,15 @@ function _errHndlr ()
   errorMessage="$2"
   # show error
   echo "
-  A fatal error occured.
+  ${clrRED}A fatal error occured.${clrRST}
 
-    Script   : ${scriptName} (${scriptVersion})
-    Function : ${errorLocation}
-    Error    : ${errorMessage}
-
-    For possible details :  ${cmkBldLog}
+   Script      : ${scriptName} (${scriptVersion})
+   Function    : ${errorLocation}
+   Description : ${errorMessage}
 
   Exiting now.
-"
+
+ -------------------------------------------------------------------- ${clrRED}$(date '+%H:%M')${clrRST} ---"
   exit 128
 }
 
@@ -186,9 +187,17 @@ function _errHndlr ()
 # --- Main ---
 # ------------------------------------------------------------------ #
 clear
+  echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
 # some basic checks
 [ "$EUID" -eq 0 ]      && _errHndlr "Basic checks" "Do not run as root user."
 [ ! -f ${defCfgFile} ] && _errHndlr "Basic checks" "${defCfgFile} does not exist."
+echo "  default configuration file  ${clrGRN}present${clrRST}"
+if [ -s  ${usrCfgFile} ]
+then
+  echo "  user configuration file     ${clrGRN}present${clrRST}"
+else
+  echo "  user configuration file     ${clrRED}not present${clrRST}"
+fi
 # -------------------------------------------------------- #
 # parse cfg files
 while IFS=$'\n' read -r OPTVAL
