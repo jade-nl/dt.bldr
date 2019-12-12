@@ -1,0 +1,28 @@
+# -------------------------------------------------------------------------- #
+# Information about the scripts
+# -------------------------------------------------------------------------- #
+# dt.bldr.sh - the main script
+
+This is the main script
+
+
+--TODO--
+
+
+# dt.cfg.sh - the configuration checker
+At the moment this script can do two things:
+
+- Do a rough check of the configuration files that are being used. There's no
+real intelligence, but it will point out problems and mistakes.
+
+- Show the options that will be used.
+
+This script will always start with the system-wide configuration file that
+can be found in /opt/dt.bldr/cfg and, if present, overlay the local copy.
+So even if you use a local configuration file that has a limited amount of
+entries the complete set of options is shown.
+
+It is advised to run this script after you changed ~/.local/cfg/dt.bldr.cfg
+
+# -------------------------------------------------------------------------- #
+# End

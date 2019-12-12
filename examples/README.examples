@@ -1,0 +1,31 @@
+# -------------------------------------------------------------------------- #
+# Information about the example configuration files
+# -------------------------------------------------------------------------- #
+
+These are 2 dt.bldr.cfg examples to give a starting point
+                            
++ dt.bldr.cfg.system.wide - If you want to build and install a system wide
+                            version.
+                          - Connects to github using the URL shown on the
+                            darktable install webpage
+                          - Build files are installed to /opt/darktable.
+                          - Uses Release to build darktable.
+                          - All build options are still the defaults as
+                            set by the darktable development team.
+                          - Default run options are set for 'single' use.
+
++ dt.bldr.cfg.jade        - All is kept locally in $HOME/.local,
+                          - Connects to github using ssh,
+                          - Uses RelWithDebInfo to build dt
+                          - Some of the build options are disabled
+                          - Default run options are set for daily use
+
+If you want to use either of these as is or as a starting point copy the one
+you like to:
+
+  ~/.local/cfg/dt.bldr.cfg
+  
+Have a look at ../cfg/README.configuration for details.
+
+# -------------------------------------------------------------------------- #
+# End

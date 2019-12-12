@@ -14,10 +14,10 @@
 #              : 2) Build darktable
 #              : 3) Install darktable
 # -------------------------------------------------------------------------- #
-# Dependencies : /opt/dt.bldr/cfg/dt.bldr.cfg  (default cfg file)
-#              : /opt/dt.bldr/bin/dt.cfg.sh    (cfg file checker)
-#              : git Version Control Systems needs to be installed
-#              : sudo, if used for system wide installation
+# Dependencies : /opt/dt.bldr/cfg/dt.bldr.cfg             (default cfg file)
+#              : /opt/dt.bldr/bin/dt.cfg.sh               (cfg file checker)
+#              : git Version Control Systems
+#              : sudo, for non-local installations
 # -------------------------------------------------------------------------- #
 # Changes      : nov 07 2019  First build / outline              1.0.0-alpha
 #              : nov 10 2019  Options processing and help      1.0.0-alpha.1
@@ -32,6 +32,9 @@
 #              : dec 04 2019  First release candidate             1.0.0-rc.0
 #              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
 #              : dec 10 2019  Fixed sudo progress meter issue     1.0.0-rc.2
+#              : dec 12 2019  Relese Version 1.0.0                     1.0.0
+#                             Fixed sudo/progress meter layout issue        
+#                             Implemented git url from cfg                  
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -43,7 +46,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-rc.2"
+scriptVersion="1.0.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -86,7 +89,7 @@ function _gitDtClone ()
   [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
   # clone dt
   cd ${baseRepDir}
-  git clone git://github.com/darktable-org/darktable.git >/dev/null  2>&1 &
+  git clone "${urlGit}" >/dev/null  2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # initialize rawspeed
@@ -132,7 +135,7 @@ function _gitDtBuild ()
     _getDtGitVrsn
     if [ "${curVrsn}" == "${gitVrsn}" ]
     then
-      echo "  build   - ${clrBLU}skipping${clrRST} : installed and repo version are the same"
+      echo "  build   - ${clrBLU}skipping${clrRST} : installed and git version are the same"
       return
     fi
   fi
@@ -202,16 +205,22 @@ function _gitDtInstall ()
     _getDtGitVrsn
     if [ "${curVrsn}" == "${gitVrsn}" ]
     then
-      echo "  install - ${clrBLU}skipping${clrRST} : installed and repo version are the same"
+      echo "  install - ${clrBLU}skipping${clrRST} : installed and git version are the same"
       return
     fi
   fi
   cd ${dtGitDir}/build || _errHndlr "_gitDtInstall" "${dtGitDir}/build: directory doesn't exist"
 #  printf "\r  install - installing darktable using ${makeBin} .. "
   # remove previously installed version.
+  tput sc
   [ -d ${CMAKE_PREFIX_PATH} ] && ${sudoToken} rm -rf ${CMAKE_PREFIX_PATH}/*
-  # set normal permissions and token if system install
-  [ ! -z ${sudoToken} ] && umask 022 && instToken="sudo"
+  # set env if it is a non-local install
+  if [ ! -z ${sudoToken} ]
+  then
+    umask 022
+    instToken="sudo"
+    tput rc ; tput ed
+  fi
   # install using make/ninja
   ${sudoToken} ${makeBin} install >/dev/null 2>&1 &
   prcssPid="$!" ; txtStrng="install - installing darktable using make"
@@ -219,7 +228,6 @@ function _gitDtInstall ()
   # restore if system install
   [ ! -z ${sudoToken} ] && umask 026 && instToken=""
   _getDtGitVrsn
-
 }
 
 # ------------------------------------------------------------------ #
@@ -238,11 +246,11 @@ function _getDtGitVrsn ()
 # ------------------------------------------------------------------ #
 function _shwPrgrs ()
 {
-  spinParts="-\|/" ; cntr="0" ; ccld="0"
+  spnPrts="-\|/" ; cntr="0" ; ccld="0"
   while ${instToken} kill -0 $prcssPid 2>/dev/null
   do
     cntr=$(( (cntr+1) %4 ))
-    printf "\r  ${txtStrng} ${clrGRN}${spinParts:$cntr:1}${clrRST}  "
+    printf "\r  ${txtStrng} ${clrGRN}${spnPrts:$cntr:1}${clrRST}   "
     sleep .3 ; ((ccld++))
   done
 #set -x
@@ -371,7 +379,6 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
 ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST} 
 EOF
 exit 0
-
 }
 
 # -------------------------------------------------------------------------- #
@@ -382,6 +389,7 @@ echo ""
 strRunTime=$(date +%s)
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 [ "$EUID" -eq 0 ] && _errHndlr "Main" "Do not run script as root user."
+
 # -------------------------------------------------------------------------- #
 # parse configuration file
 # ------------------------------------------------------------------ #
@@ -394,6 +402,7 @@ ${cfgChkr} >/dev/null 2>&1
 . ${defCfgFile}
 # parse user defined configuration file
 [ -f "${usrCfgFile}" ] && . ${usrCfgFile}
+
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
@@ -401,6 +410,7 @@ dtGitDir="${baseRepDir}/darktable"
 scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
 [[ "${CMAKE_PREFIX_PATH}" != "$HOME"* ]] && sudoToken="sudo"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
+
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
 # ------------------------------------------------------------------ #
@@ -418,11 +428,13 @@ else
   echo " - cmake will be used" >> "${scrptLog}"
   ninjaIsUsed="NO" ; cmakeGen="Unix Makefiles" ; makeBin="make"
 fi
+
 # -------------------------------------------------------------------------- #
 # --- set amount of cores ---
 # ------------------------------------------------------------------ #
 nmbrCores="$(printf %.0f $(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc ))"
 makeOpts="-j ${nmbrCores}"
+
 # -------------------------------------------------------------------------- #
 # get/set darktable version information (installed version)
 # ------------------------------------------------------------------ #
@@ -431,6 +443,7 @@ makeOpts="-j ${nmbrCores}"
   [ -x ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
     curVrsn="$(${CMAKE_PREFIX_PATH}/bin/darktable --version | \
     sed 's/[~+]/-/g' | awk 'NR==1 { print $4 }')"
+
 # -------------------------------------------------------------------------- #
 # process options, if any
 # ------------------------------------------------------------------ #
@@ -462,12 +475,14 @@ else
     esac
   done
 fi
+
 # -------------------------------------------------------- #
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
 [ "${optPull}"    = "1" ] && _gitDtPull
 [ "${optBuild}"   = "1" ] && _gitDtBuild
 [ "${optInstall}" = "1" ] && _gitDtInstall
+
 # -------------------------------------------------------- #
 # show some information
 endRunTime=$(date +%s) ; totRunTime=$(( $endRunTime - $strRunTime ))
@@ -476,11 +491,13 @@ echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($totRunTime/3600)) $(($totRunTime%3600/60)) $(($totRunTime%60))
 echo "  installed version  ${curVrsn}"
 echo "  git version        ${gitVrsn}"
+
 # -------------------------------------------------------- #
 # --- Cleanup ---
 echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
 
 exit 0
+
 # -------------------------------------------------------------------------- #
 # End

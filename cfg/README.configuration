@@ -1,0 +1,39 @@
+# -------------------------------------------------------------------------- #
+# Information about the configuration setup and the example files
+# -------------------------------------------------------------------------- #
+- How is the configuration file set up.
+
+The dt.bldr.sh script needs at least one configuration file to do its thing.
+The default configuration file can be found in /opt/dt.bldr/cfg. This is a
+'sane and safe' configuration and it should *not* be changed!
+
+This default configuration file is parsed first. After that the dt.bldr.sh
+script will look for a local configuration file in $HOME/.local/cfg called
+dt.bldr.cfg.
+
+It is not needed to specify all the options in the local configuration file.
+The default file is parsed first so all the options are set and you can
+suffice by only settings those options you want to change.
+
+The above would suggest that the local configuration is optional, and it is. I
+do however recommend creating one if only to change the default clone option
+into a pull option and activate the stop-when-the-same option.
+
+- Content of the configuration file.
+
+The configuration file isn't limited to the darktable specific configuration,
+build and install options. The following can also be specified:
+
++ The way the script connects with GitHub. Currently only 3 ways are
+  defined: https:// or git@ or git://
++ The location of the log file(s),
++ The location of the git repository directory,
++ The percentage of cores to use during the build,
++ The default run options (when no options are supplied at the command
+  line).
+
+Have a look inside the default configuration file, there should be enough
+comments to make things clear.
+
+# -------------------------------------------------------------------------- #
+# End

@@ -19,6 +19,8 @@
 #              : dec 02 2019 added partial git url flexibility  1.0.0-beta.2
 #              : dec 03 2019 Changed variable name              1.0.0-beta.3
 #              : dec 04 2019 First relese candidate               1.0.0-rc.0
+#              : dec 10 2019 Relese Version 1.0.0                      1.0.0
+#              : dec 11 2019 Removed leftover stuff                    1.0.1
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -30,7 +32,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.0.0-rc.0"
+scriptVersion="1.0.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -136,10 +138,6 @@ function _doCheck ()
   echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
 }
 
-# ------------------------------------------------------------------ #
-# Function : Show configuration
-# Syntax   : _doShow
-# ------------------------------------------------------------------ #
 function _doShow ()
 {
   echo " ---------------------------------------------------------------------- git --- "
@@ -170,6 +168,23 @@ function _doShow ()
   for key in "${!optsCRS[@]}"; do
       printf "  %-28s%-5s%s\n" ${key} ${optsCRS[$key]}
   done | sort
+  
+  echo " ------------------------------------------------------- system information --- "
+  echo "  bash    $(bash --version | head -1)"
+  echo "  git     $(git --version)"
+  echo "  gcc     $(gcc --version | head -1)"
+  echo "  cmake   $(cmake --version | head -1)"
+  echo "  make    $(make --version | head -1)"
+  echo "  ninja   $(ninja --version)"
+  echo "  ccache  $(ccache --version | head -1)"
+  echo "  $( uname -rv )"
+
+  echo " ------------------------------------------------------ darktable cms tests --- "
+  [ $(which darktable-cmstest) ] && darktable-cmstest | awk '{ print "  " $0 }'
+
+  echo " ------------------------------------------------------- darktable cl tests --- "
+  [ $(which darktable-cltest) ] && darktable-cltest | awk '{ print "  " $0 }'
+
   echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
 }
 
