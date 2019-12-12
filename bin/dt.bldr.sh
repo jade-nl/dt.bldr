@@ -30,6 +30,7 @@
 #                             Changed wording output to screen
 #                             Fixed skip issue
 #              : dec 04 2019  First release candidate             1.0.0-rc.0
+#              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -41,7 +42,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0-rc.0"
+scriptVersion="1.0.0-rc.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -103,7 +104,8 @@ function _gitDtClone ()
 # ------------------------------------------------------------------ #
 function _gitDtPull ()
 {
-  cd ${dtGitDir}
+  cd ${dtGitDir} 2>/dev/null || _errHndlr "_gitDtPull" "No such directory."
+  [ "$(ls -A)" ] || _errHndlr "_gitDtPull" "git directory is empty (clone first?)"
   # pull dt
   git pull >/dev/null 2>&1 &
   prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
@@ -288,8 +290,7 @@ function _shwHelp ()
 ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST} 
  ${scriptName} - version : ${scriptVersion}
  ------------------------------------------------------------------------------
- Syntax
-  : dt.bldr.sh <options>
+ Syntax    dt.bldr.sh <options>
  ------------------------------------------------------------------------------
  Options
   : -c     Clone files from repository to ${baseRepDir}
@@ -299,24 +300,21 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   : -b     Build darktable (see General below)
   : -i     Install darktable to ${CMAKE_PREFIX_PATH}
   : -h/-?  Show this output
+
+  Starting without any options set will trigger the default run options.
  ------------------------------------------------------------------------------
- Current settings are:
-
   - General
-
     Script base directory ....... ${scriptDir} 
     Default Cfg file ............ ${defCfgFile}
     USer Cfg file ............... ${usrCfgFile}
     Script log file ............. ${logDir}
 
   - GIT
-
     URL ......................... ${urlGit}
     Base git directory .......... ${baseRepDir}
     darktable git directory ..... ${dtGitDir}
 
   - Build and Install
-
     Prefix (install) path ....... ${CMAKE_PREFIX_PATH}
 
     CMAKE_BUILD_TYPE ............ ${CMAKE_BUILD_TYPE}
@@ -357,7 +355,14 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     BINARY_PACKAGE_BUILD ........ ${BINARY_PACKAGE_BUILD}
     TESTBUILD_OPENCL_PROGRAMS.... ${TESTBUILD_OPENCL_PROGRAMS}
 
-    Use ninja ................... ${ninjaIsUsed}
+  - Default run options
+    dfltClone ................... ${dfltClone}
+    dfltPull .................... ${dfltPull}
+    dfltBuild ................... ${dfltBuild}
+    dfltInstall ................. ${dfltInstall}
+    dfltNinja ................... ${dfltNinja}
+    dfltStop .................... ${dfltStop}
+
 ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST} 
 EOF
 exit 0
@@ -388,9 +393,9 @@ ${cfgChkr} >/dev/null 2>&1
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
 dtGitDir="${baseRepDir}/darktable"
-scrptLog="${logDir}/dt.script.log"
+scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
 [[ "${CMAKE_PREFIX_PATH}" != "$HOME"* ]] && sudoToken="sudo"
-echo "$(date '+%H:%M:%S') - Script starts" > "${scrptLog}"
+echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
 # ------------------------------------------------------------------ #
