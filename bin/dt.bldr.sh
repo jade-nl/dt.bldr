@@ -35,6 +35,7 @@
 #              : dec 12 2019  Relese Version 1.0.0                     1.0.0
 #                             Fixed sudo/progress meter layout issue        
 #                             Implemented git url from cfg                  
+#              : dec 13 2019  Extra comments + Code cleanup            1.0.1
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -46,7 +47,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.0"
+scriptVersion="1.0.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -88,7 +89,7 @@ function _gitDtClone ()
   # remove current files/dirs first
   [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
   # clone dt
-  cd ${baseRepDir}
+  cd ${baseRepDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseRepDir} No such directory."
   git clone "${urlGit}" >/dev/null  2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
@@ -99,6 +100,7 @@ function _gitDtClone ()
   # update rawspeed
   git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule update"
   printf "\r          - initializing and updating rawspeed ${clrGRN}OK${clrRST}\n"
+  # get dt version from repo
   _getDtGitVrsn
 }
 
@@ -109,7 +111,7 @@ function _gitDtClone ()
 # ------------------------------------------------------------------ #
 function _gitDtPull ()
 {
-  cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtPull" "No such directory."
+  cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtPull" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtPull" "git directory is empty"
   # pull dt
   git pull >/dev/null 2>&1 &
@@ -119,6 +121,7 @@ function _gitDtPull ()
   printf "\r          - updating rawspeed .. "
   git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtPull" "submodule update"
   printf "\r          - updating rawspeed ${clrGRN}OK${clrRST}\n"
+  # get dt version from repo
   _getDtGitVrsn
 }
 
@@ -128,7 +131,7 @@ function _gitDtPull ()
 # ------------------------------------------------------------------ #
 function _gitDtBuild ()
 {
-  cd ${dtGitDir}
+  cd ${dtGitDir} 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
   # check same versions if optStop is set
   if [ "${optStop}" == "1" ]
   then
@@ -191,6 +194,7 @@ function _gitDtBuild ()
   # stop timer
   endBldTime=$(date +%s)
   totBldTime=$(($endBldTime - $strtBldTime))
+  # get dt version from repo
   _getDtGitVrsn
 }
 
@@ -200,6 +204,7 @@ function _gitDtBuild ()
 # ------------------------------------------------------------------ #
 function _gitDtInstall ()
 {
+  # check same versions if optStop is set
   if [ "${optStop}" == "1" ]
   then
     _getDtGitVrsn
@@ -209,8 +214,7 @@ function _gitDtInstall ()
       return
     fi
   fi
-  cd ${dtGitDir}/build || _errHndlr "_gitDtInstall" "${dtGitDir}/build: directory doesn't exist"
-#  printf "\r  install - installing darktable using ${makeBin} .. "
+  cd ${dtGitDir}/build || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
   # remove previously installed version.
   tput sc
   [ -d ${CMAKE_PREFIX_PATH} ] && ${sudoToken} rm -rf ${CMAKE_PREFIX_PATH}/*
@@ -227,6 +231,7 @@ function _gitDtInstall ()
   _shwPrgrs
   # restore if system install
   [ ! -z ${sudoToken} ] && umask 026 && instToken=""
+  # get dt version from repo
   _getDtGitVrsn
 }
 
