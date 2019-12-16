@@ -70,6 +70,7 @@ sudoToken=""
 instToken=""
 gitVrsn="n/a"
 curVrsn="n/a"
+theSame="0"
 totBldTime="0"
 # input options
 optBuild="0"
@@ -140,6 +141,7 @@ function _gitDtBuild ()
     if [ "${curVrsn}" == "${gitVrsn}" ]
     then
       echo "  build   - ${clrBLU}skipping${clrRST} : installed and git version are the same"
+      theSame="1"
       return
     fi
   fi
@@ -212,6 +214,7 @@ function _gitDtInstall ()
     if [ "${curVrsn}" == "${gitVrsn}" ]
     then
       echo "  install - ${clrBLU}skipping${clrRST} : installed and git version are the same"
+      theSame="1"
       return
     fi
   fi
@@ -496,15 +499,15 @@ echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 [ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $(($totBldTime/3600)) $(($totBldTime%3600/60)) $(($totBldTime%60))
 printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($totRunTime/3600)) $(($totRunTime%3600/60)) $(($totRunTime%60))
 
-if [[ ${optInstall} -eq "0" || ${optStop} -eq "1" ]]
+if [[ ${optInstall} -eq "1" && ${theSame} -eq "0" ]]
 then
-  # git version is not installed
-  echo "  installed version  ${curVrsn}"
-  echo "  git version        ${gitVrsn}"
-else
   # git version is installed
   echo "  previous version   ${curVrsn}"
   echo "  installed version  ${gitVrsn}"
+else
+  # git version is not installed
+  echo "  installed version  ${curVrsn}"
+  echo "  git version        ${gitVrsn}"
 fi
 
 # -------------------------------------------------------- #
