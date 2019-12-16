@@ -36,6 +36,7 @@
 #                             Fixed sudo/progress meter layout issue        
 #                             Implemented git url from cfg                  
 #              : dec 13 2019  Extra comments + Code cleanup            1.0.1
+#              : dec 16 2019  Fixed output inconsistency               1.0.2
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -47,7 +48,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.1"
+scriptVersion="1.0.2"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -214,7 +215,7 @@ function _gitDtInstall ()
       return
     fi
   fi
-  cd ${dtGitDir}/build || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
+  cd ${dtGitDir}/build 2>/dev/null || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
   # remove previously installed version.
   tput sc
   [ -d ${CMAKE_PREFIX_PATH} ] && ${sudoToken} rm -rf ${CMAKE_PREFIX_PATH}/*
@@ -284,13 +285,13 @@ function _errHndlr ()
   errorMessage="$2"
   #----------
   # To screen
-  echo " ${clrRED}A fatal error occured.${clrRST}
+  echo -e "\n  ${clrRED}A fatal error occured.${clrRST}
 
-     Script      : ${scriptName} (${scriptVersion})
-     Problem     : ${errorLocation}
-     Description : ${errorMessage}
+   Script      : ${scriptName} (${scriptVersion})
+   Problem     : ${errorLocation}
+   Description : ${errorMessage}
 
-   Exiting now.
+  ${clrRED}Exiting now.${clrRST}
 ${lrgDvdr}${clrRED}$(date '+%H:%M:%S') --${clrRST}
 "
   exit 255
@@ -494,8 +495,17 @@ endRunTime=$(date +%s) ; totRunTime=$(( $endRunTime - $strRunTime ))
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 [ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $(($totBldTime/3600)) $(($totBldTime%3600/60)) $(($totBldTime%60))
 printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($totRunTime/3600)) $(($totRunTime%3600/60)) $(($totRunTime%60))
-echo "  installed version  ${curVrsn}"
-echo "  git version        ${gitVrsn}"
+
+if [[ ${optInstall} -eq "0" || ${optStop} -eq "1" ]]
+then
+  # git version is not installed
+  echo "  installed version  ${curVrsn}"
+  echo "  git version        ${gitVrsn}"
+else
+  # git version is installed
+  echo "  previous version   ${curVrsn}"
+  echo "  installed version  ${gitVrsn}"
+fi
 
 # -------------------------------------------------------- #
 # --- Cleanup ---
