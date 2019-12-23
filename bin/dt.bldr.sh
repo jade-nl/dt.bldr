@@ -24,7 +24,7 @@
 #              : nov 18 2019  Start setting up main functions  1.0.0-alpha.2
 #              : nov 19 2019  Fixed install and build functions   1.0.0-beta
 #              : dec 02 2019  Added partial git url flexibility 1.0.0-beta.1
-#              : dec 03 2019  Code cleanup                      1.0.0-beta.2
+#              : dec 03 2019  Code clean-up                     1.0.0-beta.2
 #                             Changed some variable names
 #                             Fixed some minor layout issue's
 #                             Changed wording output to screen
@@ -32,13 +32,15 @@
 #              : dec 04 2019  First release candidate             1.0.0-rc.0
 #              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
 #              : dec 10 2019  Fixed sudo progress meter issue     1.0.0-rc.2
-#              : dec 12 2019  Relese Version 1.0.0                     1.0.0
+#              : dec 12 2019  Release Version 1.0.0                    1.0.0
 #                             Fixed sudo/progress meter layout issue        
 #                             Implemented git url from cfg                  
-#              : dec 13 2019  Extra comments + Code cleanup            1.0.1
+#              : dec 13 2019  Extra comments + Code clean-up           1.0.1
 #              : dec 16 2019  Fixed output inconsistency               1.0.2
+#              : dec 17 2019  Checked and corrected spelling           1.0.3
+#                             Set sensible optClone/optPull preference 
 # -------------------------------------------------------------------------- #
-# Copright     : GNU General Public License v3.0
+# Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
 # -------------------------------------------------------------------------- #
 #set -x
@@ -48,7 +50,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.2"
+scriptVersion="1.0.3"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -70,8 +72,8 @@ sudoToken=""
 instToken=""
 gitVrsn="n/a"
 curVrsn="n/a"
-theSame="0"
-totBldTime="0"
+equVrsn="0"
+ttlBldTime="0"
 # input options
 optBuild="0"
 optClone="0"
@@ -141,7 +143,7 @@ function _gitDtBuild ()
     if [ "${curVrsn}" == "${gitVrsn}" ]
     then
       echo "  build   - ${clrBLU}skipping${clrRST} : installed and git version are the same"
-      theSame="1"
+      equVrsn="1"
       return
     fi
   fi
@@ -196,7 +198,7 @@ function _gitDtBuild ()
   _shwPrgrs
   # stop timer
   endBldTime=$(date +%s)
-  totBldTime=$(($endBldTime - $strtBldTime))
+  ttlBldTime=$(($endBldTime - $strtBldTime))
   # get dt version from repo
   _getDtGitVrsn
 }
@@ -214,7 +216,7 @@ function _gitDtInstall ()
     if [ "${curVrsn}" == "${gitVrsn}" ]
     then
       echo "  install - ${clrBLU}skipping${clrRST} : installed and git version are the same"
-      theSame="1"
+      equVrsn="1"
       return
     fi
   fi
@@ -246,7 +248,8 @@ function _gitDtInstall ()
 function _getDtGitVrsn ()
 {
   gitVrsn=$( cd ${dtGitDir}
-  git describe | sed -e 's/release-//' -e 's/[~+]/-/g' )
+             git describe | \
+             sed -e 's/release-//' -e 's/[~+]/-/g' )
 }
 
 # ------------------------------------------------------------------ #
@@ -288,7 +291,7 @@ function _errHndlr ()
   errorMessage="$2"
   #----------
   # To screen
-  echo -e "\n  ${clrRED}A fatal error occured.${clrRST}
+  echo -e "\n  ${clrRED}A fatal error occurred.${clrRST}
 
    Script      : ${scriptName} (${scriptVersion})
    Problem     : ${errorLocation}
@@ -301,7 +304,7 @@ ${lrgDvdr}${clrRED}$(date '+%H:%M:%S') --${clrRST}
 }
 
 # ------------------------------------------------------------------ #
-# Function : Show help and exit
+# Function : Show help
 # Purpose  : Show help and exit
 # ------------------------------------------------------------------ #
 function _shwHelp ()
@@ -474,8 +477,7 @@ else
   do
     case "${OPTION}" in
       c) optClone="1" ;;
-      p) optClone="0"     # p beats c if both are set
-         optPull="1" ;;
+      p) optPull="1" ;;
       s) optStop="1" ;;
       b) optBuild="1" ;;
       i) optInstall="1" ;;
@@ -484,22 +486,23 @@ else
     esac
   done
 fi
-
+# -------------------------------------------------------- #
+# if optClone and optPull are both set optPull is discarded
+[[ ${optclone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
 # -------------------------------------------------------- #
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
 [ "${optPull}"    = "1" ] && _gitDtPull
 [ "${optBuild}"   = "1" ] && _gitDtBuild
 [ "${optInstall}" = "1" ] && _gitDtInstall
-
 # -------------------------------------------------------- #
 # show some information
-endRunTime=$(date +%s) ; totRunTime=$(( $endRunTime - $strRunTime ))
+endRunTime=$(date +%s) ; ttlRnTime=$(( $endRunTime - $strRunTime ))
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
-[ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $(($totBldTime/3600)) $(($totBldTime%3600/60)) $(($totBldTime%60))
-printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($totRunTime/3600)) $(($totRunTime%3600/60)) $(($totRunTime%60))
-
-if [[ ${optInstall} -eq "1" && ${theSame} -eq "0" ]]
+[ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $(($ttlBldTime/3600)) $(($ttlBldTime%3600/60)) $(($ttlBldTime%60))
+printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($ttlRnTime/3600)) $(($ttlRnTime%3600/60)) $(($ttlRnTime%60))
+# set text output depending on version differences
+if [[ ${optInstall} -eq "1" && ${equVrsn} -eq "0" ]]
 then
   # git version is installed
   echo "  previous version   ${curVrsn}"
@@ -511,7 +514,7 @@ else
 fi
 
 # -------------------------------------------------------- #
-# --- Cleanup ---
+# --- Clean-up ---
 echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
 
