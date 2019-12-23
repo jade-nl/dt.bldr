@@ -20,15 +20,7 @@
 #              : sudo, for non-local installations
 # -------------------------------------------------------------------------- #
 # Changes      : nov 07 2019  First build / outline              1.0.0-alpha
-#              : nov 10 2019  Options processing and help      1.0.0-alpha.1
-#              : nov 18 2019  Start setting up main functions  1.0.0-alpha.2
 #              : nov 19 2019  Fixed install and build functions   1.0.0-beta
-#              : dec 02 2019  Added partial git url flexibility 1.0.0-beta.1
-#              : dec 03 2019  Code clean-up                     1.0.0-beta.2
-#                             Changed some variable names
-#                             Fixed some minor layout issue's
-#                             Changed wording output to screen
-#                             Fixed skip issue
 #              : dec 04 2019  First release candidate             1.0.0-rc.0
 #              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
 #              : dec 10 2019  Fixed sudo progress meter issue     1.0.0-rc.2
@@ -37,8 +29,9 @@
 #                             Implemented git url from cfg                  
 #              : dec 13 2019  Extra comments + Code clean-up           1.0.1
 #              : dec 16 2019  Fixed output inconsistency               1.0.2
-#              : dec 17 2019  Checked and corrected spelling           1.0.3
+#              : dec 17 2019  Checked and corrected spelling errors    1.0.3
 #                             Set sensible optClone/optPull preference 
+#              : dec 23 2019  Implemented better sudo detection        1.0.4
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -50,7 +43,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.3"
+scriptVersion="1.0.4"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -420,8 +413,13 @@ ${cfgChkr} >/dev/null 2>&1
 # ------------------------------------------------------------------ #
 dtGitDir="${baseRepDir}/darktable"
 scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
-[[ "${CMAKE_PREFIX_PATH}" != "$HOME"* ]] && sudoToken="sudo"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
+
+# -------------------------------------------------------- #
+# sudo is needed when installing dt in: /usr, /opt or /bin
+[[ ${CMAKE_PREFIX_PATH} == /opt/* || \
+   ${CMAKE_PREFIX_PATH} == /usr/* || \
+   ${CMAKE_PREFIX_PATH} == /bin/* ]] && sudoToken="sudo"
 
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
