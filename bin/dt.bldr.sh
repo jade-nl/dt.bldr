@@ -29,9 +29,9 @@
 #                             Implemented git url from cfg                  
 #              : dec 13 2019  Extra comments + Code clean-up           1.0.1
 #              : dec 16 2019  Fixed output inconsistency               1.0.2
-#              : dec 17 2019  Checked and corrected spelling errors    1.0.3
-#                             Set sensible optClone/optPull preference 
-#              : dec 23 2019  Implemented better sudo detection        1.0.4
+#              :              Checked and corrected spelling
+#                             Set sensible optClone/optPull preference
+#              : dec 23 2019  Implemented better sudo detection        1.0.3
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -43,7 +43,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.4"
+scriptVersion="1.0.3"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -486,7 +486,7 @@ else
 fi
 # -------------------------------------------------------- #
 # if optClone and optPull are both set optPull is discarded
-[[ ${optclone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
+[[ ${optClone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
 # -------------------------------------------------------- #
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
