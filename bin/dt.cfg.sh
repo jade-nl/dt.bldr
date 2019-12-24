@@ -6,7 +6,7 @@
 # Options      : -s show configuration file(s)
 #                -c check user configuration file
 # -------------------------------------------------------------------------- #
-# Purpose      : 1) Show configuration files used bu dt.bldr.sh
+# Purpose      : 1) Show configuration files used by dt.bldr.sh
 #              : 2) Check validity of configuration file(s)
 # -------------------------------------------------------------------------- #
 # Dependencies : default config file : /opt/dt.bldr/cfg/dt.bldr.cfg
@@ -21,6 +21,7 @@
 #              : dec 04 2019 First relese candidate               1.0.0-rc.0
 #              : dec 10 2019 Relese Version 1.0.0                      1.0.0
 #              : dec 11 2019 Removed leftover stuff                    1.0.1
+#              : dec 24 2019 Fixed a typo                              1.0.2
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -32,7 +33,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.0.1"
+scriptVersion="1.0.2"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
