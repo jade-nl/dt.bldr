@@ -3,26 +3,96 @@
 # -------------------------------------------------------------------------- #
 # dt.bldr.sh - the main script
 
-This is the main script
+This script is what this project is all about and was created to make fetching, building and installing darktable easier and more flexible.
 
+In essence there is nothing wrong at all with the "git version" instructions
+on the darktable website (right here: https://www.darktable.org/install/). But
+if you are like me and don't like doing things multiple times by hand, like to
+test specific options or build a version specific for your environment you
+might want more flexibility.
 
---TODO--
+Checking if all the dependencies are met for building darktable and presenting
+them in a nice fashion is out of scope. The script will stop with a nice error
+message and all the output generated is put into a log file, so you do have
+starting point to tackle the problem if you run into them.
 
+The following options can be used when running dt.bldr.sh:
 
+  -c    Clone files from the darktable git repository
+  -p    Pull updateis from the darktable git repository
+  -s    Stop if versions are the same
+  -b    Build darktable
+  -i    Install darktable
+  -h/-? Show help
+
+If no options are given when running the script, the defaults that are in the
+configuration file are being used. The global/default configuration file
+(/opt/dt.dt.bldr/cfg/dt.bldr.cfg) is set to use -c and -b. I would recommend
+to set a sensible combo in the personalised config file
+($HOME/.local/cfg/dt.bldr.cfg). I use the following default set: -p -s -b -i
+
+The clone and pull options (-c and -p) will also take care of the rawspeed
+module.
+
+The -s options checks if the latest cloned/pulled git version is the same as
+the darktable version that is installed. If this is the case then the build
+and/or install steps are skipped.
+
+If ninja is installed it will _not_ be used out-of-the-box, you need to tell
+the script to use it by setting the appropriate option in the dt.bldr.cfg
+file.
+
+Out-of-the-box the script will use 75% of the cores available when using "make
+-jX". This can also be adjusted in the configuration file. The current legal
+range is 10% -> 200%
+
+In certain situations sudo will be used during the installation of darktable.
+At the moment the use of sudo will be triggered by the CMAKE_PREFIX_PATH
+variable starting with either of these three: /opt/, /usr/ or /bin/ I would
+discourage using /bin as prefix because the installation process installs more
+then just a few binaries (which would all end up in /bin).
+
+# -------------------------------------------------------------------------- #
 # dt.cfg.sh - the configuration checker
+
+It is advised to run this script after you changed ~/.local/cfg/dt.bldr.cfg
+
 At the moment this script can do two things:
 
-- Do a rough check of the configuration files that are being used. There's no
-real intelligence, but it will point out problems and mistakes.
+- Check the configuration files,
+- Show the configuration files and darktable related system information
 
-- Show the options that will be used.
+Two options determine the way this script runs:
+
+  -c checks
+  -s shows
+
+If dt.cfg.sh is called without any option it defaults to -c
+
+# dt.cfg.sh -c  (or dt.cfg.sh)
+
+Do a rough check of the combined configuration files that are being used.
+There's no real intelligence, but it will point out common problems and
+mistakes.
+
+# dt.cfg.sh -s
+
+This will print all the options that are being used as well as some extra
+information relevant when building dartable.
+
+The extra's:
+
+- Version information for: bash, ccache, git, gcc, cmake, make, ninja
+- Kernel release and version
+- if the color management subsystem of your computer is correctly configured
+- if there is a usable OpenCL environment for darktable to use
+
+# General
 
 This script will always start with the system-wide configuration file that
 can be found in /opt/dt.bldr/cfg and, if present, overlay the local copy.
 So even if you use a local configuration file that has a limited amount of
-entries the complete set of options is shown.
-
-It is advised to run this script after you changed ~/.local/cfg/dt.bldr.cfg
+entries the complete set of options is used/shown.
 
 # -------------------------------------------------------------------------- #
 # End
