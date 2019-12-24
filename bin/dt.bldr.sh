@@ -32,6 +32,7 @@
 #              :              Checked and corrected spelling
 #                             Set sensible optClone/optPull preference
 #              : dec 23 2019  Implemented better sudo detection        1.0.3
+#              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.04
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -43,7 +44,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.3"
+scriptVersion="1.0.4"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -419,7 +420,7 @@ echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 # sudo is needed when installing dt in: /usr, /opt or /bin
 [[ ${CMAKE_PREFIX_PATH} == /opt/* || \
    ${CMAKE_PREFIX_PATH} == /usr/* || \
-   ${CMAKE_PREFIX_PATH} == /bin/* ]] && sudoToken="sudo"
+   ${CMAKE_PREFIX_PATH} == /bin* ]] && sudoToken="sudo"
 
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
