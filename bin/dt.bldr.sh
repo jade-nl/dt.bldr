@@ -33,8 +33,9 @@
 #                             Set sensible optClone/optPull preference
 #              : dec 23 2019  Implemented better sudo detection        1.0.3
 #              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.0.4
-#              : jan 02 2020  Fixed logging install part               1.0.5
+#              : jan 02 2020  Fixed logging install part               1.1.0
 #                             Added MAKE_INSTALL_xyz flexibility
+#                             Added installing from local tarball
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -46,7 +47,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.5"
+scriptVersion="1.1.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -249,9 +250,17 @@ function _gitDtInstall ()
 # ------------------------------------------------------------------ #
 function _getDtGitVrsn ()
 {
-  gitVrsn=$( cd ${dtGitDir}
-             git describe | \
-             sed -e 's/release-//' -e 's/[~+]/-/g' )
+  # remote or local
+  if [[ "${useSRC}" == "git" ]]
+  then
+  # remote
+    gitVrsn=$( cd ${dtGitDir}
+               git describe | \
+               sed -e 's/release-//' -e 's/[~+]/-/g' )
+  else
+  # local
+    gitVrsn=""
+  fi
 }
 
 # ------------------------------------------------------------------ #
@@ -343,6 +352,12 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
 
   - Build and Install
     Prefix (install) path ....... ${CMAKE_PREFIX_PATH}
+    Bindir path ................. ${CMAKE_INSTALL_BINDIR}
+    Libdir path ................. ${CMAKE_INSTALL_LIBDIR}
+    Datarootdir path ............ ${CMAKE_INSTALL_DATAROOTDIR}
+    Docdir path ................. ${CMAKE_INSTALL_DOCDIR}
+    Localedir path .............. ${CMAKE_INSTALL_LOCALEDIR}
+    Mandir path ................. ${CMAKE_INSTALL_MANDIR}
 
     CMAKE_BUILD_TYPE ............ ${CMAKE_BUILD_TYPE}
 
@@ -493,6 +508,35 @@ else
     esac
   done
 fi
+
+# -------------------------------------------------------------------------- #
+# set env for git or local source
+# ------------------------------------------------------------------ #
+echo " - source is: ${useSRC}" >> "${scrptLog}"
+if [[ "${useSRC}" == "local" ]]
+then
+  echo " - setting up local source environment" >> "${scrptLog}"
+  # source is local
+  # no cloning or pulling
+  dfltClone="0"
+  dfltPull="0"
+  # get/set dir and file name
+  lclDir="${lclSRC%/*}"
+  lclFile="${lclSRC##*/}"
+# TODO Werkt dit? Output is leeg (zie ook: show some information)
+  gitVrsn="$(echo ${lclFile} | \
+             sed -e 's/darktable-\(.*\).tar.xz/\1/' -e 's/[~+]/-/g')"
+  tempDir="darktable$(date '+%j')"
+  cd -P ${lclDir}
+  rm -rf ${tempDir}
+  mkdir ${tempDir}
+  # untar tarball
+  tar xvf "${lclFile}" \
+      --directory="${lclSRC%/*}/${tempDir}/" \
+      --strip-components=1 >> ${scrptLog} 2>&1 || _errHndlr "Set local env" "Cannot untar file."
+  dtGitDir="${lclDir}/${tempDir}/"
+fi
+
 # -------------------------------------------------------- #
 # if optClone and optPull are both set optPull is discarded
 [[ ${optClone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
@@ -502,6 +546,7 @@ fi
 [ "${optPull}"    = "1" ] && _gitDtPull
 [ "${optBuild}"   = "1" ] && _gitDtBuild
 [ "${optInstall}" = "1" ] && _gitDtInstall
+
 # -------------------------------------------------------- #
 # show some information
 endRunTime=$(date +%s) ; ttlRnTime=$(( $endRunTime - $strRunTime ))
