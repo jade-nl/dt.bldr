@@ -12,17 +12,14 @@
 # Dependencies : default config file : /opt/dt.bldr/cfg/dt.bldr.cfg
 # -------------------------------------------------------------------------- #
 # Changes      : oct 28 2019 First build                         1.0.0-alpha
-#              : oct 31 2019 Import data                       1.0.0-alpha.1
-#              : nov 02 2019 Show data                         1.0.0-alpha.2
 #              : nov 05 2019 Check data / set exit status         1.0.0-beta
-#              : nov 18 2019 Minor chnages to layout            1.0.0-beta.1
-#              : dec 02 2019 added partial git url flexibility  1.0.0-beta.2
-#              : dec 03 2019 Changed variable name              1.0.0-beta.3
 #              : dec 04 2019 First relese candidate               1.0.0-rc.0
 #              : dec 10 2019 Relese Version 1.0.0                      1.0.0
 #              : dec 11 2019 Removed leftover stuff                    1.0.1
 #              : dec 24 2019 Fixed a typo                              1.0.2
-#              : jan 02 2020 Added some options/checks                 1.1.0
+#              : jan 02 2020 Incorporated extra CMAKE_INSTALL_iX vars  1.1.0
+#                            Changed CMAKE_INSTALL checks
+#                            Added installing from local tarbal
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -44,7 +41,7 @@ cfgDir="${scriptDir}/cfg"
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
 # arrays
-declare -A optsGIT
+declare -A optsSRC
 declare -A optsDRS
 declare -A optsCMK
 declare -A optsUSE
@@ -69,13 +66,53 @@ exitSTTS="0"
 # ------------------------------------------------------------------ #
 function _doCheck ()
 {
-  echo " ---------------------------------------------------------------------- git --- "
+  echo " ------------------------------------------------------------------- source --- "
+  # git or local
+  if [ -z "${optsSRC[useSRC]}" ]
+  then
+    # -------------------------------------------------------- #
+    # empty
     STATUS="${clrGRN}OK${clrRST}"
-    [[ "${optsGIT[urlGit]}" =~ ^(git@github.com:|git://github.com/|https://github.com/) ]] || \
-      { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
-#    eval [ ! -d "${optsGIT[$ITEM]}" ] && \
-#      { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
-    printf "  %-28s%-18s%s\n" "urlGit" "${STATUS}" "${optsGIT[urlGit]}"
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+  elif [[ "${optsSRC[useSRC]}" == "git" ]]
+  then
+    # -------------------------------------------------------- #
+    # remote -> git
+    if [ -z "${optsSRC[gitSRC]}" ]
+    then
+      STATUS="${clrGRN}OK${clrRST}"
+      { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+    else
+      STATUS="${clrGRN}OK${clrRST}"
+      printf "  %-28s%-18s%s\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
+      [[ "${optsSRC[gitSRC]}" =~ ^(git@github.com:|git://github.com/|https://github.com/) ]] || \
+        { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
+    fi
+    printf "  %-28s%-18s%s\n" "gitSRC" "${STATUS}" "${optsSRC[gitSRC]}"
+  elif [[ "${optsSRC[useSRC]}" == "local"  ]]
+  then
+
+    # -------------------------------------------------------- #
+    # local -> tarbal
+    if [ -z "${optsSRC[lclSRC]}" ]
+    then
+      STATUS="${clrGRN}OK${clrRST}"
+      { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+    else
+      STATUS="${clrGRN}OK${clrRST}"
+      printf "  %-28s%-18s%s\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
+      [[ "${optsSRC[lclSRC]}" =~ ^.*/darktable-[0-9\.]*.tar.xz$ ]] || \
+        { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
+    fi
+    printf "  %-28s%-18s%s\n" "lclSRC" "${STATUS}" "${optsSRC[lclSRC]}"
+
+
+  else
+    # -------------------------------------------------------- #
+    # oops
+    echo "Oeps!!"
+  fi
+  # directories
   echo " -------------------------------------------------------------- directories --- "
   for ITEM in baseRepDir logDir
   do
@@ -84,20 +121,50 @@ function _doCheck ()
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
     printf "  %-28s%-18s%s\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
   done
+  # cmake path options
   echo " ------------------------------------------------------------ cmake options --- "
   # CMAKE_PREFIX_PATH
   STATUS="${clrGRN}OK${clrRST}"
-  eval [ ! -d "${optsCMK[CMAKE_PREFIX_PATH]}" ] && \
-    { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="254" ; }
+  [ -z "${optsCMK[CMAKE_PREFIX_PATH]}" ] && \
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
   printf "  %-28s%-18s%s\n" "CMAKE_PREFIX_PATH" "${STATUS}" "${optsCMK[CMAKE_PREFIX_PATH]}"
+  # CMAKE_INSTALL_BINDIR
+  STATUS="${clrGRN}OK${clrRST}"
+  [ -z "${optsCMK[CMAKE_INSTALL_BINDIR]}" ] && \
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_BINDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_BINDIR]}"
+  # CMAKE_INSTALL_LIBDIR
+  STATUS="${clrGRN}OK${clrRST}"
+  [ -z "${optsCMK[CMAKE_INSTALL_LIBDIR]}" ] && \
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_LIBDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_LIBDIR]}"
+  # CMAKE_INSTALL_DATAROOTDIR
+  STATUS="${clrGRN}OK${clrRST}"
+  [ -z "${optsCMK[CMAKE_INSTALL_DATAROOTDIR]}" ] && \
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_DATAROOTDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_DATAROOTDIR]}"
+  # CMAKE_INSTALL_DOCDIR
+  STATUS="${clrGRN}OK${clrRST}"
+  [ -z "${optsCMK[CMAKE_INSTALL_DOCDIR]}" ] && \
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_DOCDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_DOCDIR]}"
+  # CMAKE_INSTALL_LOCALEDIR
+  STATUS="${clrGRN}OK${clrRST}"
+  [ -z "${optsCMK[CMAKE_INSTALL_LOCALEDIR]}" ] && \
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_LOCALEDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_LOCALEDIR]}"
+  # CMAKE_INSTALL_MANDIR
+  STATUS="${clrGRN}OK${clrRST}"
+  [ -z "${optsCMK[CMAKE_INSTALL_MANDIR]}" ] && \
+    { STATUS="${clrRED}ERROR  - empty variable -${clrRST}" ; exitSTTS="254" ; }
+  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_MANDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_MANDIR]}"
   # CMAKE_BUILD_TYPE="RelWithDebInfo"   -> Debug | Release | RelWithDebInfo
   STATUS="${clrGRN}OK${clrRST}"
   [[ "${optsCMK[CMAKE_BUILD_TYPE]}" =~ ^(Debug|Release|RelWithDebInfo)$ ]] || \
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="253" ; }
   printf "  %-28s%-18s%s\n" "CMAKE_BUILD_TYPE" "${STATUS}" "${optsCMK[CMAKE_BUILD_TYPE]}"
-  # CMAKE_FLAGS not checked
-  STATUS="${clrBLK}not checked${clrRST}"
-  printf "  %-28s%-18s%s\n" "CMAKE_FLAGS" "${STATUS}" "${optsCMK[CMAKE_FLAGS]}"
+
+  # cmake use options
   echo " -------------------------------------------------------------- use options --- "
   for key in "${!optsUSE[@]}"
   do
@@ -107,7 +174,8 @@ function _doCheck ()
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="252" ; }
     printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsUSE[$key]}
   done
-  
+
+  # cmake build options
   echo " ------------------------------------------------------------ build options --- "
   for key in "${!optsBLD[@]}"
   do
@@ -117,7 +185,8 @@ function _doCheck ()
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="251" ; }
     printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsBLD[$key]}
   done
-  
+
+  # run options  
   echo " ------------------------------------------------------------- run defaults --- "
   for key in "${!optsDFT[@]}"
   do
@@ -127,7 +196,8 @@ function _doCheck ()
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="250" ; }
     printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsDFT[$key]}
   done
-  
+
+  #  cpu cores usage
   echo " -------------------------------------------------------------- cpu options --- "
   for key in "${!optsCRS[@]}"
   do
@@ -143,8 +213,8 @@ function _doCheck ()
 function _doShow ()
 {
   echo " ---------------------------------------------------------------------- git --- "
-  for key in "${!optsGIT[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsGIT[$key]}
+  for key in "${!optsSRC[@]}"; do
+      printf "  %-28s%-5s%s\n" ${key} ${optsSRC[$key]}
   done | sort
   echo " -------------------------------------------------------------- directories --- "
   for key in "${!optsDRS[@]}"; do
@@ -226,7 +296,7 @@ if [ -s  ${usrCfgFile} ]
 then
   echo "  user configuration file     ${clrGRN}present${clrRST}"
 else
-  echo "  user configuration file     ${clrRED}not present${clrRST}"
+  echo "  user configuration file     ${clrBLU}! not present !${clrRST}"
 fi
 # -------------------------------------------------------- #
 # parse cfg files
@@ -239,7 +309,7 @@ do
   cfgOPT=${OPTVAL%=*}   # select all before = (inclusive)
   cfgVal=${OPTVAL#*=}   # select all after = (inclusive)
   # store opt + val pair in appropriate array
-  [[ ${cfgOPT} =~ urlGit ]]      && optsGIT[${cfgOPT}]=${cfgVal}
+  [[ ${cfgOPT} =~ SRC ]]         && optsSRC[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ Dir ]]         && optsDRS[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ ^CMAKE_ ]]     && optsCMK[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ ^USE_ ]]       && optsUSE[${cfgOPT}]=${cfgVal}
