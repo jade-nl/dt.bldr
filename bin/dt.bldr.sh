@@ -33,7 +33,7 @@
 #                             Set sensible optClone/optPull preference
 #              : dec 23 2019  Implemented better sudo detection        1.0.3
 #              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.0.4
-#              : jan 02 2020  Fixed logging install part               1.1.0
+#              : jan 02 2020  Fixed logging install part               1.0.5
 #                             Added MAKE_INSTALL_xyz flexibility
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
@@ -46,7 +46,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.1.0"
+scriptVersion="1.0.5"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"

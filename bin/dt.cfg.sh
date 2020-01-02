@@ -105,8 +105,6 @@ function _doCheck ()
         { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="255" ; }
     fi
     printf "  %-28s%-18s%s\n" "lclSRC" "${STATUS}" "${optsSRC[lclSRC]}"
-
-
   else
     # -------------------------------------------------------- #
     # oops
