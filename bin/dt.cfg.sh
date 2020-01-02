@@ -22,6 +22,7 @@
 #              : dec 10 2019 Relese Version 1.0.0                      1.0.0
 #              : dec 11 2019 Removed leftover stuff                    1.0.1
 #              : dec 24 2019 Fixed a typo                              1.0.2
+#              : jan 02 2020 Added some options/checks                 1.1.0
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -33,7 +34,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.0.2"
+scriptVersion="1.1.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"

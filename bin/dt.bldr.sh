@@ -32,7 +32,9 @@
 #              :              Checked and corrected spelling
 #                             Set sensible optClone/optPull preference
 #              : dec 23 2019  Implemented better sudo detection        1.0.3
-#              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.04
+#              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.0.4
+#              : jan 02 2020  Fixed logging install part               1.1.0
+#                             Added MAKE_INSTALL_xyz flexibility
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -44,7 +46,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.0.4"
+scriptVersion="1.1.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -149,6 +151,12 @@ function _gitDtBuild ()
   strtBldTime=$(date +%s)
   # run cmake
   cmake -DCMAKE_INSTALL_PREFIX="${CMAKE_PREFIX_PATH}" \
+        -DCMAKE_INSTALL_BINDIR="${CMAKE_INSTALL_BINDIR}" \
+        -DCMAKE_INSTALL_LIBDIR="${CMAKE_INSTALL_LIBDIR}" \
+        -DCMAKE_INSTALL_DATAROOTDIR="${CMAKE_INSTALL_DATAROOTDIR}" \
+        -DCMAKE_INSTALL_DOCDIR="${CMAKE_INSTALL_DOCDIR}" \
+        -DCMAKE_INSTALL_LOCALEDIR="${CMAKE_INSTALL_LOCALEDIR}" \
+        -DCMAKE_INSTALL_MANDIR="${CMAKE_INSTALL_MANDIR}" \
         -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
         -DUSE_CAMERA_SUPPORT="${USE_CAMERA_SUPPORT}" \
         -DUSE_COLORD="${USE_COLORD}" \
@@ -226,7 +234,7 @@ function _gitDtInstall ()
     tput rc ; tput ed
   fi
   # install using make/ninja
-  ${sudoToken} ${makeBin} install >/dev/null 2>&1 &
+  ${sudoToken} ${makeBin} install >> ${scrptLog} 2>&1 &
   prcssPid="$!" ; txtStrng="install - installing darktable using make"
   _shwPrgrs
   # restore if system install
