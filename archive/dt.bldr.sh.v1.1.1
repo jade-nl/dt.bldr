@@ -58,8 +58,7 @@ cfgDir="${scriptDir}/cfg"
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
-cfgChkr="/home/jade/.local/git/dt.bldr/bin/dt.cfg.sh -c"
-#cfgChkr="${binDir}/dt.cfg.sh -c"
+cfgChkr="${binDir}/dt.cfg.sh -c"
 # colours
 clrRST=$(tput sgr0)    # reset
 clrRED=$(tput setaf 1) # red
