@@ -247,19 +247,19 @@ function _gitDtInstall ()
 
 # ------------------------------------------------------------------ #
 # Function : Get darktable version
-# Purpose  : Get dt version from local git repository
+# Purpose  : Get dt version from local source
 # ------------------------------------------------------------------ #
 function _getDtGitVrsn ()
 {
   # remote or local
   if [[ "${useSRC}" == "git" ]]
   then
-  # remote
+  # remote (git is used)
     gitVrsn=$( cd ${dtGitDir}
                git describe | \
                sed -e 's/release-//' -e 's/[~+]/-/g' )
   else
-  # local
+  # local (tarball is used)
     gitVrsn="$(echo ${lclSRC} | \
                sed -e 's/darktable-\(.*\).tar.xz/\1/' -e 's/[~+]/-/g')"
   fi
@@ -438,7 +438,6 @@ ${cfgChkr} >/dev/null 2>&1
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
-
 scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
@@ -473,6 +472,7 @@ makeOpts="-j ${nmbrCores}"
 
 # -------------------------------------------------------------------------- #
 # get/set darktable version information (installed version)
+# TODO - this only works for default CMAKE_PREFIX_PATH installs!
 # ------------------------------------------------------------------ #
 # set currently installed darktable version if available
 [ -e ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
@@ -481,7 +481,7 @@ makeOpts="-j ${nmbrCores}"
     sed 's/[~+]/-/g' | awk 'NR==1 { print $4 }')"
 
 # -------------------------------------------------------------------------- #
-# process options, if any
+# process options
 # ------------------------------------------------------------------ #
 echo " - options processing" >> "${scrptLog}"
 # are any options given
@@ -512,7 +512,7 @@ else
 fi
 
 # -------------------------------------------------------------------------- #
-# set env for git or local source
+# set env for remote (git) or local (tarball) source
 # ------------------------------------------------------------------ #
 echo " - source is: ${useSRC}" >> "${scrptLog}"
 # source is remote
