@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------------------- #
+# ~/.local/cfg/dt.bldr.cfg
+# ---------------------------------------------------------------------------- #
+# Example configuration file
+# - release       : latest stable version
+# - source        : local, using tarball
+# - build options : defaults except for CMAKE_BUILD_TYPE (-> Release)
+# - location      : system wide -> /opt/darktable
+#                 : man pages in /usr/share/man/
+#                 : locale in /usr/share/locale
+# -------------------------------------------------------------------------- #
+# source section
+# -------------------------------------------------------------------------- #
+# - default source to use: git or local
+useSRC="local"
+lclSRC="darktable-3.0.0.tar.xz"
+# -------------------------------------------------------------------------- #
+# directories
+# -------------------------------------------------------------------------- #
+# local source base directory
+baseLclSrcDir="$HOME/Downloads"
+# -------------------------------------------------------------------------- #
+# make options
+# -------------------------------------------------------------------------- #
+# darktable installation prefixes
+CMAKE_PREFIX_PATH="/opt/darktable"
+CMAKE_INSTALL_LOCALEDIR="/usr/share/locale"
+CMAKE_INSTALL_MANDIR="/usr/share/man"
+# -------------------------------------------------------------------#
+# build type
+CMAKE_BUILD_TYPE="Release"
+# -------------------------------------------------------------------------- #
+# default run options
+# -------------------------------------------------------------------------- #
+dfltClone="1"                          # do     clone repository
+dfltPull="0"                           # do not pull
+dfltStop="0"                           # do not stop
+dfltBuild="1"                          # do     build
+dfltInstall="1"                        # do     install
+dfltNinja="0"                          # do not use ninja
+# -------------------------------------------------------------------------- #
+# cpu cores usage ( precentage, range 10 - 200 )
+# -------------------------------------------------------------------------- #
+crsAprch="100"                          # use 75% of the available cores
+# ---------------------------------------------------------------------------- #
+# End

@@ -1,0 +1,15 @@
+# ---------------------------------------------------------------------------- #
+# ~/.local/cfg/dt.bldr.cfg
+# ---------------------------------------------------------------------------- #
+# Example configuration file
+# - all values are taken from the fall-back cfg file except for the
+#   default run options.
+# ---------------------------------------------------------------------------- #
+dfltClone="0"                          # do not clone repository
+dfltPull="1"                           # do     pull
+dfltStop="1"                           # do     stop
+dfltBuild="1"                          # do     build
+dfltInstall="1"                        # do     install
+dfltNinja="0"                          # do not use ninja
+# ---------------------------------------------------------------------------- #
+# End
