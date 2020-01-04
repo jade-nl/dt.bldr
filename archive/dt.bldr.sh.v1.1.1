@@ -36,7 +36,8 @@
 #              : jan 02 2020  Fixed logging install part               1.1.0
 #                             Added MAKE_INSTALL_xyz flexibility
 #                             Added installing from local tarball
-#              : jan 03 2020  Local vs remote overhaul                 1.1.1
+#              : jan 04 2020  Local vs remote overhaul                 1.1.1
+#                             Code cleanup
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -54,7 +55,6 @@ scriptName="$(basename ${0})"
 scriptDir="/opt/dt.bldr"
 binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
-# -> logDir : parsed from cfg file
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
@@ -135,10 +135,10 @@ function _gitDtBuild ()
 {
   cd ${dtGitDir} 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
   # check same versions if optStop is set
-  if [ "${optStop}" == "1" ]
+  if [ "${optStop}" -eq "1" ]
   then
     _getDtGitVrsn
-    if [ "${curVrsn}" == "${gitVrsn}" ]
+    if [[ "${curVrsn}" == "${gitVrsn}" ]]
     then
       echo "  build   - ${clrBLU}skipping${clrRST} : installed and git version are the same"
       equVrsn="1"
@@ -214,10 +214,10 @@ function _gitDtBuild ()
 function _gitDtInstall ()
 {
   # check same versions if optStop is set
-  if [ "${optStop}" == "1" ]
+  if [ "${optStop}" -eq "1" ]
   then
     _getDtGitVrsn
-    if [ "${curVrsn}" == "${gitVrsn}" ]
+    if [[ "${curVrsn}" == "${gitVrsn}" ]]
     then
       echo "  install - ${clrBLU}skipping${clrRST} : installed and git version are the same"
       equVrsn="1"
@@ -278,7 +278,6 @@ function _shwPrgrs ()
     printf "\r  ${txtStrng} ${clrGRN}${spnPrts:$cntr:1}${clrRST}   "
     sleep .3 ; ((ccld++))
   done
-#set -x
   wait ${prcssPid}
   if [[ "$?" != "0" || "${ccld}" -le "1" ]]
   then
@@ -347,10 +346,12 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USer Cfg file ............... ${usrCfgFile}
     Script log file ............. ${logDir}
 
-  - GIT
-    URL ......................... ${urlGit}
-    Base git directory .......... ${baseSrcDir}
-    darktable git directory ..... ${dtGitDir}
+  - Source
+    Source used ................. ${useSRC}
+    GIT source .................. ${gitSRC}
+    Local GIT directory ......... ${baseGitSrcDir}
+    Tarball ..................... ${lclSRC}
+    Local tarball directory ..... ${baseLclSrcDir}
 
   - Build and Install
     Prefix (install) path ....... ${CMAKE_PREFIX_PATH}
@@ -419,7 +420,7 @@ clear
 echo ""
 strRunTime=$(date +%s)
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
-[ "$EUID" -eq 0 ] && _errHndlr "Main" "Do not run script as root user."
+[ "$EUID" -eq "0" ] && _errHndlr "Main" "Do not run script as root user."
 
 # -------------------------------------------------------------------------- #
 # parse configuration file
@@ -517,15 +518,17 @@ echo " - source is: ${useSRC}" >> "${scrptLog}"
 # source is remote
 if [[ "${useSRC}" == "git" ]]
 then
+  # set dir names
   baseSrcDir="${baseGitSrcDir}"
   dtGitDir="${baseSrcDir}/darktable"
 fi
 # source is local
 if [[ "${useSRC}" == "local" ]]
 then
-fallThrough="1"
-baseSrcDir="${baseLclSrcDir}"
-tempDir="darktable.temp"
+  fallThrough="1"
+  # set dir names
+  baseSrcDir="${baseLclSrcDir}"
+  tempDir="darktable.temp"
   # no cloning or pulling
   optClone="0"
   optPull="0"
@@ -534,12 +537,11 @@ tempDir="darktable.temp"
   if [[ ${optBuild="1"} -eq "1" || ${optInstall} -eq "1" ]]
   then
     echo " - setting up local source environment" >> "${scrptLog}"
-    # get/set dir and file name
-  fallThrough="0"
+    fallThrough="0"
   fi
   # ---------------------------------------------------------------- #
   # only if -b is used
-  if [[ ${optBuild="1"} -eq "1" ]]
+  if [ ${optBuild="1"} -eq "1" ]
   then
     cd -P ${baseSrcDir} >> ${scrptLog} 2>&1
     rm -rf ${tempDir} >> ${scrptLog} 2>&1
@@ -548,7 +550,7 @@ tempDir="darktable.temp"
     tar xvf "${lclSRC}" \
         --directory="${tempDir}/" \
         --strip-components=1 >> ${scrptLog} 2>&1 || _errHndlr "Set local env" "Cannot untar file."
-  fallThrough="0"
+    fallThrough="0"
   fi
   dtGitDir="${baseSrcDir}/${tempDir}/"
   [ "${fallThrough}" -eq "1" ] && echo "  nothing to do      ${clrBLU}no usable action(s) specified${clrRST}"
@@ -582,8 +584,6 @@ else
   printf '  %-10s%-9s%-15s\n' "${useSRC}" "version" "${gitVrsn}"
 fi
 
-# -------------------------------------------------------- #
-# --- Clean-up ---
 echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
 
