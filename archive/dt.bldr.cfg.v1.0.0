@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------- #
 # Start /opt/dt.dt.bldr/cfg/dt.bldr.cfg
 # ---------------------------------------------------------------------------- #
-# cfgVersion="1.0.0"
+# cfgVersion="1.1.0"
 # ---------------------------------------------------------------------------- #
 #
 # Sensible fall-back configuration file for dt.bldr.sh
@@ -11,21 +11,34 @@
 # Edit ~/.local/cfg/dt.bldr.cfg instead !!
 #
 # -------------------------------------------------------------------------- #
-# git url   -> https://github.com/ or git@github.com: or git://github.com/
-urlGit="https://github.com/darktable-org/darktable.git"
+# source files
+#  - remote : https://github.com/darktable-org/darktable.git
+#            git://github.com/darktable-org/darktable.git
+#            git@github.com:darktable-org/darktable.git
+gitSRC="https://github.com/darktable-org/darktable.git"
+#  - local  : /path/to/darktable.x.y.z.tar.xz
+lclSRC=""
+# - default source to use (git or local)
+useSRC="git"
 # -------------------------------------------------------------------------- #
 # directories   -> defaults to $HOME/.local/XYZ
 # -------------------------------------------------------------------------- #
-# directory to store build+install logs
-logDir="$HOME/.local/log"
-# ----------------------------------------------------------------------- #
 # base directory location for git repositories
 baseRepDir="$HOME/.local/git"
+# ----------------------------------------------------------------------- #
+# directory to store build+install logs
+logDir="$HOME/.local/log"
 # -------------------------------------------------------------------------- #
 # make options
 # -------------------------------------------------------------------------- #
-# darktable installation prefix
+# darktable installation prefixes
 CMAKE_PREFIX_PATH="$HOME/.local/darktable"
+CMAKE_INSTALL_BINDIR="bin"
+CMAKE_INSTALL_LIBDIR="lib"
+CMAKE_INSTALL_DATAROOTDIR="share"
+CMAKE_INSTALL_DOCDIR="${CMAKE_INSTALL_DATAROOTDIR}/doc"
+CMAKE_INSTALL_LOCALEDIR="${CMAKE_INSTALL_DATAROOTDIR}/locale"
+CMAKE_INSTALL_MANDIR="${CMAKE_INSTALL_DATAROOTDIR}/man"
 # -------------------------------------------------------------------#
 # build type
 CMAKE_BUILD_TYPE="RelWithDebInfo"      # use darktable's build.sh default
