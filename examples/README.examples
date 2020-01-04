@@ -2,23 +2,37 @@
 # Information about the example configuration files
 # -------------------------------------------------------------------------- #
 
-These are 2 dt.bldr.cfg examples to give a starting point
+These are 4 dt.bldr.cfg examples to give a starting point
                             
-+ dt.bldr.cfg.system.wide - If you want to build and install a system wide
-                            version.
-                          - Connects to github using the URL shown on the
-                            darktable install webpage
-                          - Build files are installed to /opt/darktable.
-                          - Uses Release to build darktable.
-                          - All build options are still the defaults as
-                            set by the darktable development team.
-                          - Default run options are set for 'single' use.
++ dt.bldr.cfg.simple       - The simplest version. It is possible to run
+                             the main script without a local cfg file but I
+                             do advise against it.
+                           - This version sets the default run options.
 
-+ dt.bldr.cfg.jade        - All is kept locally in $HOME/.local,
-                          - Connects to github using ssh,
-                          - Uses RelWithDebInfo to build dt
-                          - Some of the build options are disabled
-                          - Default run options are set for daily use
+
++ dt.bldr.cfg.git.local    - A slimmed-down version that still shows the most
+                             important options available.
+                           - This can be used for daily (hourly?) builds.
+                           - All is kept locally and thus doesn't need sudo.
+
+
++ dt.bldr.cfg.git.system   - This one can be used to install a system wide
+                             version of darktable.
+                           - It uses ssh to connect to github to clone.
+                           - All is installed in '/opt/darktable'
+                           - It uses 'Release' instead of 'RelWithDebInfo'
+                           - Only the build options that differ from the
+                             default settings are set.
+
+
++ dt.bldr.cfg.local.system - This builds and install a tarball that is stored
+                             locally.
+                           - All build options are as the defaults.
+                           - The binaries and libraries are installed in the
+                             default '/opt/darktable' location.
+                           - Locale files are installed in '/usr/share/locale'
+                           - Manual pages are installed in '/usr/share/man'
+
 
 If you want to use either of these as is or as a starting point copy the one
 you like to:

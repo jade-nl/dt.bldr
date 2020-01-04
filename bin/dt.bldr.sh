@@ -36,6 +36,8 @@
 #              : jan 02 2020  Fixed logging install part               1.1.0
 #                             Added MAKE_INSTALL_xyz flexibility
 #                             Added installing from local tarball
+#              : jan 04 2020  Local vs remote overhaul                 1.1.1
+#                             Code cleanup
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -47,13 +49,12 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.1.0"
+scriptVersion="1.1.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
 binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
-# -> logDir : parsed from cfg file
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
@@ -90,8 +91,8 @@ function _gitDtClone ()
   # remove current files/dirs first
   [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
   # clone dt
-  cd ${baseRepDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseRepDir} No such directory."
-  git clone "${urlGit}" >/dev/null  2>&1 &
+  cd ${baseSrcDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseSrcDir} No such directory."
+  git clone "${gitSRC}" >/dev/null  2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # initialize rawspeed
@@ -134,10 +135,10 @@ function _gitDtBuild ()
 {
   cd ${dtGitDir} 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
   # check same versions if optStop is set
-  if [ "${optStop}" == "1" ]
+  if [ "${optStop}" -eq "1" ]
   then
     _getDtGitVrsn
-    if [ "${curVrsn}" == "${gitVrsn}" ]
+    if [[ "${curVrsn}" == "${gitVrsn}" ]]
     then
       echo "  build   - ${clrBLU}skipping${clrRST} : installed and git version are the same"
       equVrsn="1"
@@ -213,10 +214,10 @@ function _gitDtBuild ()
 function _gitDtInstall ()
 {
   # check same versions if optStop is set
-  if [ "${optStop}" == "1" ]
+  if [ "${optStop}" -eq "1" ]
   then
     _getDtGitVrsn
-    if [ "${curVrsn}" == "${gitVrsn}" ]
+    if [[ "${curVrsn}" == "${gitVrsn}" ]]
     then
       echo "  install - ${clrBLU}skipping${clrRST} : installed and git version are the same"
       equVrsn="1"
@@ -246,20 +247,21 @@ function _gitDtInstall ()
 
 # ------------------------------------------------------------------ #
 # Function : Get darktable version
-# Purpose  : Get dt version from local git repository
+# Purpose  : Get dt version from local source
 # ------------------------------------------------------------------ #
 function _getDtGitVrsn ()
 {
   # remote or local
   if [[ "${useSRC}" == "git" ]]
   then
-  # remote
+  # remote (git is used)
     gitVrsn=$( cd ${dtGitDir}
                git describe | \
                sed -e 's/release-//' -e 's/[~+]/-/g' )
   else
-  # local
-    gitVrsn=""
+  # local (tarball is used)
+    gitVrsn="$(echo ${lclSRC} | \
+               sed -e 's/darktable-\(.*\).tar.xz/\1/' -e 's/[~+]/-/g')"
   fi
 }
 
@@ -276,7 +278,6 @@ function _shwPrgrs ()
     printf "\r  ${txtStrng} ${clrGRN}${spnPrts:$cntr:1}${clrRST}   "
     sleep .3 ; ((ccld++))
   done
-#set -x
   wait ${prcssPid}
   if [[ "$?" != "0" || "${ccld}" -le "1" ]]
   then
@@ -329,7 +330,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
  Syntax    dt.bldr.sh <options>
  ------------------------------------------------------------------------------
  Options
-  : -c     Clone files from repository to ${baseRepDir}
+  : -c     Clone files from repository to ${baseSrcDir}
   : -p     Pull updates from repository to ${dtGitDir}
   : -s     Stop processing if installed version and cloned
             or pulled versions are the same.
@@ -345,10 +346,12 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USer Cfg file ............... ${usrCfgFile}
     Script log file ............. ${logDir}
 
-  - GIT
-    URL ......................... ${urlGit}
-    Base git directory .......... ${baseRepDir}
-    darktable git directory ..... ${dtGitDir}
+  - Source
+    Source used ................. ${useSRC}
+    GIT source .................. ${gitSRC}
+    Local GIT directory ......... ${baseGitSrcDir}
+    Tarball ..................... ${lclSRC}
+    Local tarball directory ..... ${baseLclSrcDir}
 
   - Build and Install
     Prefix (install) path ....... ${CMAKE_PREFIX_PATH}
@@ -417,7 +420,7 @@ clear
 echo ""
 strRunTime=$(date +%s)
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
-[ "$EUID" -eq 0 ] && _errHndlr "Main" "Do not run script as root user."
+[ "$EUID" -eq "0" ] && _errHndlr "Main" "Do not run script as root user."
 
 # -------------------------------------------------------------------------- #
 # parse configuration file
@@ -435,11 +438,9 @@ ${cfgChkr} >/dev/null 2>&1
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
-dtGitDir="${baseRepDir}/darktable"
 scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
-# -------------------------------------------------------- #
 # sudo is needed when installing dt in: /usr, /opt or /bin
 [[ ${CMAKE_PREFIX_PATH} == /opt/* || \
    ${CMAKE_PREFIX_PATH} == /usr/* || \
@@ -471,6 +472,7 @@ makeOpts="-j ${nmbrCores}"
 
 # -------------------------------------------------------------------------- #
 # get/set darktable version information (installed version)
+# TODO - this only works for default CMAKE_PREFIX_PATH installs!
 # ------------------------------------------------------------------ #
 # set currently installed darktable version if available
 [ -e ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
@@ -479,7 +481,7 @@ makeOpts="-j ${nmbrCores}"
     sed 's/[~+]/-/g' | awk 'NR==1 { print $4 }')"
 
 # -------------------------------------------------------------------------- #
-# process options, if any
+# process options
 # ------------------------------------------------------------------ #
 echo " - options processing" >> "${scrptLog}"
 # are any options given
@@ -510,31 +512,48 @@ else
 fi
 
 # -------------------------------------------------------------------------- #
-# set env for git or local source
+# set env for remote (git) or local (tarball) source
 # ------------------------------------------------------------------ #
 echo " - source is: ${useSRC}" >> "${scrptLog}"
+# source is remote
+if [[ "${useSRC}" == "git" ]]
+then
+  # set dir names
+  baseSrcDir="${baseGitSrcDir}"
+  dtGitDir="${baseSrcDir}/darktable"
+fi
+# source is local
 if [[ "${useSRC}" == "local" ]]
 then
-  echo " - setting up local source environment" >> "${scrptLog}"
-  # source is local
+  fallThrough="1"
+  # set dir names
+  baseSrcDir="${baseLclSrcDir}"
+  tempDir="darktable.temp"
   # no cloning or pulling
-  dfltClone="0"
-  dfltPull="0"
-  # get/set dir and file name
-  lclDir="${lclSRC%/*}"
-  lclFile="${lclSRC##*/}"
-# TODO Werkt dit? Output is leeg (zie ook: show some information)
-  gitVrsn="$(echo ${lclFile} | \
-             sed -e 's/darktable-\(.*\).tar.xz/\1/' -e 's/[~+]/-/g')"
-  tempDir="darktable$(date '+%j')"
-  cd -P ${lclDir}
-  rm -rf ${tempDir}
-  mkdir ${tempDir}
-  # untar tarball
-  tar xvf "${lclFile}" \
-      --directory="${lclSRC%/*}/${tempDir}/" \
-      --strip-components=1 >> ${scrptLog} 2>&1 || _errHndlr "Set local env" "Cannot untar file."
-  dtGitDir="${lclDir}/${tempDir}/"
+  optClone="0"
+  optPull="0"
+  # ---------------------------------------------------------------- #
+  # only if -b / -i are used
+  if [[ ${optBuild="1"} -eq "1" || ${optInstall} -eq "1" ]]
+  then
+    echo " - setting up local source environment" >> "${scrptLog}"
+    fallThrough="0"
+  fi
+  # ---------------------------------------------------------------- #
+  # only if -b is used
+  if [ ${optBuild="1"} -eq "1" ]
+  then
+    cd -P ${baseSrcDir} >> ${scrptLog} 2>&1
+    rm -rf ${tempDir} >> ${scrptLog} 2>&1
+    mkdir ${tempDir} >> ${scrptLog} 2>&1
+    # untar tarball
+    tar xvf "${lclSRC}" \
+        --directory="${tempDir}/" \
+        --strip-components=1 >> ${scrptLog} 2>&1 || _errHndlr "Set local env" "Cannot untar file."
+    fallThrough="0"
+  fi
+  dtGitDir="${baseSrcDir}/${tempDir}/"
+  [ "${fallThrough}" -eq "1" ] && echo "  nothing to do      ${clrBLU}no usable action(s) specified${clrRST}"
 fi
 
 # -------------------------------------------------------- #
@@ -556,17 +575,15 @@ printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($ttlRnTime/3600)) $(($t
 # set text output depending on version differences
 if [[ ${optInstall} -eq "1" && ${equVrsn} -eq "0" ]]
 then
-  # git version is installed
+  # source version is installed
   echo "  previous version   ${curVrsn}"
   echo "  installed version  ${gitVrsn}"
 else
-  # git version is not installed
+  # source version is not installed
   echo "  installed version  ${curVrsn}"
-  echo "  git version        ${gitVrsn}"
+  printf '  %-10s%-9s%-15s\n' "${useSRC}" "version" "${gitVrsn}"
 fi
 
-# -------------------------------------------------------- #
-# --- Clean-up ---
 echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
 

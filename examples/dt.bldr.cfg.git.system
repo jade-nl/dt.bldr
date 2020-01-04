@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------- #
+# ~/.local/cfg/dt.bldr.cfg
+# ---------------------------------------------------------------------------- #
+# Example configuration file
+# - release       : latest development version
+# - source        : git, using ssh to connect to github
+# - build options : a personalised version
+# - location      : system wide -> /opt/darktable
+# -------------------------------------------------------------------------- #
+# source section
+# -------------------------------------------------------------------------- #
+useSRC="git"
+gitSRC="git@github.com:darktable-org/darktable.git"
+# -------------------------------------------------------------------------- #
+# make options
+# -------------------------------------------------------------------------- #
+# darktable installation prefixes
+CMAKE_PREFIX_PATH="/opt/darktable"
+# -------------------------------------------------------------------#
+# build type
+CMAKE_BUILD_TYPE="Release"
+# -------------------------------------------------------------------------- #
+# build options
+# -------------------------------------------------------------------------- #
+# - use -
+USE_FLICKR="OFF"                       # default: ON
+USE_KWALLET="OFF"                      # default: ON
+USE_MAP="OFF"                          # default: ON
+USE_OPENCL="OFF"                       # default: ON
+# -------------------------------------------------------------------#
+# - build -
+BUILD_PRINT="OFF"                      # default: ON
+TESTBUILD_OPENCL_PROGRAMS="OFF"        # default: ON
+# -------------------------------------------------------------------------- #
+# default run options
+# -------------------------------------------------------------------------- #
+dfltClone="1"                          # do     clone repository
+dfltPull="0"                           # do not pull
+dfltStop="0"                           # do not stop
+dfltBuild="1"                          # do     build
+dfltInstall="1"                        # do     install
+dfltNinja="0"                          # do not use ninja
+# -------------------------------------------------------------------------- #
+# cpu cores usage ( precentage, range 10 - 200 )
+# -------------------------------------------------------------------------- #
+crsAprch="125"                         # use 75% of the available cores
+# ---------------------------------------------------------------------------- #
+# End
