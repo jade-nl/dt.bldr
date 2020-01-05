@@ -37,7 +37,9 @@
 #                             Added MAKE_INSTALL_xyz flexibility
 #                             Added installing from local tarball
 #              : jan 04 2020  Local vs remote overhaul                 1.1.1
-#                             Code cleanup
+#              :              Code cleanup
+#              : jan 05 2020  Divided logfile                          1.2.0
+#                             Further code cleanup
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -49,7 +51,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.1.1"
+scriptVersion="1.2.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -92,15 +94,15 @@ function _gitDtClone ()
   [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
   # clone dt
   cd ${baseSrcDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseSrcDir} No such directory."
-  git clone "${gitSRC}" >/dev/null  2>&1 &
+  git clone "${gitSRC}" >> ${bldLog} 2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # initialize rawspeed
   printf "\r          - initializing and updating rawspeed .. "
   cd ${dtGitDir}
-  git submodule init >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule init"
+  git submodule init >> ${bldLog} 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
-  git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule update"
+  git submodule update >> ${bldLog} 2>&1 || _errHndlr "_gitDtClone" "submodule update"
   printf "\r          - initializing and updating rawspeed ${clrGRN}OK${clrRST}\n"
   # get dt version from repo
   _getDtGitVrsn
@@ -116,12 +118,12 @@ function _gitDtPull ()
   cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtPull" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtPull" "git directory is empty"
   # pull dt
-  git pull >/dev/null 2>&1 &
+  git pull >> ${bldLog} 2>&1 &
   prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
   _shwPrgrs
   # update rawspeed
   printf "\r          - updating rawspeed .. "
-  git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtPull" "submodule update"
+  git submodule update >> ${bldLog} 2>&1 || _errHndlr "_gitDtPull" "submodule update"
   printf "\r          - updating rawspeed ${clrGRN}OK${clrRST}\n"
   # get dt version from repo
   _getDtGitVrsn
@@ -193,11 +195,11 @@ function _gitDtBuild ()
         CMAKE_C_FLAGS="${CMAKE_FLAGS}" \
         CMAKE_CXX_FLAGS="${CMAKE_FLAGS}" \
         -G "${cmakeGen}" \
-        .. >> ${scrptLog} 2>&1 &
+        .. >> ${bldLog} 2>&1 &
   prcssPid="$!" ; txtStrng="build   - configuring darktable using cmake"
   _shwPrgrs
   # run make/ninja
-  ${makeBin} ${makeOpts} >> ${scrptLog} 2>&1 &
+  ${makeBin} ${makeOpts} >> ${bldLog} 2>&1 &
   prcssPid="$!" ; txtStrng="        - building darktable using ${makeBin}"
   _shwPrgrs
   # stop timer
@@ -236,7 +238,7 @@ function _gitDtInstall ()
     tput rc ; tput ed
   fi
   # install using make/ninja
-  ${sudoToken} ${makeBin} install >> ${scrptLog} 2>&1 &
+  ${sudoToken} ${makeBin} install >> ${bldLog} 2>&1 &
   prcssPid="$!" ; txtStrng="install - installing darktable using make"
   _shwPrgrs
   # restore if system install
@@ -439,6 +441,7 @@ ${cfgChkr} >/dev/null 2>&1
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
 scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
+bldLog="${logDir}/dt.build.log.$(date '+%Y.%m.%d.%H%M')"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
 # sudo is needed when installing dt in: /usr, /opt or /bin
@@ -559,6 +562,7 @@ fi
 # -------------------------------------------------------- #
 # if optClone and optPull are both set optPull is discarded
 [[ ${optClone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
+
 # -------------------------------------------------------- #
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
@@ -584,6 +588,9 @@ else
   printf '  %-10s%-9s%-15s\n' "${useSRC}" "version" "${gitVrsn}"
 fi
 
+# -------------------------------------------------------------------------- #
+# --- Exit ---
+# -------------------------------------------------------------------------- #
 echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
 

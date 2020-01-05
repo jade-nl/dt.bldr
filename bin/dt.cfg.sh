@@ -21,6 +21,7 @@
 #                            Changed CMAKE_INSTALL checks
 #                            Added installing from local tarbal
 #              : jan 03 2020 Local vs remote overhaul                  1.1.1
+#              : jan 05 2020 Code cleanup                              1.2.0
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -32,7 +33,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.1.1"
+scriptVersion="1.2.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -59,6 +60,7 @@ clrBLU=$(tput setaf 4) # blue
 doChkFile="0"
 doShwFile="0"
 exitSTTS="0"
+
 # -------------------------------------------------------------------------- #
 # --- Functions ---
 # ------------------------------------------------------------------ #
@@ -123,7 +125,8 @@ function _doCheck ()
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="245" ; }
     printf "  %-28s%-18s%s\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
   done
-  # cmake path options
+
+  # cmake install path options
   echo " ------------------------------------------------------------ cmake options --- "
   # CMAKE_PREFIX_PATH
   STATUS="${clrGRN}OK${clrRST}"
@@ -160,7 +163,7 @@ function _doCheck ()
   [ -z "${optsCMK[CMAKE_INSTALL_MANDIR]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="233" ; }
   printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_MANDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_MANDIR]}"
-  # CMAKE_BUILD_TYPE="RelWithDebInfo"   -> Debug | Release | RelWithDebInfo
+  # CMAKE_BUILD_TYPE
   STATUS="${clrGRN}OK${clrRST}"
   [[ "${optsCMK[CMAKE_BUILD_TYPE]}" =~ ^(Debug|Release|RelWithDebInfo)$ ]] || \
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="232" ; }
@@ -268,7 +271,6 @@ function _doShow ()
 # ------------------------------------------------------------------ #
 function _errHndlr ()
 {
-  # legible
   errorLocation="$1"
   errorMessage="$2"
   # show error
@@ -290,6 +292,7 @@ function _errHndlr ()
 # ------------------------------------------------------------------ #
 clear
   echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
+
 # some basic checks
 [ "$EUID" -eq 0 ]      && _errHndlr "Basic checks" "Do not run as root user."
 [ ! -f ${defCfgFile} ] && _errHndlr "Basic checks" "${defCfgFile} does not exist."
@@ -300,17 +303,19 @@ then
 else
   echo "  user configuration file     ${clrBLU}! not present !${clrRST}"
 fi
+
 # -------------------------------------------------------- #
 # parse cfg files
 while IFS=$'\n' read -r OPTVAL
 do
-  # process input line
+  # select appropriate lines
   [[ "${OPTVAL}" =~ ^#.*$ ]] && continue
+  # select appropriate parts
   OPTVAL=${OPTVAL%% *}  # remove comment/empty part on same line
   OPTVAL=${OPTVAL//\"/} # strip double quotes
   cfgOPT=${OPTVAL%=*}   # select all before = (inclusive)
   cfgVal=${OPTVAL#*=}   # select all after = (inclusive)
-  # store opt + val pair in appropriate array
+  # store opt + val pair in appropriate arrays
   [[ ${cfgOPT} =~ SRC ]]         && optsSRC[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ Dir ]]         && optsDRS[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ ^CMAKE_ ]]     && optsCMK[${cfgOPT}]=${cfgVal}
@@ -332,14 +337,17 @@ do
     s) doShwFile="1" ;;
   esac
 done
-# no opts given -> show configuration
+# no opts given -> use -c (show configuration)
 [ "$#" -eq "0" ] && doChkFile="1"
+
 # execute options
 [ "${doChkFile}" = "1" ] && _doCheck
 [ "${doShwFile}" = "1" ] && _doShow
+
 # -------------------------------------------------------------------------- #
 # --- Cleanup ---
 # ------------------------------------------------------------------ #
 exit ${exitSTTS}
+
 # -------------------------------------------------------------------------- #
 # End
