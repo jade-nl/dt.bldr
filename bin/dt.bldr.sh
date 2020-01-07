@@ -40,6 +40,7 @@
 #              :              Code cleanup
 #              : jan 05 2020  Divided logfile                          1.2.0
 #                             Further code cleanup
+#              : jan 07 2020  Fixed 'unbound var' error                1.2.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -51,7 +52,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.2.0"
+scriptVersion="1.2.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -66,6 +67,12 @@ clrRST=$(tput sgr0)    # reset
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
 clrBLU=$(tput setaf 4) # blue
+# input options
+optBuild="0"
+optClone="0"
+optInstall="0"
+optPull="0"
+optStop="0"
 # script misc
 lrgDvdr=" ------------------------------------------------------------------ "
 sudoToken=""
@@ -74,12 +81,8 @@ gitVrsn="n/a"
 curVrsn="n/a"
 equVrsn="0"
 ttlBldTime="0"
-# input options
-optBuild="0"
-optClone="0"
-optInstall="0"
-optPull="0"
-optStop="0"
+baseSrcDir=""
+dtGitDir=""
 
 # -------------------------------------------------------------------------- #
 # --- Functions ---
