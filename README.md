@@ -34,7 +34,7 @@ The dt.bldr.cfg.system.wide configuration file is based on the settings used by 
 
 The other options in the dt.bldr.cfg.system.wide file have settings that should be sane/safe.
 
-Run *dt.cfg.sh* to check and get an overview of the options.
+Run *dt.cfg.sh -h* to check and get an overview of the options.
 
 Run *dt.cfg.sh -s* to see all the options and some darktable/build related information.
 
