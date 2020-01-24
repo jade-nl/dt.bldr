@@ -8,6 +8,7 @@
 # - location      : system wide -> /opt/darktable
 #                 : man pages in /usr/share/man/
 #                 : locale in /usr/share/locale
+#                 : use 100% of the cores available
 # -------------------------------------------------------------------------- #
 # source section
 # -------------------------------------------------------------------------- #
