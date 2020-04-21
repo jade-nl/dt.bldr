@@ -1,6 +1,6 @@
 ## dt.bldr
 
-**A darktable builder and installer. The source can be either the development git version or stable version via local tarball.**
+**A darktable builder and installer. The source can be either the development git version or a stable version via local tarball.**
 
 This project was initially created to automate the darktable clone (or pull), configure, build and install process.
 
