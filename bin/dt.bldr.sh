@@ -41,6 +41,7 @@
 #              : jan 05 2020  Divided logfile                          1.2.0
 #                             Further code cleanup
 #              : jan 07 2020  Fixed 'unbound var' error                1.2.1
+#              : may 04 2020  Changed log naming                       1.2.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -52,7 +53,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.2.1"
+scriptVersion="1.2.2"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
