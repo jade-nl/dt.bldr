@@ -443,8 +443,8 @@ ${cfgChkr} >/dev/null 2>&1
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
-scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
-bldLog="${logDir}/dt.build.log.$(date '+%Y.%m.%d.%H%M')"
+scrptLog="${logDir}/dt.script.$(date '+%Y.%m.%d.%H%M').log"
+bldLog="${logDir}/dt.build.$(date '+%Y.%m.%d.%H%M').log"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
 # sudo is needed when installing dt in: /usr, /opt or /bin
