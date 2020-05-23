@@ -9,8 +9,8 @@ fetching, building and installing darktable easier and more flexible.
 In essence there is nothing wrong at all with the "git version" instructions
 on the darktable website (right here: https://www.darktable.org/install/). But
 if you are like me and don't like doing things multiple times by hand, like to
-test specific options or build a version specific for your environment you
-might want more flexibility.
+test specific options or build a version specific for your environment, you
+might want or need more flexibility.
 
 Checking if all the dependencies are met for building darktable and presenting
 them in a nice fashion is out of scope. The script will stop with a nice error
@@ -27,15 +27,17 @@ The following options can be used when running dt.bldr.sh:
   -h/-? Show help
 
 If no options are given when running the script, the defaults that are in the
-configuration file are being used. The global/default configuration file
-(/opt/dt.dt.bldr/cfg/dt.bldr.cfg) is set to use -c and -b. I would recommend
-to set a sensible combo in the personalised config file
-($HOME/.local/cfg/dt.bldr.cfg). I use the following default set: -p -s -b -i
+global configuration file are being used.
+
+The global/default configuration file (*/opt/dt.dt.bldr/cfg/dt.bldr.cfg*) is
+set to use -c and -b. I would recommend to set a sensible combo in the
+personalised config file (*$HOME/.local/cfg/dt.bldr.cfg*). I use the following
+default set: -p -s -b -i Do have a look at the example configuration files present in the *examples* directory.
 
 The clone and pull options (-c and -p) will also take care of the rawspeed
 module.
 
-The -s options checks if the latest cloned/pulled git version is the same as
+The -s option checks if the latest cloned/pulled git version is the same as
 the darktable version that is already installed. If this is the case then the
 build and/or install steps are skipped.
 
@@ -43,15 +45,21 @@ If ninja is installed it will _not_ be used out-of-the-box, you need to tell
 the script to use it by setting the appropriate option in the local copy of
 your dt.bldr.cfg file.
 
-Out-of-the-box the script will use 75% of the cores available when using "make
--jX". This can also be adjusted in the configuration file. The current allowed
+Out-of-the-box the script will use 75% of the cores available, using *make
+-jX*. This can also be adjusted in the configuration file. The current allowed
 range is 10% -> 200%
 
 In certain situations sudo will be used during the installation of darktable.
 At the moment the use of sudo will be triggered by the CMAKE_PREFIX_PATH
-variable starting with either of these three: /opt/, /usr/ or /bin/ I would
-discourage using /bin as prefix because the installation process installs more
-then just a few binaries (which would all end up in /bin).
+variable starting with either of these three:
+
+* /opt/
+* /usr/
+* /bin/
+
+I would discourage using /bin as prefix because the installation process
+installs more then just a few binaries. These would all end up in /bin when
+setting the global prefix to /bin.
 
 # -------------------------------------------------------------------------- #
 # dt.cfg.sh - the configuration checker
