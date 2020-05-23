@@ -42,6 +42,7 @@
 #                             Further code cleanup
 #              : jan 07 2020  Fixed 'unbound var' error                1.2.1
 #              : may 04 2020  Changed log naming                       1.2.2
+#              : may 23 2020  Clarified error log message              1.2.3
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -53,7 +54,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.2.2"
+scriptVersion="1.2.3"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -290,7 +291,7 @@ function _shwPrgrs ()
     printf "\r\r  - - - - - -> ${clrRED}An error occurred${clrRST}\n\n"
     echo   "              Stubbornly refusing to continue."
     echo   ""
-    echo   "              Details are in :  ${scrptLog}"
+    echo   "              Details are in :  ${bldLog}"
     echo   ""
     exit 254
   fi
