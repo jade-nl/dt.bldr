@@ -29,10 +29,10 @@ The following options can be used when running dt.bldr.sh:
 If no options are given when running the script, the defaults that are in the
 global configuration file are being used.
 
-The global/default configuration file (*/opt/dt.dt.bldr/cfg/dt.bldr.cfg*) is
+The global/default configuration file (/opt/dt.dt.bldr/cfg/dt.bldr.cfg) is
 set to use -c and -b. I would recommend to set a sensible combo in the
-personalised config file (*$HOME/.local/cfg/dt.bldr.cfg*). I use the following
-default set: -p -s -b -i Do have a look at the example configuration files present in the *examples* directory.
+personalised config file ($HOME/.local/cfg/dt.bldr.cfg). I use the following
+default set: -p -s -b -i Do have a look at the example configuration files present in the examples directory.
 
 The clone and pull options (-c and -p) will also take care of the rawspeed
 module.
@@ -45,8 +45,8 @@ If ninja is installed it will _not_ be used out-of-the-box, you need to tell
 the script to use it by setting the appropriate option in the local copy of
 your dt.bldr.cfg file.
 
-Out-of-the-box the script will use 75% of the cores available, using *make
--jX*. This can also be adjusted in the configuration file. The current allowed
+Out-of-the-box the script will use 75% of the cores available, using 'make
+-jX'. This can also be adjusted in the configuration file. The current allowed
 range is 10% -> 200%
 
 In certain situations sudo will be used during the installation of darktable.
