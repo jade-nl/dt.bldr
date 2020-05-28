@@ -86,6 +86,7 @@ equVrsn="0"
 ttlBldTime="0"
 baseSrcDir=""
 dtGitDir=""
+vrbMsg=""
 
 # -------------------------------------------------------------------------- #
 # --- Functions ---
@@ -207,7 +208,7 @@ function _gitDtBuild ()
   _shwPrgrs
   # run make/ninja
   ${makeBin} ${makeOpts} >> ${bldLog} 2>&1 &
-  prcssPid="$!" ; txtStrng="        - building darktable using ${makeBin}"
+  prcssPid="$!" ; txtStrng="        - building darktable using ${makeBin}${vrbMsg}"
   _shwPrgrs
   # stop timer
   endBldTime=$(date +%s)
@@ -456,6 +457,9 @@ echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 [[ ${CMAKE_PREFIX_PATH} == /opt/* || \
    ${CMAKE_PREFIX_PATH} == /usr/* || \
    ${CMAKE_PREFIX_PATH} == /bin* ]] && sudoToken="sudo"
+
+# verbose or not verbose
+[[ "${CMAKE_VERBOSE_MAKEFILE},," =~ "ON" ]] && vrbMsg=" (verbose)"
 
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
