@@ -50,13 +50,6 @@ dt.bldr.sh -i    # if all looks good, install darktable
 
 If the above steps went as expected you can now safely run *dt.bldr.sh* without any options and thus fall back to the default run options that you set in the configuration file.
 
-### TODO
-
-The current version works and can be used 'as-is', but there are some things I like to add or change to either of the scripts. Not sure if it is going to happen, but maybe if I mention the two I'm mostly thinking about I am more inclined to actually start working on them.
-
-- [ ] Make it possible to build darktable against the newest, locally build, applications.
-- [ ] Remove or overhaul dt.cfg.sh's -s option.
-
 ### Useful sources
 
 - [darktable website](https://www.darktable.org/)

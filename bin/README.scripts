@@ -89,11 +89,11 @@ mistakes.
 This will print all the options that are being used as well as some extra
 information relevant when building dartable.
 
-The extra's:
+The extras:
 
 - Version information for: bash, ccache, git, gcc, cmake, make, ninja
 - Kernel release and version
-- if the color management subsystem of your computer is correctly configured
+- if the colour management subsystem of your computer is correctly configured
 - if there is a usable OpenCL environment for darktable to use
 
 # General
