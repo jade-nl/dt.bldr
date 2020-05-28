@@ -22,6 +22,7 @@
 #                            Added installing from local tarbal
 #              : jan 03 2020 Local vs remote overhaul                  1.1.1
 #              : jan 05 2020 Code cleanup                              1.2.0
+#              : may 28 2020 Added verbose logging voor make           1.3.0
 # -------------------------------------------------------------------------- #
 # Copright     : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -33,7 +34,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.2.0"
+scriptVersion="1.3.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -168,6 +169,11 @@ function _doCheck ()
   [[ "${optsCMK[CMAKE_BUILD_TYPE]}" =~ ^(Debug|Release|RelWithDebInfo)$ ]] || \
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="232" ; }
   printf "  %-28s%-18s%s\n" "CMAKE_BUILD_TYPE" "${STATUS}" "${optsCMK[CMAKE_BUILD_TYPE]}"
+  # CMAKE_VERBOSE_MAKEFILE
+  STATUS="${clrGRN}OK${clrRST}"
+  [[ "${optsCMK[CMAKE_VERBOSE_MAKEFILE],,}" =~ ^(on|off)$ ]] || \
+    { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="232" ; }
+  printf "  %-28s%-18s%s\n" "CMAKE_VERBOSE_MAKEFILE" "${STATUS}" "${optsCMK[CMAKE_VERBOSE_MAKEFILE]}"
 
   # cmake use options
   echo " -------------------------------------------------------------- use options --- "

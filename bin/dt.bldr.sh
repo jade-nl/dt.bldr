@@ -43,6 +43,7 @@
 #              : jan 07 2020  Fixed 'unbound var' error                1.2.1
 #              : may 04 2020  Changed log naming                       1.2.2
 #              : may 23 2020  Clarified error log message              1.2.3
+#              : may 28 2020  Added verbose logging voor make          1.3.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -54,7 +55,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.2.3"
+scriptVersion="1.3.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -167,6 +168,7 @@ function _gitDtBuild ()
         -DCMAKE_INSTALL_LOCALEDIR="${CMAKE_INSTALL_LOCALEDIR}" \
         -DCMAKE_INSTALL_MANDIR="${CMAKE_INSTALL_MANDIR}" \
         -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
+        -DCMAKE_VERBOSE_MAKEFILE:BOOL="${CMAKE_VERBOSE_MAKEFILE}" \
         -DUSE_CAMERA_SUPPORT="${USE_CAMERA_SUPPORT}" \
         -DUSE_COLORD="${USE_COLORD}" \
         -DUSE_DARKTABLE_PROFILING="${USE_DARKTABLE_PROFILING}" \
@@ -368,6 +370,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     Docdir path ................. ${CMAKE_INSTALL_DOCDIR}
     Localedir path .............. ${CMAKE_INSTALL_LOCALEDIR}
     Mandir path ................. ${CMAKE_INSTALL_MANDIR}
+    Verbosity ................... ${CMAKE_VERBOSE_MAKEFILE}
 
     CMAKE_BUILD_TYPE ............ ${CMAKE_BUILD_TYPE}
 
@@ -463,6 +466,12 @@ then
   then
     echo " - ninja will be used" >> "${scrptLog}"
     ninjaIsUsed="YES" ; cmakeGen="Ninja" ; makeBin="ninja"
+    # CMAKE_VERBOSE_MAKEFILE cannot be used with ninja
+    if [[ "${CMAKE_VERBOSE_MAKEFILE}" == "ON" ]]
+    then
+      echo " - ninja does not support make's verbose" >> "${scrptLog}"
+      CMAKE_VERBOSE_MAKEFILE="OFF"
+    fi
   else
     echo " - cmake forced, ninja will not be used" >> "${scrptLog}"
     ninjaIsUsed="NO" ; cmakeGen="Unix Makefiles" ; makeBin="make"
