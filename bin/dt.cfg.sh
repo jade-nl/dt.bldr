@@ -13,16 +13,13 @@
 # -------------------------------------------------------------------------- #
 # Changes      : oct 28 2019 First build                         1.0.0-alpha
 #              : nov 05 2019 Check data / set exit status         1.0.0-beta
-#              : dec 04 2019 First release candidate               1.0.0-rc.0
-#              : dec 10 2019 Release Version 1.0.0                      1.0.0
-#              : dec 11 2019 Removed leftover stuff                    1.0.1
-#              : dec 24 2019 Fixed a typo                              1.0.2
+#              : dec 04 2019 First release candidate              1.0.0-rc.0
 #              : jan 02 2020 Incorporated extra CMAKE_INSTALL_iX vars  1.1.0
 #                            Changed CMAKE_INSTALL checks
 #                            Added installing from local tarbal
 #              : jan 03 2020 Local vs remote overhaul                  1.1.1
-#              : jan 05 2020 Code cleanup                              1.2.0
-#              : may 28 2020 Added verbose logging for make           1.3.0
+#              : may 28 2020 Added verbose logging for make            1.3.0
+#              : may 28 2020 Base development version 1.5              1.5.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -34,7 +31,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.3.0"
+scriptVersion="1.5.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
