@@ -19,31 +19,12 @@
 #              : git Version Control Systems
 #              : sudo, for non-local installations
 # -------------------------------------------------------------------------- #
-# Changes      : nov 07 2019  First build / outline              1.0.0-alpha
-#              : nov 19 2019  Fixed install and build functions   1.0.0-beta
-#              : dec 04 2019  First release candidate             1.0.0-rc.0
-#              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
-#              : dec 10 2019  Fixed sudo progress meter issue     1.0.0-rc.2
-#              : dec 12 2019  Release Version 1.0.0                    1.0.0
-#                             Fixed sudo/progress meter layout issue        
-#                             Implemented git url from cfg                  
-#              : dec 13 2019  Extra comments + Code clean-up           1.0.1
-#              : dec 16 2019  Fixed output inconsistency               1.0.2
-#              :              Checked and corrected spelling
-#                             Set sensible optClone/optPull preference
-#              : dec 23 2019  Implemented better sudo detection        1.0.3
-#              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.0.4
-#              : jan 02 2020  Fixed logging install part               1.1.0
-#                             Added MAKE_INSTALL_xyz flexibility
-#                             Added installing from local tarball
-#              : jan 04 2020  Local vs remote overhaul                 1.1.1
-#              :              Code cleanup
-#              : jan 05 2020  Divided logfile                          1.2.0
-#                             Further code cleanup
+# Changes      : dec 12 2019  Release Version 1.0.0                    1.0.0
+#              : jan 05 2020  Release Version 1.2.0                    1.2.0
 #              : jan 07 2020  Fixed 'unbound var' error                1.2.1
 #              : may 04 2020  Changed log naming                       1.2.2
 #              : may 23 2020  Clarified error log message              1.2.3
-#              : may 28 2020  Added verbose logging voor make          1.3.0
+#              : may 28 2020  Release Version 1.4.0                    1.4.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -55,7 +36,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.3.0"
+scriptVersion="1.4.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
