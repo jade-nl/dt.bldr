@@ -45,6 +45,7 @@
 #              : may 23 2020  Clarified error log message              1.2.3
 #              : may 28 2020  Added verbose logging voor make          1.3.0
 #              : may 28 2020  Base development version 1.5             1.5.0
+#              : jun 08 2020  Make sure base environment is sane       1.5.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -52,11 +53,13 @@
 #set -x
 set -u
 umask 026
+# Set sane environment
+LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # -------------------------------------------------------------------------- #
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.5.0"
+scriptVersion="1.5.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
