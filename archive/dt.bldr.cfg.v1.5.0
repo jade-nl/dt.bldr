@@ -1,0 +1,121 @@
+# ---------------------------------------------------------------------------- #
+# Start /opt/dt.dt.bldr/cfg/dt.bldr.cfg
+# ---------------------------------------------------------------------------- #
+# cfgVersion="1.5.0"
+# ---------------------------------------------------------------------------- #
+#
+# Sensible fall-back configuration file for dt.bldr.sh
+#
+# ! ! ! - - DO NOT CHANGE THIS FILE - - ! ! !
+#
+# Edit ~/.local/cfg/dt.bldr.cfg instead !!
+#
+# -------------------------------------------------------------------------- #
+# source section
+# -------------------------------------------------------------------------- #
+# - default source to use: git or local
+useSRC="git"
+#  - remote protocols that can be used:
+#      smart http - https://github.com/darktable-org/darktable.git
+#      dumb http  - git://github.com/darktable-org/darktable.git
+#      ssh        - git@github.com:darktable-org/darktable.git
+gitSRC="https://github.com/darktable-org/darktable.git"
+#  - local tarball filename:
+#                 - darktable.x.y.z.tar.xz
+lclSRC=""
+# -------------------------------------------------------------------------- #
+# directories
+# -------------------------------------------------------------------------- #
+# git source base directory -> must be present
+baseGitSrcDir="$HOME/.local/git"
+# local source base directory -> must be present
+baseLclSrcDir="$HOME/Downloads"
+# ----------------------------------------------------------------------- #
+# directory to store logs -> must be present
+logDir="$HOME/.local/log"
+# -------------------------------------------------------------------------- #
+# make options
+# -------------------------------------------------------------------------- #
+# darktable installation prefixes
+CMAKE_PREFIX_PATH="$HOME/.local/darktable"
+CMAKE_INSTALL_BINDIR="bin"
+CMAKE_INSTALL_LIBDIR="lib"
+CMAKE_INSTALL_DATAROOTDIR="share"
+CMAKE_INSTALL_DOCDIR="${CMAKE_INSTALL_DATAROOTDIR}/doc"
+CMAKE_INSTALL_LOCALEDIR="${CMAKE_INSTALL_DATAROOTDIR}/locale"
+CMAKE_INSTALL_MANDIR="${CMAKE_INSTALL_DATAROOTDIR}/man"
+# -------------------------------------------------------------------#
+# build type
+# - legal entries are:
+#     Debug          - Full debug info. No optimization
+#     Release        - Standard build. Full optimization
+#     RelWithDebInfo - 'Release' with debug. Keep debug, some optimization 
+CMAKE_BUILD_TYPE="RelWithDebInfo"      # use darktable's build.sh default
+# -------------------------------------------------------------------#
+# compiler flags
+CMAKE_FLAGS=""
+# -------------------------------------------------------------------------- #
+# build options
+# -------------------------------------------------------------------------- #
+# - use -
+USE_CAMERA_SUPPORT="ON"                # all these are defaults taken from
+USE_COLORD="ON"                        # git/darktable/DefineOptions.cmake
+USE_DARKTABLE_PROFILING="OFF"
+USE_FLICKR="ON"
+USE_GRAPHICSMAGICK="ON"
+USE_KWALLET="ON"
+USE_LENSFUN="ON"
+USE_LIBSECRET="ON"
+USE_MAP="ON"
+USE_NLS="ON"
+USE_OPENEXR="ON"
+USE_OPENJPEG="ON"
+USE_OPENMP="ON"
+USE_UNITY="OFF"
+USE_WEBP="ON"
+USE_XMLLINT="ON"
+USE_LUA="ON"
+DONT_USE_INTERNAL_LUA="ON"
+USE_OPENCL="ON"
+# -------------------------------------------------------------------#
+# - build -
+BUILD_BATTERY_INDICATOR="OFF"          # all these are defaults taken from
+BUILD_CMSTEST="ON"                     # git/darktable/DefineOptions.cmake
+BUILD_CURVE_TOOLS="OFF"
+BUILD_NOISE_TOOLS="OFF"
+BUILD_PRINT="ON"
+BUILD_RS_IDENTIFY="ON"
+BUILD_TESTS="OFF"
+BUILD_USERMANUAL="OFF"
+TESTBUILD_OPENCL_PROGRAMS="ON"
+# -------------------------------------------------------------------#
+# - misc -
+CUSTOM_CFLAGS="OFF"                    # these are defaults taken from
+BINARY_PACKAGE_BUILD="OFF"             # git/darktable/DefineOptions.cmake
+# -------------------------------------------------------------------------- #
+# sensible and safe default run options
+# -------------------------------------------------------------------------- #
+dfltClone="1"                          # do     clone repository
+dfltPull="0"                           # do not pull
+dfltStop="0"                           # do not stop
+dfltBuild="1"                          # do     build
+dfltInstall="0"                        # do not install
+dfltNinja="0"                          # do not use ninja
+# -------------------------------------------------------------------------- #
+# cpu cores usage ( precentage, range 10 - 200 )
+# -------------------------------------------------------------------------- #
+crsAprch="75"                          # use 75% of the available cores
+# -------------------------------------------------------------------------- #
+# Verbose logging during make step
+# -------------------------------------------------------------------------- #
+CMAKE_VERBOSE_MAKEFILE="OFF"          # no verbose logging when using make
+# ---------------------------------------------------------------------------- #
+#
+# Sensible fall-back configuration file for dt.bldr.sh
+#
+# ! ! ! - - DO NOT CHANGE THIS FILE - - ! ! !
+#
+# Edit ~/.local/cfg/dt.bldr.cfg instead !!
+#
+# ---------------------------------------------------------------------------- #
+# End
