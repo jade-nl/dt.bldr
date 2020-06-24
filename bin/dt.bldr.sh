@@ -8,6 +8,7 @@
 #              : -s          Stop if versions are the same
 #              : -b          Build darktable
 #              : -i          Install darktable
+#              : -m          Merge forked branch into darktable
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
 # Purpose      : 1) Clone or pull darktable from git repository
@@ -46,6 +47,7 @@
 #              : may 28 2020  Added verbose logging voor make          1.3.0
 #              : may 28 2020  Base development version 1.5             1.5.0
 #              : jun 08 2020  Make sure base environment is sane       1.5.1
+#              : jun 24 2020  Make merging of forked branch possible   1.6.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -59,16 +61,18 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.5.1"
+scriptVersion="1.6.0"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
 binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
+usrBaseDir="$HOME/.local"
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
-usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
+usrCfgFile="${usrBaseDir}/cfg/dt.bldr.cfg"
 cfgChkr="${binDir}/dt.cfg.sh -c"
+usrMergeFile="${usrBaseDir}/cfg/dt.ext.branch.cfg"
 # colours
 clrRST=$(tput sgr0)    # reset
 clrRED=$(tput setaf 1) # red
@@ -78,6 +82,7 @@ clrBLU=$(tput setaf 4) # blue
 optBuild="0"
 optClone="0"
 optInstall="0"
+optMerge="0"
 optPull="0"
 optStop="0"
 # script misc
@@ -138,6 +143,28 @@ function _gitDtPull ()
   printf "\r          - updating rawspeed ${clrGRN}OK${clrRST}\n"
   # get dt version from repo
   _getDtGitVrsn
+}
+
+# ------------------------------------------------------------------ #
+# Function : Merge forked
+# Purpose  : Merge specific branch from a forked darktable into master
+# ------------------------------------------------------------------ #
+function _gitDtMerge ()
+{
+  printf "\r  merge   - merging fork "
+  cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
+  [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
+  # set up remote, forked repo
+  git remote add dtfuture "${FRK_GIT}"  || _errHndlr "_gitDtMerge" "Unable to add remote"
+  git remote update > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
+  # create, checkout and merge wanted (remote) branch
+  git branch "${FRK_BRNCH}" || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git checkout "${FRK_BRNCH}" > /dev/null 2>&1
+  git merge -m "merging" --allow-unrelated-histories dtfuture/${FRK_BRNCH} > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
+  # merge into darktable master
+  git checkout master > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git merge -m "future" "${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
+  printf "\r  merge   - merging fork ${clrGRN}OK${clrRST}\n"
 }
 
 # ------------------------------------------------------------------ #
@@ -522,7 +549,7 @@ then
 else
   echo " - options are found" >> "${scrptLog}"
   # process options
-  while getopts ":cpsbih" OPTION
+  while getopts ":cpsmbih" OPTION
   do
     case "${OPTION}" in
       c) optClone="1" ;;
@@ -530,6 +557,7 @@ else
       s) optStop="1" ;;
       b) optBuild="1" ;;
       i) optInstall="1" ;;
+      m) optMerge="1" ;;
       h) _shwHelp ;;
      \?) _shwHelp ;;
     esac
@@ -550,6 +578,12 @@ fi
 # source is local
 if [[ "${useSRC}" == "local" ]]
 then
+  if [[ "${optMerge}" -eq "1" ]]
+  then
+    echo "Mergin into stable tarball source is currently unsupported."
+    echo "Exiting now....."
+    exit 2
+  fi
   fallThrough="1"
   # set dir names
   baseSrcDir="${baseLclSrcDir}"
@@ -559,7 +593,7 @@ then
   optPull="0"
   # ---------------------------------------------------------------- #
   # only if -b / -i are used
-  if [[ ${optBuild="1"} -eq "1" || ${optInstall} -eq "1" ]]
+  if [[ ${optBuild} -eq "1" || ${optInstall} -eq "1" ]]
   then
     echo " - setting up local source environment" >> "${scrptLog}"
     fallThrough="0"
@@ -586,9 +620,32 @@ fi
 [[ ${optClone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
 
 # -------------------------------------------------------- #
+# load cfg file and set option when optMerge is requested
+if [[ "${optMerge}" -eq "1" ]]
+then
+  # check dt.ext.branch.cfg
+  if test -r "${usrMergeFile}" -a -f "${usrMergeFile}"
+  then
+    # parse file
+    . "${usrMergeFile}"
+
+    # force cloning
+    optClone="1"
+    optPull="0"
+    # do not stop if versions are mismatched
+    optStop="0"
+  else
+  # oops
+  echo "something went wrong."
+  exit 2
+  fi
+fi
+
+# -------------------------------------------------------- #
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
 [ "${optPull}"    = "1" ] && _gitDtPull
+[ "${optMerge}"   = "1" ] && _gitDtMerge
 [ "${optBuild}"   = "1" ] && _gitDtBuild
 [ "${optInstall}" = "1" ] && _gitDtInstall
 
