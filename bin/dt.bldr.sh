@@ -571,6 +571,7 @@ fi
 # source is local
 if [[ "${useSRC}" == "local" ]]
 then
+  # merge is only alowed when using git
   if [[ "${optMerge}" -eq "1" ]]
   then
     echo "Mergin into stable tarball source is currently unsupported."
@@ -581,7 +582,7 @@ then
   # set dir names
   baseSrcDir="${baseLclSrcDir}"
   tempDir="darktable.temp"
-  # no cloning or pulling
+  # no cloning or pulling for tarballs
   optClone="0"
   optPull="0"
   # ---------------------------------------------------------------- #
@@ -627,10 +628,12 @@ then
     optPull="0"
     # do not stop if versions are mismatched
     optStop="0"
+    # forcefully disbale installing in same go for now
+    # this merge function needs (practical) testing
+    optInstall="0"
   else
   # oops
-  echo "something went wrong."
-  exit 2
+  _errHndlr "merge load cfg" "Cannot find ${usrMergeFile}."
   fi
 fi
 
