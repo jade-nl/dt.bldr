@@ -68,8 +68,6 @@ file called dt.ext.branch.cfg (must be located in ~/.local/cfg). This file
 holds the URL of the forked repository and the name of the branch (the example
 directory has a sample).
 
-When merge (-m) is used a clone is forced and install is initially, forcefully disabled. If the build works run the script with -i to install. At a later point, when tested thoroughly, using -mbi will be possible.
-
 Beware: This merge option (-m) is experimental.
 
 * Merging might not work depending on the branch that is being merged,
