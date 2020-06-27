@@ -20,34 +20,14 @@
 #              : git Version Control Systems
 #              : sudo, for non-local installations
 # -------------------------------------------------------------------------- #
-# Changes      : nov 07 2019  First build / outline              1.0.0-alpha
-#              : nov 19 2019  Fixed install and build functions   1.0.0-beta
-#              : dec 04 2019  First release candidate             1.0.0-rc.0
-#              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
-#              : dec 10 2019  Fixed sudo progress meter issue     1.0.0-rc.2
-#              : dec 12 2019  Release Version 1.0.0                    1.0.0
-#                             Fixed sudo/progress meter layout issue        
-#                             Implemented git url from cfg                  
-#              : dec 13 2019  Extra comments + Code clean-up           1.0.1
-#              : dec 16 2019  Fixed output inconsistency               1.0.2
-#              :              Checked and corrected spelling
-#                             Set sensible optClone/optPull preference
-#              : dec 23 2019  Implemented better sudo detection        1.0.3
-#              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.0.4
-#              : jan 02 2020  Fixed logging install part               1.1.0
-#                             Added MAKE_INSTALL_xyz flexibility
-#                             Added installing from local tarball
-#              : jan 04 2020  Local vs remote overhaul                 1.1.1
-#              :              Code cleanup
-#              : jan 05 2020  Divided logfile                          1.2.0
-#                             Further code cleanup
-#              : jan 07 2020  Fixed 'unbound var' error                1.2.1
-#              : may 04 2020  Changed log naming                       1.2.2
-#              : may 23 2020  Clarified error log message              1.2.3
-#              : may 28 2020  Added verbose logging voor make          1.3.0
-#              : may 28 2020  Base development version 1.5             1.5.0
-#              : jun 08 2020  Make sure base environment is sane       1.5.1
-#              : jun 24 2020  Make merging of forked branch possible   1.6.0
+#              : dec 12 2019                                           1.0.0
+#              : jan 02 2020                                           1.1.0
+#              : jan 05 2020                                           1.2.0
+#              : may 28 2020                                           1.3.0
+#              : may 28 2020                                           1.4.0
+#              : may 30 2020                                           1.5.0
+#              : jun 24 2020                                           1.6.0
+#              : jun 27 2020  Code cleanup                             1.6.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -61,7 +41,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.6.0"
+scriptVersion="1.6.1"
 scriptName="$(basename ${0})"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -107,18 +87,18 @@ vrbMsg=""
 function _gitDtClone ()
 {
   # remove current files/dirs first
-  [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
+  [ -d "${dtGitDir}" ] && find "${dtGitDir}" -mindepth 1 -delete
   # clone dt
   cd ${baseSrcDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseSrcDir} No such directory."
-  git clone "${gitSRC}" >> ${bldLog} 2>&1 &
+  git clone "${gitSRC}" >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # initialize rawspeed
   printf "\r          - initializing and updating rawspeed .. "
-  cd ${dtGitDir}
-  git submodule init >> ${bldLog} 2>&1 || _errHndlr "_gitDtClone" "submodule init"
+  cd "${dtGitDir}" || _errHndlr "_gitDtClone" "Cannot cd into ${dtGitDir} directory"
+  git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
-  git submodule update >> ${bldLog} 2>&1 || _errHndlr "_gitDtClone" "submodule update"
+  git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule update"
   printf "\r          - initializing and updating rawspeed ${clrGRN}OK${clrRST}\n"
   # get dt version from repo
   _getDtGitVrsn
@@ -131,15 +111,15 @@ function _gitDtClone ()
 # ------------------------------------------------------------------ #
 function _gitDtPull ()
 {
-  cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtPull" "${dtGitDir} No such directory."
+  cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtPull" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtPull" "git directory is empty"
   # pull dt
-  git pull >> ${bldLog} 2>&1 &
+  git pull >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
   _shwPrgrs
   # update rawspeed
   printf "\r          - updating rawspeed .. "
-  git submodule update >> ${bldLog} 2>&1 || _errHndlr "_gitDtPull" "submodule update"
+  git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
   printf "\r          - updating rawspeed ${clrGRN}OK${clrRST}\n"
   # get dt version from repo
   _getDtGitVrsn
@@ -152,7 +132,7 @@ function _gitDtPull ()
 function _gitDtMerge ()
 {
   printf "\r  merge   - merging fork "
-  cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
+  cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
   # set up remote, forked repo
   git remote add dtfuture "${FRK_GIT}"  || _errHndlr "_gitDtMerge" "Unable to add remote"
@@ -173,7 +153,7 @@ function _gitDtMerge ()
 # ------------------------------------------------------------------ #
 function _gitDtBuild ()
 {
-  cd ${dtGitDir} 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
+  cd "${dtGitDir}" 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
   # check same versions if optStop is set
   if [ "${optStop}" -eq "1" ]
   then
@@ -187,8 +167,8 @@ function _gitDtBuild ()
   fi
   # create and enter clean build environment
   rm -rf build > /dev/null 2>&1
-  mkdir build
-  cd build
+  mkdir build || _errHndlr "_gitDtBuild" "Cannot create build directory"
+  cd build || _errHndlr "_gitDtBuild" "Cannot cd into build directory"
   # start timer
   strtBldTime=$(date +%s)
   # run cmake
@@ -234,11 +214,11 @@ function _gitDtBuild ()
         CMAKE_C_FLAGS="${CMAKE_FLAGS}" \
         CMAKE_CXX_FLAGS="${CMAKE_FLAGS}" \
         -G "${cmakeGen}" \
-        .. >> ${bldLog} 2>&1 &
+        .. >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="build   - configuring darktable using cmake"
   _shwPrgrs
   # run make/ninja
-  ${makeBin} ${makeOpts} >> ${bldLog} 2>&1 &
+  ${makeBin} ${makeOpts} >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="        - building darktable using ${makeBin}${vrbMsg}"
   _shwPrgrs
   # stop timer
@@ -265,7 +245,7 @@ function _gitDtInstall ()
       return
     fi
   fi
-  cd ${dtGitDir}/build 2>/dev/null || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
+  cd "${dtGitDir}/build" 2>/dev/null || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
   # remove previously installed version.
   tput sc
   [ -d ${CMAKE_PREFIX_PATH} ] && ${sudoToken} rm -rf ${CMAKE_PREFIX_PATH}/*
@@ -277,7 +257,7 @@ function _gitDtInstall ()
     tput rc ; tput ed
   fi
   # install using make/ninja
-  ${sudoToken} ${makeBin} install >> ${bldLog} 2>&1 &
+  ${sudoToken} ${makeBin} install >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="install - installing darktable using make"
   _shwPrgrs
   # restore if system install
@@ -296,7 +276,7 @@ function _getDtGitVrsn ()
   if [[ "${useSRC}" == "git" ]]
   then
   # remote (git is used)
-    gitVrsn=$( cd ${dtGitDir}
+    gitVrsn=$( cd "${dtGitDir}"
                git describe | \
                sed -e 's/release-//' -e 's/[~+]/-/g' )
   else
@@ -473,7 +453,7 @@ ${cfgChkr} >/dev/null 2>&1
   _errHndlr "Configuration file(s)" \
             "Content not valid.  Run dt.cfg.sh -c for details"
 # parse default system wide configuration file
-. ${defCfgFile}
+. "${defCfgFile}"
 # parse user defined configuration file
 [ -f "${usrCfgFile}" ] && . ${usrCfgFile}
 
@@ -495,7 +475,7 @@ echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
 # ------------------------------------------------------------------ #
-if  [ `which ninja` ]
+if  [ "$(command -v ninja)" ]
 then
   if [ "${dfltNinja}" -eq "1" ]
   then
@@ -602,13 +582,13 @@ then
   # only if -b is used
   if [ ${optBuild="1"} -eq "1" ]
   then
-    cd -P ${baseSrcDir} >> ${scrptLog} 2>&1
-    rm -rf ${tempDir} >> ${scrptLog} 2>&1
-    mkdir ${tempDir} >> ${scrptLog} 2>&1
+    cd -P ${baseSrcDir} >> "${scrptLog}" 2>&1 || _errHndlr "Set local env" "Cannot cd into ${baseSrcDir}."
+    rm -rf "${tempDir}" >> "${scrptLog}" 2>&1
+    mkdir "${tempDir}" >> "${scrptLog}" 2>&1
     # untar tarball
     tar xvf "${lclSRC}" \
         --directory="${tempDir}/" \
-        --strip-components=1 >> ${scrptLog} 2>&1 || _errHndlr "Set local env" "Cannot untar file."
+        --strip-components=1 >> "${scrptLog}" 2>&1 || _errHndlr "Set local env" "Cannot untar file."
     fallThrough="0"
   fi
   dtGitDir="${baseSrcDir}/${tempDir}/"
