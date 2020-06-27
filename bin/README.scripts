@@ -24,7 +24,7 @@ The following options can be used when running dt.bldr.sh:
   -s    Stop if versions are the same
   -b    Build darktable
   -i    Install darktable
-  -m    Merge branche from forked darktable repo (experimental)
+  -m    Merge branch from forked darktable repo (experimental)
   -h/-? Show help
 
 If no options are given when running the script, the defaults that are in the
@@ -66,9 +66,14 @@ I decided to make it possible to merge a branch from a forked darktable
 repository into the current master. This is done using the -m options and a
 file called dt.ext.branch.cfg (must be located in ~/.local/cfg). This file
 holds the URL of the forked repository and the name of the branch (the example
-directory has a sample). When merge (-m) is used a clone is forced and build
-and install are initially disabled. Afterwards run the script with -b and if
-that works with -i. This merge option (-m) is experimental!
+directory has a sample).
+
+When merge (-m) is used a clone is forced and install is initially, forcefully disabled. If the build works run the script with -i to install. At a later point, when tested thoroughly, using -mbi will be possible.
+
+Beware: This merge option (-m) is experimental.
+
+* Merging might not work depending on the branch that is being merged,
+* Reverting back to a clean copy of master might have unwanted results.
 
 # -------------------------------------------------------------------------- #
 # dt.cfg.sh - the configuration checker
@@ -96,7 +101,7 @@ mistakes.
 # dt.cfg.sh -s
 
 This will print all the options that are being used as well as some extra
-information relevant when building dartable.
+information relevant when building darktable.
 
 The extras:
 
