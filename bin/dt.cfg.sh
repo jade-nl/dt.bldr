@@ -20,6 +20,7 @@
 #              : jan 03 2020 Local vs remote overhaul                  1.1.1
 #              : may 28 2020 Added verbose logging for make            1.3.0
 #              : may 28 2020 Base development version 1.5              1.5.0
+#              : jun 28 2020 Code cleanup                              1.5.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -31,11 +32,10 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.5.0"
-scriptName="$(basename ${0})"
+scriptVersion="1.5.1"
+scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
-binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
@@ -50,7 +50,6 @@ declare -A optsDFT
 declare -A optsCRS
 # colours
 clrRST=$(tput sgr0)    # reset
-clrBLK=$(tput setaf 0) # black
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
 clrBLU=$(tput setaf 4) # blue
@@ -74,17 +73,17 @@ function _doCheck ()
   then
     # empty
     STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="255"
-    printf "  %-28s%-18s%s\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
+    printf "  %-28s%-18s%s\\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
   elif [[ ! "${optsSRC[useSRC]}" =~ ^(git|local) ]]
   then
     # invalid entry
     STATUS="${clrRED}ERROR  ${clrRST}" ; exitSTTS="254"
-    printf "  %-28s%-18s%s\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
+    printf "  %-28s%-18s%s\\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
   elif [[ "${optsSRC[useSRC]}" == "git" ]]
   then
     # -------------------------------------------------------------- #
     # remote -> git
-    printf "  %-28s%-18s%s\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
+    printf "  %-28s%-18s%s\\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
     if [ -z "${optsSRC[gitSRC]}" ]
     then
       STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="253"
@@ -92,14 +91,14 @@ function _doCheck ()
     then
       STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="252"
     fi
-    printf "  %-28s%-18s%s\n" "gitSRC" "${STATUS}" "${optsSRC[gitSRC]}"
+    printf "  %-28s%-18s%s\\n" "gitSRC" "${STATUS}" "${optsSRC[gitSRC]}"
     [ -z "${optsDRS[baseGitSrcDir]}" ] && \
       { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="251" ; }
-    printf "  %-28s%-18s%s\n" "baseGitSrcDir" "${STATUS}" "${optsDRS[baseGitSrcDir]}"
+    printf "  %-28s%-18s%s\\n" "baseGitSrcDir" "${STATUS}" "${optsDRS[baseGitSrcDir]}"
   else
     # -------------------------------------------------------------- #
     # local -> tarball
-    printf "  %-28s%-18s%s\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
+    printf "  %-28s%-18s%s\\n" "useSRC" "${STATUS}" "${optsSRC[useSRC]}"
     if [ -z "${optsSRC[lclSRC]}" ]
     then
       STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="250"
@@ -107,10 +106,10 @@ function _doCheck ()
     then
       STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="249"
     fi
-    printf "  %-28s%-18s%s\n" "lclSRC" "${STATUS}" "${optsSRC[lclSRC]}"
+    printf "  %-28s%-18s%s\\n" "lclSRC" "${STATUS}" "${optsSRC[lclSRC]}"
     [ -z "${optsDRS[baseLclSrcDir]}" ] && \
       { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="248" ; }
-    printf "  %-28s%-18s%s\n" "baseLclSrcDir" "${STATUS}" "${optsDRS[baseLclSrcDir]}"
+    printf "  %-28s%-18s%s\\n" "baseLclSrcDir" "${STATUS}" "${optsDRS[baseLclSrcDir]}"
   fi
 
   # ---------------------------------------------------------------- #
@@ -121,7 +120,7 @@ function _doCheck ()
     STATUS="${clrGRN}OK${clrRST}"
     eval [ ! -d "${optsDRS[$ITEM]}" ] && \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="245" ; }
-    printf "  %-28s%-18s%s\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
+    printf "  %-28s%-18s%s\\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
   done
 
   # cmake install path options
@@ -130,47 +129,47 @@ function _doCheck ()
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_PREFIX_PATH]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="239" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_PREFIX_PATH" "${STATUS}" "${optsCMK[CMAKE_PREFIX_PATH]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_PREFIX_PATH" "${STATUS}" "${optsCMK[CMAKE_PREFIX_PATH]}"
   # CMAKE_INSTALL_BINDIR
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_INSTALL_BINDIR]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="238" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_BINDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_BINDIR]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_INSTALL_BINDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_BINDIR]}"
   # CMAKE_INSTALL_LIBDIR
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_INSTALL_LIBDIR]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="237" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_LIBDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_LIBDIR]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_INSTALL_LIBDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_LIBDIR]}"
   # CMAKE_INSTALL_DATAROOTDIR
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_INSTALL_DATAROOTDIR]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="236" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_DATAROOTDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_DATAROOTDIR]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_INSTALL_DATAROOTDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_DATAROOTDIR]}"
   # CMAKE_INSTALL_DOCDIR
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_INSTALL_DOCDIR]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="235" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_DOCDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_DOCDIR]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_INSTALL_DOCDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_DOCDIR]}"
   # CMAKE_INSTALL_LOCALEDIR
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_INSTALL_LOCALEDIR]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="234" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_LOCALEDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_LOCALEDIR]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_INSTALL_LOCALEDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_LOCALEDIR]}"
   # CMAKE_INSTALL_MANDIR
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_INSTALL_MANDIR]}" ] && \
     { STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="233" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_INSTALL_MANDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_MANDIR]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_INSTALL_MANDIR" "${STATUS}" "${optsCMK[CMAKE_INSTALL_MANDIR]}"
   # CMAKE_BUILD_TYPE
   STATUS="${clrGRN}OK${clrRST}"
   [[ "${optsCMK[CMAKE_BUILD_TYPE]}" =~ ^(Debug|Release|RelWithDebInfo)$ ]] || \
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="232" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_BUILD_TYPE" "${STATUS}" "${optsCMK[CMAKE_BUILD_TYPE]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_BUILD_TYPE" "${STATUS}" "${optsCMK[CMAKE_BUILD_TYPE]}"
   # CMAKE_VERBOSE_MAKEFILE
   STATUS="${clrGRN}OK${clrRST}"
   [[ "${optsCMK[CMAKE_VERBOSE_MAKEFILE],,}" =~ ^(on|off)$ ]] || \
     { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="232" ; }
-  printf "  %-28s%-18s%s\n" "CMAKE_VERBOSE_MAKEFILE" "${STATUS}" "${optsCMK[CMAKE_VERBOSE_MAKEFILE]}"
+  printf "  %-28s%-18s%s\\n" "CMAKE_VERBOSE_MAKEFILE" "${STATUS}" "${optsCMK[CMAKE_VERBOSE_MAKEFILE]}"
 
   # cmake use options
   echo " -------------------------------------------------------------- use options --- "
@@ -180,7 +179,7 @@ function _doCheck ()
     ITEM="${optsUSE[$key]}"
     [[ "${ITEM,,}" =~ ^on$ ]] ||  [[ "${ITEM,,}" =~ ^off$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="230" ; }
-    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsUSE[$key]}
+    printf "  %-28s%-18s%s\\n" "${key}" "${STATUS}" "${optsUSE[$key]}"
   done
 
   # cmake build options
@@ -191,7 +190,7 @@ function _doCheck ()
     ITEM="${optsBLD[$key]}"
     [[ "${ITEM,,}" =~ ^on$ ]] ||  [[ "${ITEM,,}" =~ ^off$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="220" ; }
-    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsBLD[$key]}
+    printf "  %-28s%-18s%s\\n" "${key}" "${STATUS}" "${optsBLD[$key]}"
   done
 
   # run options  
@@ -202,7 +201,7 @@ function _doCheck ()
     ITEM="${optsDFT[$key]}"
     [[ "${ITEM,,}" =~ ^[01]$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="210" ; }
-    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsDFT[$key]}
+    printf "  %-28s%-18s%s\\n" "${key}" "${STATUS}" "${optsDFT[$key]}"
   done
 
   #  cpu cores usage
@@ -213,7 +212,7 @@ function _doCheck ()
     ITEM="${optsCRS[$key]}"
     [[ "${ITEM,,}" =~ ^([1-9][0-9]{1}|1[0-9]{2}|200)$ ]] || \
       { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="200" ; }
-    printf "  %-28s%-18s%s\n" ${key} ${STATUS} ${optsCRS[$key]}
+    printf "  %-28s%-18s%s\\n" "${key}" "${STATUS}" "${optsCRS[$key]}"
   done
   echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
 }
@@ -222,31 +221,31 @@ function _doShow ()
 {
   echo " ---------------------------------------------------------------------- git --- "
   for key in "${!optsSRC[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsSRC[$key]}
+      printf "  %-28s%-5s\\n" "${key}" "${optsSRC[$key]}"
   done | sort
   echo " -------------------------------------------------------------- directories --- "
   for key in "${!optsDRS[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsDRS[$key]}
+      printf "  %-28s%-5s\\n" "${key}" "${optsDRS[$key]}"
   done | sort
   echo " ------------------------------------------------------------ cmake options --- "
   for key in "${!optsCMK[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsCMK[$key]}
+      printf "  %-28s%-5s\\n" "${key}" "${optsCMK[$key]}"
   done | sort
   echo " -------------------------------------------------------------- use options --- "
   for key in "${!optsUSE[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsUSE[$key]}
+      printf "  %-28s%-5s\\n" "${key}" "${optsUSE[$key]}"
   done | sort
   echo " ------------------------------------------------------------ build options --- "
   for key in "${!optsBLD[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsBLD[$key]}
+      printf "  %-28s%-5s\\n" "${key}" "${optsBLD[$key]}"
   done | sort
   echo " ------------------------------------------------------------- run defaults --- "
   for key in "${!optsDFT[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsDFT[$key]}
+      printf "  %-28s%-5s\\n" "${key}" "${optsDFT[$key]}"
   done | sort
   echo " -------------------------------------------------------------- cpu options --- "
   for key in "${!optsCRS[@]}"; do
-      printf "  %-28s%-5s%s\n" ${key} ${optsCRS[$key]}
+      printf "  %-28s%-5s\\n" "${key}" "${optsCRS[$key]}"
   done | sort
   
   echo " ------------------------------------------------------- system information --- "
@@ -255,15 +254,21 @@ function _doShow ()
   echo "  gcc     $(gcc --version | head -1)"
   echo "  cmake   $(cmake --version | head -1)"
   echo "  make    $(make --version | head -1)"
-  echo "  ninja   $(ninja --version)"
-  echo "  ccache  $(ccache --version | head -1)"
+  if command -v ninja >/dev/null
+  then
+    echo "  ninja   $(ninja --version)"
+  fi
+  if command -v ccache  >/dev/null
+  then
+     echo "  ccache  $(ccache --version | head -1)"
+  fi
   echo "  $( uname -rv )"
 
   echo " ------------------------------------------------------ darktable cms tests --- "
-  [ $(which darktable-cmstest) ] && darktable-cmstest | awk '{ print "  " $0 }'
+  [ "$(command -v darktable-cmstest)" ] && darktable-cmstest | awk '{ print "  " $0 }'
 
   echo " ------------------------------------------------------- darktable cl tests --- "
-  [ $(which darktable-cltest) ] && darktable-cltest | awk '{ print "  " $0 }'
+  [ "$(command -v darktable-cltest)" ] && darktable-cltest | awk '{ print "  " $0 }'
 
   echo " -------------------------------------------------------------------- ${clrBLU}$(date '+%H:%M')${clrRST} --- "
 }
@@ -290,6 +295,29 @@ function _errHndlr ()
   exit 128
 }
 
+# ------------------------------------------------------------------ #
+# Function : Show help
+# Syntax   : _showHelp
+# ------------------------------------------------------------------ #
+function _showHelp() {
+  clear
+  echo "
+  Script purpose:
+
+  - 1) Show configuration files used by dt.bldr.sh
+  - 2) Check validity of configuration file(s)
+
+  Options:
+
+  -c : check configuration file(s)
+  -s : show configuration file(s)
+
+  -h : show help
+
+  if no options are given the script falls back to using -c
+"
+  exit 0
+}
 # -------------------------------------------------------------------------- #
 # --- Main ---
 # ------------------------------------------------------------------ #
@@ -300,7 +328,7 @@ clear
 [ "$EUID" -eq 0 ]      && _errHndlr "Basic checks" "Do not run as root user."
 [ ! -f ${defCfgFile} ] && _errHndlr "Basic checks" "${defCfgFile} does not exist."
 echo "  default configuration file  ${clrGRN}present${clrRST}"
-if [ -s  ${usrCfgFile} ]
+if [ -s  "${usrCfgFile}" ]
 then
   echo "  user configuration file     ${clrGRN}present${clrRST}"
 else
@@ -330,14 +358,18 @@ do
   [[ ${cfgOPT} =~ ^TESTBUILD_ ]] && optsBLD[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ ^dflt ]]       && optsDFT[${cfgOPT}]=${cfgVal}
   [[ ${cfgOPT} =~ ^crs ]]        && optsCRS[${cfgOPT}]=${cfgVal}
-done < <( cat ${defCfgFile} ${usrCfgFile} 2>/dev/null )
+done < <( cat "${defCfgFile}" "${usrCfgFile}" 2>/dev/null )
 
 # handle options given
-while getopts "cs" OPTION
+while getopts "hcs" OPTION
 do
   case "${OPTION}" in
     c) doChkFile="1" ;;
     s) doShwFile="1" ;;
+    h) _showHelp ;;
+    \?) clear
+        echo -e "\\nUnknown option encountered. Exiting now....\\n"
+       exit 255 ;;
   esac
 done
 # no opts given -> use -c (show configuration)

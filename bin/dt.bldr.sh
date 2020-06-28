@@ -27,7 +27,7 @@
 #              : may 28 2020                                           1.4.0
 #              : may 30 2020                                           1.5.0
 #              : jun 24 2020                                           1.6.0
-#              : jun 27 2020  Code cleanup                             1.6.1
+#              : jun 28 2020  Code cleanup                             1.6.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -110,7 +110,7 @@ function _gitDtClone ()
   git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
   git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule update"
-  printf "\\r          - initializing and updating rawspeed ${clrGRN}OK${clrRST}\\n"
+  printf "\\r          - initializing and updating rawspeed %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
   _getDtGitVrsn
 }
@@ -131,7 +131,7 @@ function _gitDtPull ()
   # update rawspeed
   printf "\\r          - updating rawspeed .. "
   git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
-  printf "\\r          - updating rawspeed ${clrGRN}OK${clrRST}\\n"
+  printf "\\r          - updating rawspeed %sOK$%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
   _getDtGitVrsn
 }
@@ -155,7 +155,7 @@ function _gitDtMerge ()
   # merge into darktable master
   git checkout master > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
   git merge -m "future" "${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
-  printf "\\r  merge   - merging fork ${clrGRN}OK${clrRST}\\n"
+  printf "\\r  merge   - merging fork %sOK%s\\n" "${clrGRN}" "${clrRST}"
 }
 
 # ------------------------------------------------------------------ #
@@ -288,7 +288,7 @@ function _getDtGitVrsn ()
   if [[ "${useSRC}" == "git" ]]
   then
   # remote (git is used)
-    gitVrsn=$( cd "${dtGitDir}"
+    gitVrsn=$( cd "${dtGitDir}" || _errHndlr "_getDtGitVrsn" "Unable to cd"
                git describe | \
                sed -e 's/release-//' -e 's/[~+]/-/g' )
   else
@@ -308,20 +308,20 @@ function _shwPrgrs ()
   while ${instToken} kill -0 $prcssPid 2>/dev/null
   do
     cntr=$(( (cntr+1) %4 ))
-    printf "\\r  ${txtStrng} ${clrGRN}${spnPrts:$cntr:1}${clrRST}   "
+    printf "\\r  %s %s%s%s   " "${txtStrng}" "${clrGRN}" "${spnPrts:$cntr:1}" "${clrRST}"
     sleep .3 ; ((ccld++))
   done
   wait ${prcssPid}
   if [[ "$?" != "0" || "${ccld}" -le "1" ]]
   then
-    printf "\\r\\r  - - - - - -> ${clrRED}An error occurred${clrRST}\\n\\n"
+    printf "\\r\\r  - - - - - -> %sAn error occurred%s\\n\\n" "${clrRED}" "${clrRST}"
     echo   "              Stubbornly refusing to continue."
     echo   ""
     echo   "              Details are in :  ${bldLog}"
     echo   ""
     exit 254
   fi
-  printf "\\r  ${txtStrng} ${clrGRN}OK${clrRST}\\n"
+  printf "\\r  ${txtStrng} %sOK%s\\n" "${clrGRN}" "${clrRST}"
 }
 
 # ------------------------------------------------------------------ #
@@ -336,7 +336,7 @@ function _errHndlr ()
   errorMessage="$2"
   #----------
   # To screen
-  echo -e "\n  ${clrRED}A fatal error occurred.${clrRST}
+  echo -e "\\n  ${clrRED}A fatal error occurred.${clrRST}
 
    Script      : ${scriptName} (${scriptVersion})
    Problem     : ${errorLocation}
@@ -466,8 +466,8 @@ ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
 # shellcheck source=/opt/dt.bldr/cfg/dt.bldr.cfg
 source "${defCfgFile}"
 # parse user defined configuration file
-# shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg.dvlp.lcl.default
-[ -f "${usrCfgFile}" ] && . "${usrCfgFile}"
+# shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg
+[ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
 
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
@@ -511,7 +511,7 @@ fi
 # -------------------------------------------------------------------------- #
 # --- set amount of cores ---
 # ------------------------------------------------------------------ #
-nmbrCores="$(printf %.0f $(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc ))"
+nmbrCores="$(printf %.0f "$(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc )")"
 makeOpts="-j ${nmbrCores}"
 
 # -------------------------------------------------------------------------- #
@@ -619,7 +619,7 @@ then
   if test -r "${usrMergeFile}" -a -f "${usrMergeFile}"
   then
     # parse file
-# shellcheck source=/home/jade/.local/cfg/dt.ext.branch.cfg
+    # shellcheck source=/home/jade/.local/cfg/dt.ext.branch.cfg
     source "${usrMergeFile}"
 
     # force cloning
