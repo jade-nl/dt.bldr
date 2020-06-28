@@ -54,4 +54,5 @@ If the above steps went as expected you can now safely run *dt.bldr.sh* without 
 
 - [darktable website](https://www.darktable.org/)
 - [darktable on GitHub](https://github.com/darktable-org/darktable)
-- [Building darktable](https://redmine.darktable.org/projects/darktable/wiki/Building_darktable_20)
+- [Building darktable](https://github.com/darktable-org/darktable#building)
+- [Building darktable (old development wiki)](https://redmine.darktable.org/projects/darktable/wiki/Building_darktable_20)
