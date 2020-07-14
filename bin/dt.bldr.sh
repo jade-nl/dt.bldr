@@ -28,6 +28,7 @@
 #              : may 30 2020                                           1.5.0
 #              : jun 24 2020                                           1.6.0
 #              : jun 28 2020  Code cleanup                             1.6.1
+#              : jul 14 2020  Fix minor screen output mishap           1.6.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -41,7 +42,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.6.1"
+scriptVersion="1.6.2"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -131,7 +132,7 @@ function _gitDtPull ()
   # update rawspeed
   printf "\\r          - updating rawspeed .. "
   git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
-  printf "\\r          - updating rawspeed %sOK$%s\\n" "${clrGRN}" "${clrRST}"
+  printf "\\r          - updating rawspeed %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
   _getDtGitVrsn
 }
