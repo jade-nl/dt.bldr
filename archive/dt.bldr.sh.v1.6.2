@@ -8,6 +8,7 @@
 #              : -s          Stop if versions are the same
 #              : -b          Build darktable
 #              : -i          Install darktable
+#              : -m          Merge forked branch into darktable
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
 # Purpose      : 1) Clone or pull darktable from git repository
@@ -19,25 +20,15 @@
 #              : git Version Control Systems
 #              : sudo, for non-local installations
 # -------------------------------------------------------------------------- #
-# Changes      : nov 07 2019  First build / outline              1.0.0-alpha
-#              : nov 19 2019  Fixed install and build functions   1.0.0-beta
-#              : dec 04 2019  First release candidate             1.0.0-rc.0
-#              : dec 05 2019  Fixed a pull issue                  1.0.0-rc.1
-#              : dec 10 2019  Fixed sudo progress meter issue     1.0.0-rc.2
-#              : dec 12 2019  Release Version 1.0.0                    1.0.0
-#                             Fixed sudo/progress meter layout issue        
-#                             Implemented git url from cfg                  
-#              : dec 13 2019  Extra comments + Code clean-up           1.0.1
-#              : dec 16 2019  Fixed output inconsistency               1.0.2
-#              :              Checked and corrected spelling
-#                             Set sensible optClone/optPull preference
-#              : dec 23 2019  Implemented better sudo detection        1.0.3
-#              : dec 24 2019  Fixed a typo, minor adjustment to sudo   1.0.4
-#              : jan 02 2020  Fixed logging install part               1.1.0
-#                             Added MAKE_INSTALL_xyz flexibility
-#                             Added installing from local tarball
-#              : jan 04 2020  Local vs remote overhaul                 1.1.1
-#                             Code cleanup
+#              : dec 12 2019                                           1.0.0
+#              : jan 02 2020                                           1.1.0
+#              : jan 05 2020                                           1.2.0
+#              : may 28 2020                                           1.3.0
+#              : may 28 2020                                           1.4.0
+#              : may 30 2020                                           1.5.0
+#              : jun 24 2020                                           1.6.0
+#              : jun 28 2020  Code cleanup                             1.6.1
+#              : jul 14 2020  Fix minor screen output mishap           1.6.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -45,25 +36,45 @@
 #set -x
 set -u
 umask 026
+# Set sane environment
+LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # -------------------------------------------------------------------------- #
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.1.1"
-scriptName="$(basename ${0})"
+scriptVersion="1.6.2"
+scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
 binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
+usrBaseDir="$HOME/.local"
+logDir=""
+baseGitSrcDir=""
+baseLclSrcDir=""
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
-usrCfgFile="$HOME/.local/cfg/dt.bldr.cfg"
+usrCfgFile="${usrBaseDir}/cfg/dt.bldr.cfg"
 cfgChkr="${binDir}/dt.cfg.sh -c"
+usrMergeFile="${usrBaseDir}/cfg/dt.ext.branch.cfg"
 # colours
 clrRST=$(tput sgr0)    # reset
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
 clrBLU=$(tput setaf 4) # blue
+# input options
+optBuild="0"
+optClone="0"
+optInstall="0"
+optMerge="0"
+optPull="0"
+optStop="0"
+dfltClone=""
+dfltPull=""
+dfltBuild=""
+dfltInstall=""
+dfltNinja=""
+dfltStop=""
 # script misc
 lrgDvdr=" ------------------------------------------------------------------ "
 sudoToken=""
@@ -72,13 +83,12 @@ gitVrsn="n/a"
 curVrsn="n/a"
 equVrsn="0"
 ttlBldTime="0"
-# input options
-optBuild="0"
-optClone="0"
-optInstall="0"
-optPull="0"
-optStop="0"
-
+baseSrcDir=""
+dtGitDir=""
+vrbMsg=""
+gitSRC=""
+useSRC=""
+lclSRC=""
 # -------------------------------------------------------------------------- #
 # --- Functions ---
 # ------------------------------------------------------------------ #
@@ -89,19 +99,19 @@ optStop="0"
 function _gitDtClone ()
 {
   # remove current files/dirs first
-  [ -d ${dtGitDir} ] && find ${dtGitDir} -mindepth 1 -delete
+  [ -d "${dtGitDir}" ] && find "${dtGitDir}" -mindepth 1 -delete
   # clone dt
   cd ${baseSrcDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseSrcDir} No such directory."
-  git clone "${gitSRC}" >/dev/null  2>&1 &
+  git clone "${gitSRC}" >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # initialize rawspeed
-  printf "\r          - initializing and updating rawspeed .. "
-  cd ${dtGitDir}
-  git submodule init >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule init"
+  printf "\\r          - initializing and updating rawspeed .. "
+  cd "${dtGitDir}" || _errHndlr "_gitDtClone" "Cannot cd into ${dtGitDir} directory"
+  git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
-  git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtClone" "submodule update"
-  printf "\r          - initializing and updating rawspeed ${clrGRN}OK${clrRST}\n"
+  git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule update"
+  printf "\\r          - initializing and updating rawspeed %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
   _getDtGitVrsn
 }
@@ -113,18 +123,40 @@ function _gitDtClone ()
 # ------------------------------------------------------------------ #
 function _gitDtPull ()
 {
-  cd ${dtGitDir}  2>/dev/null || _errHndlr "_gitDtPull" "${dtGitDir} No such directory."
+  cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtPull" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtPull" "git directory is empty"
   # pull dt
-  git pull >/dev/null 2>&1 &
+  git pull >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
   _shwPrgrs
   # update rawspeed
-  printf "\r          - updating rawspeed .. "
-  git submodule update >/dev/null 2>&1 || _errHndlr "_gitDtPull" "submodule update"
-  printf "\r          - updating rawspeed ${clrGRN}OK${clrRST}\n"
+  printf "\\r          - updating rawspeed .. "
+  git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
+  printf "\\r          - updating rawspeed %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
   _getDtGitVrsn
+}
+
+# ------------------------------------------------------------------ #
+# Function : Merge forked
+# Purpose  : Merge specific branch from a forked darktable into master
+# ------------------------------------------------------------------ #
+function _gitDtMerge ()
+{
+  printf "\\r  merge   - merging fork "
+  cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
+  [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
+  # set up remote, forked repo
+  git remote add dtfuture "${FRK_GIT}"  || _errHndlr "_gitDtMerge" "Unable to add remote"
+  git remote update > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
+  # create, checkout and merge wanted (remote) branch
+  git branch "${FRK_BRNCH}" || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git checkout "${FRK_BRNCH}" > /dev/null 2>&1
+  git merge -m "merging" --allow-unrelated-histories "dtfuture/${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
+  # merge into darktable master
+  git checkout master > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git merge -m "future" "${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
+  printf "\\r  merge   - merging fork %sOK%s\\n" "${clrGRN}" "${clrRST}"
 }
 
 # ------------------------------------------------------------------ #
@@ -133,7 +165,7 @@ function _gitDtPull ()
 # ------------------------------------------------------------------ #
 function _gitDtBuild ()
 {
-  cd ${dtGitDir} 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
+  cd "${dtGitDir}" 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
   # check same versions if optStop is set
   if [ "${optStop}" -eq "1" ]
   then
@@ -147,8 +179,8 @@ function _gitDtBuild ()
   fi
   # create and enter clean build environment
   rm -rf build > /dev/null 2>&1
-  mkdir build
-  cd build
+  mkdir build || _errHndlr "_gitDtBuild" "Cannot create build directory"
+  cd build || _errHndlr "_gitDtBuild" "Cannot cd into build directory"
   # start timer
   strtBldTime=$(date +%s)
   # run cmake
@@ -160,6 +192,7 @@ function _gitDtBuild ()
         -DCMAKE_INSTALL_LOCALEDIR="${CMAKE_INSTALL_LOCALEDIR}" \
         -DCMAKE_INSTALL_MANDIR="${CMAKE_INSTALL_MANDIR}" \
         -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
+        -DCMAKE_VERBOSE_MAKEFILE:BOOL="${CMAKE_VERBOSE_MAKEFILE}" \
         -DUSE_CAMERA_SUPPORT="${USE_CAMERA_SUPPORT}" \
         -DUSE_COLORD="${USE_COLORD}" \
         -DUSE_DARKTABLE_PROFILING="${USE_DARKTABLE_PROFILING}" \
@@ -193,16 +226,17 @@ function _gitDtBuild ()
         CMAKE_C_FLAGS="${CMAKE_FLAGS}" \
         CMAKE_CXX_FLAGS="${CMAKE_FLAGS}" \
         -G "${cmakeGen}" \
-        .. >> ${scrptLog} 2>&1 &
+        .. >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="build   - configuring darktable using cmake"
   _shwPrgrs
   # run make/ninja
-  ${makeBin} ${makeOpts} >> ${scrptLog} 2>&1 &
-  prcssPid="$!" ; txtStrng="        - building darktable using ${makeBin}"
+  # DO NOT DOUBLE QUOTE ${makeOpts}
+  ${makeBin} ${makeOpts} >> "${bldLog}" 2>&1 &
+  prcssPid="$!" ; txtStrng="        - building darktable using ${makeBin}${vrbMsg}"
   _shwPrgrs
   # stop timer
   endBldTime=$(date +%s)
-  ttlBldTime=$(($endBldTime - $strtBldTime))
+  ttlBldTime=$((endBldTime - strtBldTime))
   # get dt version from repo
   _getDtGitVrsn
 }
@@ -224,10 +258,10 @@ function _gitDtInstall ()
       return
     fi
   fi
-  cd ${dtGitDir}/build 2>/dev/null || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
+  cd "${dtGitDir}/build" 2>/dev/null || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
   # remove previously installed version.
   tput sc
-  [ -d ${CMAKE_PREFIX_PATH} ] && ${sudoToken} rm -rf ${CMAKE_PREFIX_PATH}/*
+  [ -d "${CMAKE_PREFIX_PATH}" ] && ${sudoToken} rm -rf "${CMAKE_PREFIX_PATH}"/*
   # set env if it is a non-local install
   if [ ! -z ${sudoToken} ]
   then
@@ -236,7 +270,7 @@ function _gitDtInstall ()
     tput rc ; tput ed
   fi
   # install using make/ninja
-  ${sudoToken} ${makeBin} install >> ${scrptLog} 2>&1 &
+  ${sudoToken} "${makeBin}" install >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="install - installing darktable using make"
   _shwPrgrs
   # restore if system install
@@ -255,7 +289,7 @@ function _getDtGitVrsn ()
   if [[ "${useSRC}" == "git" ]]
   then
   # remote (git is used)
-    gitVrsn=$( cd ${dtGitDir}
+    gitVrsn=$( cd "${dtGitDir}" || _errHndlr "_getDtGitVrsn" "Unable to cd"
                git describe | \
                sed -e 's/release-//' -e 's/[~+]/-/g' )
   else
@@ -275,20 +309,20 @@ function _shwPrgrs ()
   while ${instToken} kill -0 $prcssPid 2>/dev/null
   do
     cntr=$(( (cntr+1) %4 ))
-    printf "\r  ${txtStrng} ${clrGRN}${spnPrts:$cntr:1}${clrRST}   "
+    printf "\\r  %s %s%s%s   " "${txtStrng}" "${clrGRN}" "${spnPrts:$cntr:1}" "${clrRST}"
     sleep .3 ; ((ccld++))
   done
   wait ${prcssPid}
   if [[ "$?" != "0" || "${ccld}" -le "1" ]]
   then
-    printf "\r\r  - - - - - -> ${clrRED}An error occurred${clrRST}\n\n"
+    printf "\\r\\r  - - - - - -> %sAn error occurred%s\\n\\n" "${clrRED}" "${clrRST}"
     echo   "              Stubbornly refusing to continue."
     echo   ""
-    echo   "              Details are in :  ${scrptLog}"
+    echo   "              Details are in :  ${bldLog}"
     echo   ""
     exit 254
   fi
-  printf "\r  ${txtStrng} ${clrGRN}OK${clrRST}\n"
+  printf "\\r  ${txtStrng} %sOK%s\\n" "${clrGRN}" "${clrRST}"
 }
 
 # ------------------------------------------------------------------ #
@@ -303,7 +337,7 @@ function _errHndlr ()
   errorMessage="$2"
   #----------
   # To screen
-  echo -e "\n  ${clrRED}A fatal error occurred.${clrRST}
+  echo -e "\\n  ${clrRED}A fatal error occurred.${clrRST}
 
    Script      : ${scriptName} (${scriptVersion})
    Problem     : ${errorLocation}
@@ -361,6 +395,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     Docdir path ................. ${CMAKE_INSTALL_DOCDIR}
     Localedir path .............. ${CMAKE_INSTALL_LOCALEDIR}
     Mandir path ................. ${CMAKE_INSTALL_MANDIR}
+    Verbosity ................... ${CMAKE_VERBOSE_MAKEFILE}
 
     CMAKE_BUILD_TYPE ............ ${CMAKE_BUILD_TYPE}
 
@@ -426,19 +461,20 @@ echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 # parse configuration file
 # ------------------------------------------------------------------ #
 # check config file(s)
-${cfgChkr} >/dev/null 2>&1
-[ "$?" -eq "0" ] || \
-  _errHndlr "Configuration file(s)" \
+${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
             "Content not valid.  Run dt.cfg.sh -c for details"
 # parse default system wide configuration file
-. ${defCfgFile}
+# shellcheck source=/opt/dt.bldr/cfg/dt.bldr.cfg
+source "${defCfgFile}"
 # parse user defined configuration file
-[ -f "${usrCfgFile}" ] && . ${usrCfgFile}
+# shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg
+[ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
 
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
 # ------------------------------------------------------------------ #
-scrptLog="${logDir}/dt.script.log.$(date '+%Y.%m.%d')"
+scrptLog="${logDir}/dt.script.$(date '+%Y.%m.%d.%H%M').log"
+bldLog="${logDir}/dt.build.$(date '+%Y.%m.%d.%H%M').log"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
 # sudo is needed when installing dt in: /usr, /opt or /bin
@@ -446,28 +482,37 @@ echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
    ${CMAKE_PREFIX_PATH} == /usr/* || \
    ${CMAKE_PREFIX_PATH} == /bin* ]] && sudoToken="sudo"
 
+# verbose or not verbose
+[[ "${CMAKE_VERBOSE_MAKEFILE},," =~ "ON" ]] && vrbMsg=" (verbose)"
+
 # -------------------------------------------------------------------------- #
 # cmake vs ninja : use ninja if available and cmake not forced
 # ------------------------------------------------------------------ #
-if  [ `which ninja` ]
+if  [ "$(command -v ninja)" ]
 then
   if [ "${dfltNinja}" -eq "1" ]
   then
     echo " - ninja will be used" >> "${scrptLog}"
-    ninjaIsUsed="YES" ; cmakeGen="Ninja" ; makeBin="ninja"
+    cmakeGen="Ninja" ; makeBin="ninja"
+    # CMAKE_VERBOSE_MAKEFILE cannot be used with ninja
+    if [[ "${CMAKE_VERBOSE_MAKEFILE}" == "ON" ]]
+    then
+      echo " - ninja does not support make's verbose" >> "${scrptLog}"
+      CMAKE_VERBOSE_MAKEFILE="OFF"
+    fi
   else
     echo " - cmake forced, ninja will not be used" >> "${scrptLog}"
-    ninjaIsUsed="NO" ; cmakeGen="Unix Makefiles" ; makeBin="make"
+    cmakeGen="Unix Makefiles" ; makeBin="make"
   fi
 else
   echo " - cmake will be used" >> "${scrptLog}"
-  ninjaIsUsed="NO" ; cmakeGen="Unix Makefiles" ; makeBin="make"
+  cmakeGen="Unix Makefiles" ; makeBin="make"
 fi
 
 # -------------------------------------------------------------------------- #
 # --- set amount of cores ---
 # ------------------------------------------------------------------ #
-nmbrCores="$(printf %.0f $(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc ))"
+nmbrCores="$(printf %.0f "$(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc )")"
 makeOpts="-j ${nmbrCores}"
 
 # -------------------------------------------------------------------------- #
@@ -475,9 +520,9 @@ makeOpts="-j ${nmbrCores}"
 # TODO - this only works for default CMAKE_PREFIX_PATH installs!
 # ------------------------------------------------------------------ #
 # set currently installed darktable version if available
-[ -e ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
-  [ -x ${CMAKE_PREFIX_PATH}/bin/darktable ] && \
-    curVrsn="$(${CMAKE_PREFIX_PATH}/bin/darktable --version | \
+[ -e "${CMAKE_PREFIX_PATH}/bin/darktable" ] && \
+  [ -x "${CMAKE_PREFIX_PATH}/bin/darktable" ] && \
+    curVrsn="$("${CMAKE_PREFIX_PATH}/bin/darktable" --version | \
     sed 's/[~+]/-/g' | awk 'NR==1 { print $4 }')"
 
 # -------------------------------------------------------------------------- #
@@ -497,7 +542,7 @@ then
 else
   echo " - options are found" >> "${scrptLog}"
   # process options
-  while getopts ":cpsbih" OPTION
+  while getopts ":cpsmbih" OPTION
   do
     case "${OPTION}" in
       c) optClone="1" ;;
@@ -505,6 +550,7 @@ else
       s) optStop="1" ;;
       b) optBuild="1" ;;
       i) optInstall="1" ;;
+      m) optMerge="1" ;;
       h) _shwHelp ;;
      \?) _shwHelp ;;
     esac
@@ -525,6 +571,12 @@ fi
 # source is local
 if [[ "${useSRC}" == "local" ]]
 then
+  if [[ "${optMerge}" -eq "1" ]]
+  then
+    echo "Mergin into stable tarball source is currently unsupported."
+    echo "Exiting now....."
+    exit 2
+  fi
   fallThrough="1"
   # set dir names
   baseSrcDir="${baseLclSrcDir}"
@@ -534,7 +586,7 @@ then
   optPull="0"
   # ---------------------------------------------------------------- #
   # only if -b / -i are used
-  if [[ ${optBuild="1"} -eq "1" || ${optInstall} -eq "1" ]]
+  if [[ ${optBuild} -eq "1" || ${optInstall} -eq "1" ]]
   then
     echo " - setting up local source environment" >> "${scrptLog}"
     fallThrough="0"
@@ -543,13 +595,13 @@ then
   # only if -b is used
   if [ ${optBuild="1"} -eq "1" ]
   then
-    cd -P ${baseSrcDir} >> ${scrptLog} 2>&1
-    rm -rf ${tempDir} >> ${scrptLog} 2>&1
-    mkdir ${tempDir} >> ${scrptLog} 2>&1
+    cd -P "${baseSrcDir}" >> "${scrptLog}" 2>&1 || _errHndlr "Set local env" "Cannot cd into ${baseSrcDir}."
+    rm -rf "${tempDir}" >> "${scrptLog}" 2>&1
+    mkdir "${tempDir}" >> "${scrptLog}" 2>&1
     # untar tarball
     tar xvf "${lclSRC}" \
         --directory="${tempDir}/" \
-        --strip-components=1 >> ${scrptLog} 2>&1 || _errHndlr "Set local env" "Cannot untar file."
+        --strip-components=1 >> "${scrptLog}" 2>&1 || _errHndlr "Set local env" "Cannot untar file."
     fallThrough="0"
   fi
   dtGitDir="${baseSrcDir}/${tempDir}/"
@@ -559,19 +611,44 @@ fi
 # -------------------------------------------------------- #
 # if optClone and optPull are both set optPull is discarded
 [[ ${optClone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
+
+# -------------------------------------------------------- #
+# load cfg file and set option when optMerge is requested
+if [[ "${optMerge}" -eq "1" ]]
+then
+  # check dt.ext.branch.cfg
+  if test -r "${usrMergeFile}" -a -f "${usrMergeFile}"
+  then
+    # parse file
+    # shellcheck source=/home/jade/.local/cfg/dt.ext.branch.cfg
+    source "${usrMergeFile}"
+
+    # force cloning
+    optClone="1"
+    optPull="0"
+    # do not stop if versions are mismatched
+    optStop="0"
+  else
+  # oops
+  echo "something went wrong."
+  exit 2
+  fi
+fi
+
 # -------------------------------------------------------- #
 # act on actions
 [ "${optClone}"   = "1" ] && _gitDtClone
 [ "${optPull}"    = "1" ] && _gitDtPull
+[ "${optMerge}"   = "1" ] && _gitDtMerge
 [ "${optBuild}"   = "1" ] && _gitDtBuild
 [ "${optInstall}" = "1" ] && _gitDtInstall
 
 # -------------------------------------------------------- #
 # show some information
-endRunTime=$(date +%s) ; ttlRnTime=$(( $endRunTime - $strRunTime ))
+endRunTime=$(date +%s) ; ttlRnTime=$(( endRunTime - strRunTime ))
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
-[ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $(($ttlBldTime/3600)) $(($ttlBldTime%3600/60)) $(($ttlBldTime%60))
-printf '%20s%02d:%02d:%02d\n' "  total runtime      " $(($ttlRnTime/3600)) $(($ttlRnTime%3600/60)) $(($ttlRnTime%60))
+[ ${optBuild} -eq "1" ] && printf '%20s%02d:%02d:%02d\n' "  total build time   " $((ttlBldTime/3600)) $((ttlBldTime%3600/60)) $((ttlBldTime%60))
+printf '%20s%02d:%02d:%02d\n' "  total runtime      " $((ttlRnTime/3600)) $((ttlRnTime%3600/60)) $((ttlRnTime%60))
 # set text output depending on version differences
 if [[ ${optInstall} -eq "1" && ${equVrsn} -eq "0" ]]
 then
@@ -584,7 +661,10 @@ else
   printf '  %-10s%-9s%-15s\n' "${useSRC}" "version" "${gitVrsn}"
 fi
 
-echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \n"
+# -------------------------------------------------------------------------- #
+# --- Exit ---
+# -------------------------------------------------------------------------- #
+echo -e "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- \\n"
 echo "$(date '+%H:%M:%S') - Script ends" >> "${scrptLog}"
 
 exit 0
