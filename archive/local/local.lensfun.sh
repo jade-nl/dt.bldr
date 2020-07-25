@@ -6,21 +6,23 @@ set -e
 set -u
 umask 026
 LANG=C; LC_ALL=C; export LANG LC_ALL
-
+LCLDIR="/home/jade/.local"
+GITDIR="${LCLDIR}/git"
+# -------------------------------------------------------------------------- #
 # get lensfun
-cd /home/jade/Git
+cd ${GITDIR}
 rm -rf lensfun
 git clone git@github.com:lensfun/lensfun.git
 
 # build lensfun
-cd /home/jade/Git/lensfun
+cd ${GITDIR}/lensfun
 rm -rf build
 mkdir build
 cd build
 
-#cmake -DCMAKE_INSTALL_PREFIX="/home/jade/.local/lensfun" \
-#      -DCMAKE_INSTALL_LIBDIR="/home/jade/.local/lib" \
-cmake -DCMAKE_INSTALL_PREFIX="/home/jade/.local" \
+#cmake -DCMAKE_INSTALL_PREFIX="${LCLDIR}/lensfun" \
+#      -DCMAKE_INSTALL_LIBDIR="${LCLDIR}/lib" \
+cmake -DCMAKE_INSTALL_PREFIX="${LCLDIR}" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DINSTALL_HELPER_SCRIPTS="ON" \
       -DBUILD_STATIC="OFF" \
@@ -33,13 +35,14 @@ cmake -DCMAKE_INSTALL_PREFIX="/home/jade/.local" \
 
 make
 
-# install lensfun
-rm -f /home/jade/.local/bin/{lensfun*,g-lensfun*,lenstool}
-rm -f /home/jade/.local/lib/liblensfun*
-rm -f /home/jade/.local/lib/pkgconfig/lensfun.pc
-rm -rf /home/jade/.local/include/lensfun
-rm -rf /home/jade/.local/lib/python2.7/site-packages/lensfun*
-rm -rf /home/jade/.local/share/lensfun
+# remove previous and install new lensfun
+rm -f ${LCLDIR}/bin/{lensfun*,g-lensfun*,lenstool}
+rm -f ${LCLDIR}/lib/liblensfun*
+rm -f ${LCLDIR}/lib/pkgconfig/lensfun.pc
+rm -rf ${LCLDIR}/include/lensfun
+rm -rf ${LCLDIR}/lib/python2.7/site-packages/lensfun*
+rm -rf ${LCLDIR}/share/lensfun
+
 make install
 
 sudo /sbin/ldconfig

@@ -6,20 +6,22 @@ set -e
 set -u
 umask 026
 LANG=C; LC_ALL=C; export LANG LC_ALL
+LCLDIR="/home/jade/.local"
+GITDIR="${LCLDIR}/git"
 # -------------------------------------------------------------------------- #
 # get exiv2
-cd /home/jade/Git
+cd ${GITDIR}
 rm -rf exiv2
 git clone git@github.com:Exiv2/exiv2
 
 # build exiv2
-cd /home/jade/Git/exiv2
+cd ${GITDIR}/exiv2
 rm -rf build
 mkdir build
 cd build
 
-cmake -DCMAKE_INSTALL_PREFIX="/home/jade/.local/exiv2"  \
-      -DCMAKE_INSTALL_LIBDIR="/home/jade/.local/lib" \
+cmake -DCMAKE_INSTALL_PREFIX="${LCLDIR}/exiv2"  \
+      -DCMAKE_INSTALL_LIBDIR="${LCLDIR}/lib" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DEXIV2_ENABLE_XMP="ON" \
       -DEXIV2_ENABLE_PNG="ON" \
@@ -34,9 +36,9 @@ cmake -DCMAKE_INSTALL_PREFIX="/home/jade/.local/exiv2"  \
 
 make
 
-# install exiv2
-rm -rf /home/jade/.local/exiv2
-find /home/jade/.local/lib -name "*exiv2*" -exec rm -f {} \;
+# remove previous + install new exiv2
+rm -rf ${LCLDIR}/exiv2
+find ${LCLDIR}/lib -name "*exiv2*" -exec rm -f {} \;
 
 make install
 
