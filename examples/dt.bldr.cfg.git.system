@@ -24,9 +24,10 @@ CMAKE_BUILD_TYPE="Release"
 # -------------------------------------------------------------------------- #
 # - use -
 USE_FLICKR="OFF"                       # default: ON
+USE_GAME="OFF"                         # default: ON
 USE_KWALLET="OFF"                      # default: ON
+USE_LIBSECRET="OFF"                    # default: ON
 USE_MAP="OFF"                          # default: ON
-USE_OPENCL="OFF"                       # default: ON
 # -------------------------------------------------------------------#
 # - build -
 BUILD_PRINT="OFF"                      # default: ON
@@ -43,6 +44,6 @@ dfltNinja="0"                          # do not use ninja
 # -------------------------------------------------------------------------- #
 # cpu cores usage ( percentage, range 10 - 200 )
 # -------------------------------------------------------------------------- #
-crsAprch="125"                         # use 75% of the available cores
+crsAprch="100"                         # use 100% of the available cores
 # ---------------------------------------------------------------------------- #
 # End
