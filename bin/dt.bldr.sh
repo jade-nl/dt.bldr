@@ -29,6 +29,7 @@
 #              : jun 24 2020                                           1.6.0
 #              : jun 28 2020  Code cleanup                             1.6.1
 #              : jul 14 2020  Fix minor screen output mishap           1.6.2
+#              : oct 10 2020  Added build options                      1.6.3
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -42,7 +43,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.6.2"
+scriptVersion="1.6.3"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -195,9 +196,13 @@ function _gitDtBuild ()
         -DCMAKE_VERBOSE_MAKEFILE:BOOL="${CMAKE_VERBOSE_MAKEFILE}" \
         -DUSE_CAMERA_SUPPORT="${USE_CAMERA_SUPPORT}" \
         -DUSE_COLORD="${USE_COLORD}" \
+        -DUSE_AVIF="${USE_AVIF}" \
         -DUSE_DARKTABLE_PROFILING="${USE_DARKTABLE_PROFILING}" \
         -DUSE_FLICKR="${USE_FLICKR}" \
+        -DUSE_GAME="${USE_GAME}" \
+        -DUSE_GMIC="${USE_GMIC}" \
         -DUSE_GRAPHICSMAGICK="${USE_GRAPHICSMAGICK}" \
+        -DUSE_IMAGEMAGICK="${USE_IMAGEMAGICK}" \
         -DUSE_KWALLET="${USE_KWALLET}" \
         -DUSE_LENSFUN="${USE_LENSFUN}" \
         -DUSE_LIBSECRET="${USE_LIBSECRET}" \
@@ -208,6 +213,7 @@ function _gitDtBuild ()
         -DUSE_OPENMP="${USE_OPENMP}" \
         -DUSE_UNITY="${USE_UNITY}" \
         -DUSE_WEBP="${USE_WEBP}" \
+        -DUSE_XCF="${USE_XCF}" \
         -DUSE_XMLLINT="${USE_XMLLINT}" \
         -DUSE_LUA="${USE_LUA}" \
         -DDONT_USE_INTERNAL_LUA="${DONT_USE_INTERNAL_LUA}" \
@@ -405,9 +411,13 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
 
     USE_CAMERA_SUPPORT .......... ${USE_CAMERA_SUPPORT}
     USE_COLORD .................. ${USE_COLORD}
+    USE_AVIF .................... ${USE_AVIF}
     USE_DARKTABLE_PROFILING ..... ${USE_DARKTABLE_PROFILING}
     USE_FLICKR .................. ${USE_FLICKR}
+    USE_GAME .................... ${USE_GAME}
+    USE_GMIC .................... ${USE_GMIC}
     USE_GRAPHICSMAGICK .......... ${USE_GRAPHICSMAGICK}
+    USE_IMAGEMAGICK ............. ${USE_IMAGEMAGICK}
     USE_KWALLET ................. ${USE_KWALLET}
     USE_LENSFUN ................. ${USE_LENSFUN}
     USE_LIBSECRET ............... ${USE_LIBSECRET}
@@ -421,6 +431,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_OPENMP .................. ${USE_OPENMP}
     USE_UNITY ................... ${USE_UNITY}
     USE_WEBP .................... ${USE_WEBP}
+    USE_XCF ..................... ${USE_XCF}
     USE_XMLLINT ................. ${USE_XMLLINT}
 
     BUILD_BATTERY_INDICATOR ..... ${BUILD_BATTERY_INDICATOR}
