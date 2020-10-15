@@ -30,6 +30,7 @@
 #              : jun 28 2020  Code cleanup                             1.6.1
 #              : jul 14 2020  Fix minor screen output mishap           1.6.2
 #              : oct 10 2020  Added build options                      1.6.3
+#              : oct 15 2020  Fixed rawspeed init in pull part         1.6.4
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -43,7 +44,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.6.3"
+scriptVersion="1.6.4"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -130,6 +131,9 @@ function _gitDtPull ()
   git pull >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
   _shwPrgrs
+  # initialize rawspeed
+  printf "\\r          - initialize rawspeed .. "
+  git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule init"
   # update rawspeed
   printf "\\r          - updating rawspeed .. "
   git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
