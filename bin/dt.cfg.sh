@@ -21,6 +21,7 @@
 #              : may 28 2020 Added verbose logging for make            1.3.0
 #              : may 28 2020 Base development version 1.5              1.5.0
 #              : jun 28 2020 Code cleanup                              1.5.1
+#              : oct 16 2020 Fixed error triggered by using tab(s)     1.5.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -32,7 +33,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.5.1"
+scriptVersion="1.5.2"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -342,7 +343,7 @@ do
   # select appropriate lines
   [[ "${OPTVAL}" =~ ^#.*$ ]] && continue
   # select appropriate parts
-  OPTVAL=${OPTVAL%% *}  # remove comment/empty part on same line
+  OPTVAL=${OPTVAL%%[ 	]*}  # remove comment/empty part on same line
   OPTVAL=${OPTVAL//\"/} # strip double quotes
   cfgOPT=${OPTVAL%=*}   # select all before = (inclusive)
   cfgVal=${OPTVAL#*=}   # select all after = (inclusive)
