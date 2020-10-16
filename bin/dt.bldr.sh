@@ -108,7 +108,7 @@ function _gitDtClone ()
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # initialize rawspeed
-  printf "\\r          - initializing and updating rawspeed .. "
+  printf "\\r          - initializing and updating rawspeed"
   cd "${dtGitDir}" || _errHndlr "_gitDtClone" "Cannot cd into ${dtGitDir} directory"
   git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
@@ -132,10 +132,10 @@ function _gitDtPull ()
   prcssPid="$!" ; txtStrng="pull    - incorporating remote changes"
   _shwPrgrs
   # initialize rawspeed
-  printf "\\r          - initialize rawspeed .. "
+  printf "\\r          - initialize rawspeed"
   git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule init"
   # update rawspeed
-  printf "\\r          - updating rawspeed .. "
+  printf "\\r          - updating rawspeed"
   git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
   printf "\\r          - updating rawspeed %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
