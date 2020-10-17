@@ -31,6 +31,7 @@
 #              : jul 14 2020  Fix minor screen output mishap           1.6.2
 #              : oct 10 2020  Added build options                      1.6.3
 #              : oct 15 2020  Fixed rawspeed init in pull part         1.6.4
+#              : oct 17 2020  Minor cosmetic fix                       1.6.5
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -44,7 +45,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.6.4"
+scriptVersion="1.6.5"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -152,7 +153,7 @@ function _gitDtMerge ()
   cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
   # set up remote, forked repo
-  git remote add dtfuture "${FRK_GIT}"  || _errHndlr "_gitDtMerge" "Unable to add remote"
+  git remote add dtfuture "${FRK_GIT}" || _errHndlr "_gitDtMerge" "Unable to add remote"
   git remote update > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
   # create, checkout and merge wanted (remote) branch
   git branch "${FRK_BRNCH}" || _errHndlr "_gitDtMerge" "Unable to switch branch"
@@ -641,7 +642,7 @@ then
     # force cloning
     optClone="1"
     optPull="0"
-    # do not stop if versions are mismatched
+    # do not stop if versions are the same
     optStop="0"
   else
   # oops

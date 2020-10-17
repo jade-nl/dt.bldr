@@ -1,7 +1,7 @@
 # -------------------------------------------------------------------------- #
 # Information about the configuration setup and the example files
 # -------------------------------------------------------------------------- #
-- How is the configuration file set up.
+- How the configuration file is set up.
 
 The dt.bldr.sh script needs at least one configuration file to do its thing.
 The default configuration file can be found in /opt/dt.bldr/cfg. This is a

@@ -25,7 +25,7 @@ using sudo it can be run as follows:
 
   sudo sh installer.sh
   
-The installer script will do the following:
+The installer script will, verbosely, do the following:
 
 - Remove, forcefully, the current content of /opt/dt.bldr,
 - Create /opt/dt.bldr/bin and copy both scripts to that location,
@@ -38,8 +38,8 @@ The installer script will do the following:
 The installer does not create or copy the local configuration file that might
 be wanted/needed.
 
-The two configuration files in examples are just guides to set up your own
-local configuration.
+The configuration files in examples are just guides to set up your own local
+configuration.
 
 Have a look at the README.configuration and README.examples files.
 
