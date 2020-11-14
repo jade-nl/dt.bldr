@@ -32,6 +32,7 @@
 #              : oct 10 2020  Added build options                      1.6.3
 #              : oct 15 2020  Fixed rawspeed init in pull part         1.6.4
 #              : oct 17 2020  Minor cosmetic fix                       1.6.5
+#              : nov 14 2020  Added set compiler option                1.7.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -45,7 +46,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.6.5"
+scriptVersion="1.7.0"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -183,6 +184,13 @@ function _gitDtBuild ()
       return
     fi
   fi
+  # set compiler to use
+  if [[ "${compSRC}" == "clang" ]]
+  then
+    export CC=clang
+    export CXX=clang++
+  fi
+
   # create and enter clean build environment
   rm -rf build > /dev/null 2>&1
   mkdir build || _errHndlr "_gitDtBuild" "Cannot create build directory"
