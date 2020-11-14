@@ -22,6 +22,7 @@
 #              : may 28 2020 Base development version 1.5              1.5.0
 #              : jun 28 2020 Code cleanup                              1.5.1
 #              : oct 16 2020 Fixed error triggered by using tab(s)     1.5.2
+#              : nov 14 2020 Added set compiler option                 1.7.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -33,7 +34,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.5.2"
+scriptVersion="1.7.0"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
