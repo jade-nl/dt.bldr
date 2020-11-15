@@ -23,6 +23,7 @@
 #              : jun 28 2020 Code cleanup                              1.5.1
 #              : oct 16 2020 Fixed error triggered by using tab(s)     1.5.2
 #              : nov 14 2020 Added set compiler option                 1.7.0
+#              : nov 15 2020 Added latest option to check              1.7.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -34,7 +35,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.7.0"
+scriptVersion="1.7.1"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -127,6 +128,22 @@ function _doCheck ()
 
   # cmake install path options
   echo " ------------------------------------------------------------ cmake options --- "
+  # compSRC
+  STATUS="${clrGRN}OK${clrRST}"
+  if [ -z "${optsSRC[compSRC]}" ]
+  then
+    # empty
+    STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="239"
+    printf "  %-28s%-18s%s\\n" "compSRC" "${STATUS}" "${optsSRC[compSRC]}"
+  elif [[ ! "${optsSRC[compSRC]}" =~ ^(gcc|clang) ]]
+  then
+    # invalid entry
+    STATUS="${clrRED}ERROR  ${clrRST}" ; exitSTTS="254"
+    printf "  %-28s%-18s%s\\n" "compSRC" "${STATUS}" "${optsSRC[compSRC]}"
+  else
+    # OK
+    printf "  %-28s%-18s%s\\n" "compSRC" "${STATUS}" "${optsSRC[compSRC]}"
+  fi  
   # CMAKE_PREFIX_PATH
   STATUS="${clrGRN}OK${clrRST}"
   [ -z "${optsCMK[CMAKE_PREFIX_PATH]}" ] && \
