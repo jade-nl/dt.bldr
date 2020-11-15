@@ -33,6 +33,7 @@
 #              : oct 15 2020  Fixed rawspeed init in pull part         1.6.4
 #              : oct 17 2020  Minor cosmetic fix                       1.6.5
 #              : nov 14 2020  Added set compiler option                1.7.0
+#              : nov 15 2020  Streamlined the compiler option          1.7.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -46,7 +47,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.7.0"
+scriptVersion="1.7.1"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -189,6 +190,10 @@ function _gitDtBuild ()
   then
     export CC=clang
     export CXX=clang++
+  else
+    # use the default compiler
+    export CC=gcc
+    export CXX=g++
   fi
 
   # create and enter clean build environment
