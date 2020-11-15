@@ -412,6 +412,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     Local tarball directory ..... ${baseLclSrcDir}
 
   - Build and Install
+    Compiler being used ......... ${compSRC}
     Prefix (install) path ....... ${CMAKE_PREFIX_PATH}
     Bindir path ................. ${CMAKE_INSTALL_BINDIR}
     Libdir path ................. ${CMAKE_INSTALL_LIBDIR}
