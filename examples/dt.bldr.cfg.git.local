@@ -6,6 +6,7 @@
 # - source        : git, using http to connect to github 
 # - build options : defaults as used/set in ../git/darktable/DefineOptions.cmake
 # - location      : keep it all local -> $HOME/.local/XYZ
+# - compiler      : use clang instead of gcc
 # ---------------------------------------------------------------------------- #
 # source section
 # -------------------------------------------------------------------------- #
@@ -19,6 +20,10 @@ baseGitSrcDir="$HOME/.local/git"
 # ----------------------------------------------------------------------- #
 # directory to store logs
 logDir="$HOME/.local/log"
+# -------------------------------------------------------------------------- #
+# compiler to use
+# -------------------------------------------------------------------------- #
+compSRC="clang"
 # -------------------------------------------------------------------------- #
 # make options
 # -------------------------------------------------------------------------- #
