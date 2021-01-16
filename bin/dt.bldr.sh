@@ -9,6 +9,7 @@
 #              : -b          Build darktable
 #              : -i          Install darktable
 #              : -m          Merge forked branch into darktable
+#              : -t          Download the integration tests
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
 # Purpose      : 1) Clone or pull darktable from git repository
