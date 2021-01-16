@@ -34,7 +34,8 @@
 #              : oct 17 2020  Minor cosmetic fix                       1.6.5
 #              : nov 14 2020  Added set compiler option                1.7.0
 #              : nov 15 2020  Streamlined the compiler option          1.7.1
-#              : jan 15 2021  Make sure cloned repo is 100% clean      1.7.2
+#              : jan 15 2021  Make sure cloned repo is 100% clean
+#                             Disable integration test downloads       1.7.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -75,12 +76,14 @@ optInstall="0"
 optMerge="0"
 optPull="0"
 optStop="0"
+optTest="0"
 dfltClone=""
 dfltPull=""
 dfltBuild=""
 dfltInstall=""
 dfltNinja=""
 dfltStop=""
+dfltTest=""
 # script misc
 lrgDvdr=" ------------------------------------------------------------------ "
 sudoToken=""
@@ -114,9 +117,15 @@ function _gitDtClone ()
   # enter repository
   cd "${dtGitDir}" || _errHndlr "_gitDtClone" "Cannot cd into ${dtGitDir} directory"
   # make sure repository is clean
-  printf "\\r          - cleaning repository"
   git clean -d -f -x >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "cleaning repository"
-  printf "\\r          - cleaning repository %sOK%s\\n" "${clrGRN}" "${clrRST}"
+
+  # disable integration test downloads (unless asked for)
+  if [ "${optTest}" -eq "0" ]
+  then
+    printf "\\r          - disabling integration tests"
+    git config submodule.src/tests/integration.update none  >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "disable integration test"
+    printf "\\r          - disabling integration tests %sOK%s\\n" "${clrGRN}" "${clrRST}"
+  fi
   # initialize rawspeed
   printf "\\r          - initializing and updating rawspeed"
   git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule init"
@@ -400,6 +409,10 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
             or pulled versions are the same.
   : -b     Build darktable (see General below)
   : -i     Install darktable to ${CMAKE_PREFIX_PATH}
+
+  : -m     Merge an external branch
+  : -t     Download the integration tests
+
   : -h/-?  Show this output
 
   Starting without any options set will trigger the default run options.
@@ -478,6 +491,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     dfltInstall ................. ${dfltInstall}
     dfltNinja ................... ${dfltNinja}
     dfltStop .................... ${dfltStop}
+    dfltTest .................... ${dfltTest}
 
 ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST} 
 EOF
@@ -575,10 +589,11 @@ then
   optStop="${dfltStop}"
   optBuild="${dfltBuild}"
   optInstall="${dfltInstall}"
+  optTest="${dfltTest}"
 else
   echo " - options are found" >> "${scrptLog}"
   # process options
-  while getopts ":cpsmbih" OPTION
+  while getopts ":cpsmtbih" OPTION
   do
     case "${OPTION}" in
       c) optClone="1" ;;
@@ -587,6 +602,7 @@ else
       b) optBuild="1" ;;
       i) optInstall="1" ;;
       m) optMerge="1" ;;
+      t) optTest="1" ;;
       h) _shwHelp ;;
      \?) _shwHelp ;;
     esac
