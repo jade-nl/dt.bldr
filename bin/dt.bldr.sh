@@ -34,6 +34,7 @@
 #              : oct 17 2020  Minor cosmetic fix                       1.6.5
 #              : nov 14 2020  Added set compiler option                1.7.0
 #              : nov 15 2020  Streamlined the compiler option          1.7.1
+#              : jan 15 2021  Make sure cloned repo is 100% clean      1.7.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -47,7 +48,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.7.1"
+scriptVersion="1.7.2"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -110,9 +111,14 @@ function _gitDtClone ()
   git clone "${gitSRC}" >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
+  # enter repository
+  cd "${dtGitDir}" || _errHndlr "_gitDtClone" "Cannot cd into ${dtGitDir} directory"
+  # make sure repository is clean
+  printf "\\r          - cleaning repository"
+  git clean -d -f -x >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "cleaning repository"
+  printf "\\r          - cleaning repository %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # initialize rawspeed
   printf "\\r          - initializing and updating rawspeed"
-  cd "${dtGitDir}" || _errHndlr "_gitDtClone" "Cannot cd into ${dtGitDir} directory"
   git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
   git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule update"
