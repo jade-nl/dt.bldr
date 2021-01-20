@@ -355,10 +355,10 @@ function _shwPrgrs ()
   wait ${prcssPid}
   if [[ "$?" != "0" || "${ccld}" -le "1" ]]
   then
-    printf "\\r\\r  - - - - - -> %sAn error occurred%s\\n\\n" "${clrRED}" "${clrRST}"
-    echo   "              Stubbornly refusing to continue."
+    printf "\\n\\n  - - - -> %sAn error occurred%s\\n\\n" "${clrRED}" "${clrRST}"
+    echo   "           Stubbornly refusing to continue."
     echo   ""
-    echo   "              Details are in :  ${bldLog}"
+    echo   "           Details are in :  ${bldLog}"
     echo   ""
     exit 254
   fi
