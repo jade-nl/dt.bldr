@@ -37,6 +37,7 @@
 #              : nov 15 2020  Streamlined the compiler option          1.7.1
 #              : jan 15 2021  Make sure cloned repo is 100% clean
 #                             Disable integration test downloads       1.7.2
+#              : nov 16 2021  Removed obsolete CMake option            1.7.3
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -50,7 +51,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.7.2"
+scriptVersion="1.7.3"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -259,7 +260,6 @@ function _gitDtBuild ()
         -DBUILD_NOISE_TOOLS="${BUILD_NOISE_TOOLS}" \
         -DBUILD_PRINT="${BUILD_PRINT}" \
         -DBUILD_RS_IDENTIFY="${BUILD_RS_IDENTIFY}" \
-        -DBUILD_TESTS="${BUILD_TESTS}" \
         -DBUILD_USERMANUAL="${BUILD_USERMANUAL}" \
         -DBINARY_PACKAGE_BUILD="${BINARY_PACKAGE_BUILD}" \
         -DTESTBUILD_OPENCL_PROGRAMS="${TESTBUILD_OPENCL_PROGRAMS}" \
@@ -479,7 +479,6 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     BUILD_NOISE_TOOLS ........... ${BUILD_NOISE_TOOLS}
     BUILD_PRINT ................. ${BUILD_PRINT}
     BUILD_RS_IDENTIFY ........... ${BUILD_RS_IDENTIFY}
-    BUILD_TESTS ................. ${BUILD_TESTS}
     BUILD_USERMANUAL ............ ${BUILD_USERMANUAL}
 
     BINARY_PACKAGE_BUILD ........ ${BINARY_PACKAGE_BUILD}

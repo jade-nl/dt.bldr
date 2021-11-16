@@ -68,7 +68,6 @@ BUILD_CURVE_TOOLS="OFF"
 BUILD_NOISE_TOOLS="OFF"
 BUILD_PRINT="ON"
 BUILD_RS_IDENTIFY="ON"
-BUILD_TESTS="OFF"
 BUILD_USERMANUAL="OFF"
 TESTBUILD_OPENCL_PROGRAMS="ON"
 # -------------------------------------------------------------------------- #
