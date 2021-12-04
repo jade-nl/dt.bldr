@@ -63,7 +63,7 @@ variable starting with either of these three, making it a system wide install :
 
 I strongly discourage using /bin as prefix because the installation process
 installs more then just a few binaries. These would all end up in /bin when
-setting the global prefix to /bin. This can be finetuned on the configuration
+setting the global prefix to /bin. This can be fine-tuned on the configuration
 file though.
 
 I decided to make it possible to merge a branch from a forked darktable
@@ -78,7 +78,7 @@ as intended depending on the branch that is being merged.
 If the -m options is used a clone is being forced (-c is used no matter the
 configuration setting). So there is no need to set -c (or -p) when using -m.
 
-The -t option takes care of the integration tests that come with darktable. The main reason for this script is to be able to build an install one or more persaonalized darktable versions.
+The -t option takes care of the integration tests that come with darktable. The main reason for this script is to be able to build an install one or more personalized darktable versions and as such these integration tests are somewhat out-of-scope.
 
 The integration tests are rather large and are not being downloaded by default. There's a configuration option that can be set in dt.bldr.cfg to change this behaviour. 
 
