@@ -26,6 +26,7 @@ The following options can be used when running dt.bldr.sh:
   -b    Build darktable
   -i    Install darktable
   -m    Merge one branch from a different remote repository
+  -t    Download the integration tests
   -h/-? Show help
 
 If no options are given when running the script, the defaults that are in the
@@ -76,6 +77,10 @@ as intended depending on the branch that is being merged.
 
 If the -m options is used a clone is being forced (-c is used no matter the
 configuration setting). So there is no need to set -c (or -p) when using -m.
+
+The -t option takes care of the integration tests that come with darktable. The main reason for this script is to be able to build an install one or more persaonalized darktable versions.
+
+The integration tests are rather large and are not being downloaded by default. There's a configuration option that can be set in dt.bldr.cfg to change this behaviour. 
 
 # -------------------------------------------------------------------------- #
 # dt.cfg.sh - the configuration checker
