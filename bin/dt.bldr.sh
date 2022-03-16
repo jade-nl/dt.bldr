@@ -38,6 +38,7 @@
 #              : jan 15 2021  Make sure cloned repo is 100% clean
 #                             Disable integration test downloads       1.7.2
 #              : nov 16 2021  Removed obsolete CMake option            1.7.3
+#              : mar 16 2022  Removed obsolete github option           1.7.4
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -51,7 +52,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.7.3"
+scriptVersion="1.7.4"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"

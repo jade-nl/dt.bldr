@@ -24,8 +24,8 @@ into a pull option and activate the stop-when-the-same option.
 The configuration file isn't limited to the darktable specific configuration,
 build and install options. The following can also be specified:
 
-+ The way the script connects with GitHub. Currently only 3 ways are
-  defined: https:// or git@ or git://
++ The way the script connects with GitHub. Currently only 2 ways are
+  defined: https:// or git@
 + The location of the log file(s),
 + The location of the git repository directory,
 + The percentage of cores to use during the build,
