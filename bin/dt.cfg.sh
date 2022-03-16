@@ -24,6 +24,7 @@
 #              : oct 16 2020 Fixed error triggered by using tab(s)     1.5.2
 #              : nov 14 2020 Added set compiler option                 1.7.0
 #              : nov 15 2020 Added latest option to check              1.7.1
+#              : mar 16 2022 Removed deprecated github option          1.7.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -35,7 +36,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.7.1"
+scriptVersion="1.7.2"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -90,9 +91,6 @@ function _doCheck ()
     if [ -z "${optsSRC[gitSRC]}" ]
     then
       STATUS="${clrRED}ERROR  - empty -${clrRST}" ; exitSTTS="253"
-    elif [[ ! "${optsSRC[gitSRC]}" =~ ^(git@github.com:|git://github.com/|https://github.com/) ]]
-    then
-      STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="252"
     fi
     printf "  %-28s%-18s%s\\n" "gitSRC" "${STATUS}" "${optsSRC[gitSRC]}"
     [ -z "${optsDRS[baseGitSrcDir]}" ] && \
