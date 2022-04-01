@@ -50,6 +50,10 @@ There's is a hidden option you can set to make merging multiple branches possibl
 
 If the -m options is used a clone is being forced (-c is used no matter the configuration setting). So there is no need to set -c (or -p) when using -m. This is also the case when using the hidden option.
 
+When multiple branches need to be integrated you need to merge these one at the time at the moment. There's no need to build and install for every branch, though. Use dt.bldr.sh -m for each branche untill all are merged and then run dt.bldr.sh -bi.
+
+To get rid of all the merged branches just run dt.bldr.sh -c, which will force a fresh clone.
+
 # -------------------------------------------------------------------------- #
 # dt.cfg.sh - the configuration checker
 
