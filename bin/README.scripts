@@ -42,6 +42,10 @@ installs more then just a few binaries. These would all end up in /bin when
 setting the global prefix to /bin. This can be fine-tuned on the configuration
 file though.
 
+The -t option takes care of the integration tests that come with darktable. The main reason for this script is to be able to build an install one or more personalized darktable versions and as such these integration tests are somewhat out-of-scope.
+
+The integration tests are rather large and are not being downloaded by default. There's a configuration option that can be set in dt.bldr.cfg to change this behaviour. 
+
 I decided to make it possible to merge a branch from a forked darktable repository into the current master. This is done using the -m options and a file called dt.ext.branch.cfg (must be located in ~/.local/cfg). This file holds the URL of the forked repository and the name of the branch (the example directory has a sample).
 
 **Beware:** This merge option (-m) is experimental. Merging might not work as intended depending on the branch that is being merged. Especially "old" PRs might introduce merging issues, the script is not intelligent enough to solve this.
@@ -73,14 +77,11 @@ If dt.cfg.sh is called without any option it defaults to -c
 
 # dt.cfg.sh -c  (or dt.cfg.sh)
 
-Do a rough check of the combined configuration files that are being used.
-There's no real intelligence, but it will point out common problems and
-mistakes.
+Do a rough check of the combined configuration files that are being used. There's no real intelligence, but it will point out common problems and mistakes.
 
 # dt.cfg.sh -s
 
-This will print all the options that are being used as well as some extra
-information relevant when building darktable.
+This will print all the options that are being used as well as some extra information relevant when building darktable.
 
 The extras:
 
@@ -91,10 +92,7 @@ The extras:
 
 # General
 
-This script will always start with the system-wide configuration file that
-can be found in /opt/dt.bldr/cfg and, if present, overlay the local copy.
-So even if you use a local configuration file that has a limited amount of
-entries the complete set of options is used/shown.
+This script will always start with the system-wide configuration file that can be found in /opt/dt.bldr/cfg and, if present, overlay the local copy. So even if you use a local configuration file that has a limited amount of entries the complete set of options is used/shown.
 
 # -------------------------------------------------------------------------- #
 # End
