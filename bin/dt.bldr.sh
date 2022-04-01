@@ -39,6 +39,7 @@
 #                             Disable integration test downloads       1.7.2
 #              : nov 16 2021  Removed obsolete CMake option            1.7.3
 #              : mar 16 2022  Removed obsolete github option           1.7.4
+#              : apr 01 2022  Made merging more flexible               1.7.5
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -52,7 +53,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.7.4"
+scriptVersion="1.7.5"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -101,6 +102,7 @@ vrbMsg=""
 gitSRC=""
 useSRC=""
 lclSRC=""
+uniFut="$(date "+%N")"
 # -------------------------------------------------------------------------- #
 # --- Functions ---
 # ------------------------------------------------------------------ #
@@ -173,12 +175,12 @@ function _gitDtMerge ()
   cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
   # set up remote, forked repo
-  git remote add dtfuture "${FRK_GIT}" || _errHndlr "_gitDtMerge" "Unable to add remote"
+  git remote add "${uniFut}" "${FRK_GIT}" || _errHndlr "_gitDtMerge" "Unable to add remote"
   git remote update > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
   # create, checkout and merge wanted (remote) branch
   git branch "${FRK_BRNCH}" || _errHndlr "_gitDtMerge" "Unable to switch branch"
   git checkout "${FRK_BRNCH}" > /dev/null 2>&1
-  git merge -m "merging" --allow-unrelated-histories "dtfuture/${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
+  git merge -m "merging" --allow-unrelated-histories "${uniFut}/${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
   # merge into darktable master
   git checkout master > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
   git merge -m "future" "${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
@@ -676,10 +678,13 @@ then
     # shellcheck source=/home/jade/.local/cfg/dt.ext.branch.cfg
     source "${usrMergeFile}"
 
-    # force cloning
+    # set preferred merge method
+    # - optClone=1 / optPull=0 is safest, but only one PR can be merged
+    # - optClone=0 / optPull=1 makes merging multiple PRs possible (one at
+    #   the time)
     optClone="1"
     optPull="0"
-    # do not stop if versions are the same
+    # do not stop if versions are the same (do not change this one)
     optStop="0"
   else
   # oops
