@@ -20,14 +20,15 @@ option in the config file that creates verbose logging if need be.
 
 The following options can be used when running dt.bldr.sh:
 
-  -c    Clone files from the darktable git repository
-  -p    Pull updates from the darktable git repository
-  -s    Stop if versions are the same
-  -b    Build darktable
-  -i    Install darktable
-  -m    Merge one branch from a different remote repository
-  -t    Download the integration tests
-  -h/-? Show help
+  -c         Clone files from the darktable git repository
+  -p         Pull updates from the darktable git repository
+  -C file    Use file as configuration
+  -s         Stop if versions are the same
+  -b         Build darktable
+  -i         Install darktable
+  -m [file]  Merge one branch from a different remote repository
+  -t         Download the integration tests
+  -h/-?      Show help
 
 If no options are given when running the script, the defaults that are in the
 global configuration file are being used.
@@ -40,6 +41,9 @@ the examples directory.
 
 The clone and pull options (-c and -p) will also take care of the rawspeed
 module.
+
+The -C file option can be used to point dt.bldr.sh to a different configuration
+file. When used it will replace the default ~/cfg/dt.bldr.cfg file. If -C file is used -b will also be assumed and set accordingly (dt.bldr.sh -C and dt.bldr.sh -bC are the same).
 
 The -s option checks if the latest cloned/pulled git version is the same as the
 darktable version that is already installed. If this is the case then the build
@@ -80,6 +84,9 @@ repository into the current master. This is done using the -m options and a
 file called dt.ext.branch.cfg (must be located in ~/.local/cfg). This file
 holds the URL of the forked repository and the name of the branch (the example
 directory has a sample).
+
+There's the possibility to provide a file when using the -m option. This file
+will then be used instead of the default (~/cfg/dt.ext.branch.cfg).
 
 **Beware:** This merge option (-m) is experimental. Merging might not work as
 intended depending on the branch that is being merged. Especially "old" PRs

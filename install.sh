@@ -22,6 +22,7 @@ echo " - - - - -> Creating directories:"
 mkdir -m 755 -v /opt/dt.bldr
 mkdir -m 755 -v /opt/dt.bldr/bin
 mkdir -m 755 -v /opt/dt.bldr/cfg
+mkdir -m 777 -v /opt/dt.bldr/log
 # -------------------------------------------------------------------------- #
 # Copy files
 # ------------------------------------------------------------------ #

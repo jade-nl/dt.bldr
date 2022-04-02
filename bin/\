@@ -113,23 +113,6 @@ uniFut="$(date "+%N")"
 # -------------------------------------------------------------------------- #
 # --- Functions ---
 # ------------------------------------------------------------------ #
-# Function : Parse configuration files
-# Purpose  : Set default options to use based on default and personal
-#            configuration file(s)
-# ------------------------------------------------------------------ #
-function _parseCfgs ()
-{
-  # check config file(s)
-  ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
-              "Content not valid.  Run dt.cfg.sh -c for details"
-  # parse default system wide configuration file
-  # shellcheck source=/opt/dt.bldr/cfg/dt.bldr.cfg
-  source "${defCfgFile}"
-  # parse user defined configuration file
-  # shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg
-  [ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
-}
-# ------------------------------------------------------------------ #
 # Function : Clone darktable
 # Purpose  : 1) Clone darktable remote repository into local directory
 #            2) Initialize and update submodule (rawspeed)
@@ -539,6 +522,70 @@ scrptLog="${logDir}/dt.script."$UID".$(date '+%Y.%m.%d.%H%M').log"
 bldLog="${logDir}/dt.build."$UID".$(date '+%Y.%m.%d.%H%M').log"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
+#-# # -------------------------------------------------------------------------- #
+#-# # parse configuration file
+#-# # ------------------------------------------------------------------ #
+#-# # check config file(s)
+#-# ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
+#-#             "Content not valid.  Run dt.cfg.sh -c for details"
+#-# # parse default system wide configuration file
+#-# # shellcheck source=/opt/dt.bldr/cfg/dt.bldr.cfg
+#-# source "${defCfgFile}"
+#-# # parse user defined configuration file
+#-# # shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg
+#-# [ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
+#-# 
+#-# # -------------------------------------------------------------------------- #
+#-# # set extra variables based on configurations file
+#-# # ------------------------------------------------------------------ #
+#-# # sudo is needed when installing dt in: /usr, /opt or /bin
+#-# [[ ${CMAKE_PREFIX_PATH} == /opt/* || \
+#-#    ${CMAKE_PREFIX_PATH} == /usr/* || \
+#-#    ${CMAKE_PREFIX_PATH} == /bin* ]] && sudoToken="sudo"
+#-# 
+#-# # verbose or not verbose
+#-# [[ "${CMAKE_VERBOSE_MAKEFILE},," =~ "ON" ]] && vrbMsg=" (verbose)"
+#-# 
+#-# # -------------------------------------------------------------------------- #
+#-# # cmake vs ninja : use ninja if available and cmake not forced
+#-# # ------------------------------------------------------------------ #
+#-# if  [ "$(command -v ninja)" ]
+#-# then
+#-#   if [ "${dfltNinja}" -eq "1" ]
+#-#   then
+#-#     echo " - ninja will be used" >> "${scrptLog}"
+#-#     cmakeGen="Ninja" ; makeBin="ninja"
+#-#     # CMAKE_VERBOSE_MAKEFILE cannot be used with ninja
+#-#     if [[ "${CMAKE_VERBOSE_MAKEFILE}" == "ON" ]]
+#-#     then
+#-#       echo " - ninja does not support make's verbose" >> "${scrptLog}"
+#-#       CMAKE_VERBOSE_MAKEFILE="OFF"
+#-#     fi
+#-#   else
+#-#     echo " - cmake forced, ninja will not be used" >> "${scrptLog}"
+#-#     cmakeGen="Unix Makefiles" ; makeBin="make"
+#-#   fi
+#-# else
+#-#   echo " - cmake will be used" >> "${scrptLog}"
+#-#   cmakeGen="Unix Makefiles" ; makeBin="make"
+#-# fi
+#-# 
+#-# # -------------------------------------------------------------------------- #
+#-# # --- set amount of cores ---
+#-# # ------------------------------------------------------------------ #
+#-# nmbrCores="$(printf %.0f "$(echo "scale=2 ;$(nproc)/100*${crsAprch}" | bc )")"
+#-# makeOpts="-j ${nmbrCores}"
+#-# 
+#-# # -------------------------------------------------------------------------- #
+#-# # get/set darktable version information (installed version)
+#-# # TODO - this only works for default CMAKE_PREFIX_PATH installs!
+#-# # ------------------------------------------------------------------ #
+#-# # set currently installed darktable version if available
+#-# [ -e "${CMAKE_PREFIX_PATH}/bin/darktable" ] && \
+#-#   [ -x "${CMAKE_PREFIX_PATH}/bin/darktable" ] && \
+#-#     curVrsn="$("${CMAKE_PREFIX_PATH}/bin/darktable" --version | \
+#-#     sed 's/[~+]/-/g' | awk 'NR==1 { print $4 }')"
+
 # -------------------------------------------------------------------------- #
 # process options
 # ------------------------------------------------------------------ #
@@ -546,12 +593,8 @@ echo " - options processing" >> "${scrptLog}"
 # are any options given
 if [ "$#" -eq "0" ]
 then
-
-  # parse configuration file 
-  _parseCfgs
-
-  # set default options from cfg
-  echo " - no command line options are found" >> "${scrptLog}"
+  echo " - no options are found" >> "${scrptLog}"
+  # use default from cfg
   optClone="${dfltClone}"
   optPull="${dfltPull}"
   optStop="${dfltStop}"
@@ -559,7 +602,10 @@ then
   optInstall="${dfltInstall}"
   optTest="${dfltTest}"
 
+echo "did we get here?"
+
 else
+
 
   echo " - options are found" >> "${scrptLog}"
   # process options
@@ -584,8 +630,16 @@ fi
 
 # -------------------------------------------------------------------------- #
 # parse configuration file
-
-_parseCfgs
+# ------------------------------------------------------------------ #
+# check config file(s)
+${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
+            "Content not valid.  Run dt.cfg.sh -c for details"
+# parse default system wide configuration file
+# shellcheck source=/opt/dt.bldr/cfg/dt.bldr.cfg
+source "${defCfgFile}"
+# parse user defined configuration file
+# shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg
+[ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
 
 # -------------------------------------------------------------------------- #
 # set extra variables based on configurations file
@@ -717,6 +771,15 @@ then
   exit 2
   fi
 fi
+
+
+echo "oc - ${optClone}"
+echo "op - ${optPull}"
+echo "om - ${optMerge}"
+echo "ob - ${optBuild}"
+echo "oi - ${optInstall}"
+echo "oh - ${optHelp}"
+exit
 
 # -------------------------------------------------------- #
 # act on actions
