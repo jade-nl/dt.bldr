@@ -26,7 +26,7 @@ The following options can be used when running dt.bldr.sh:
   -s         Stop if versions are the same
   -b         Build darktable
   -i         Install darktable
-  -m [file]  Merge one branch from a different remote repository
+  -m file    Merge one branch from a different remote repository
   -t         Download the integration tests
   -h/-?      Show help
 
@@ -81,12 +81,9 @@ behaviour.
 
 I decided to make it possible to merge a branch from a forked darktable
 repository into the current master. This is done using the -m options and a
-file called dt.ext.branch.cfg (must be located in ~/.local/cfg). This file
-holds the URL of the forked repository and the name of the branch (the example
-directory has a sample).
-
-There's the possibility to provide a file when using the -m option. This file
-will then be used instead of the default (~/cfg/dt.ext.branch.cfg).
+file that looks like dt.ext.branch.cfg. This file holds the URL of the forked
+repository and the name of the branch to be merged (the example directory has a
+sample).
 
 **Beware:** This merge option (-m) is experimental. Merging might not work as
 intended depending on the branch that is being merged. Especially "old" PRs

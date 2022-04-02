@@ -9,7 +9,8 @@
 #              : -b          Build darktable
 #              : -i          Install darktable
 #              : -C file     Use file as configuration
-#              : -m [file]   Merge forked branch into darktable
+#              : -m          Merge branch using fixed dt.ext.branch.cfg
+#              : -M file     Merge branch specifying input file
 #              : -t          Download the integration tests
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
@@ -70,9 +71,6 @@ defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="${usrBaseDir}/cfg/dt.bldr.cfg"
 cfgChkr="${binDir}/dt.cfg.sh -c"
 usrMergeFile="${usrBaseDir}/cfg/dt.ext.branch.cfg"
-
-extCfgFile="noot"    # <---- TESTING
-
 # colours
 clrRST=$(tput sgr0)    # reset
 clrRED=$(tput setaf 1) # red
@@ -123,10 +121,8 @@ function _parseCfgs ()
   ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
               "Content not valid.  Run dt.cfg.sh -c for details"
   # parse default system wide configuration file
-  # shellcheck source=/opt/dt.bldr/cfg/dt.bldr.cfg
   source "${defCfgFile}"
   # parse user defined configuration file
-  # shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg
   [ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
 }
 # ------------------------------------------------------------------ #
@@ -199,15 +195,15 @@ function _gitDtMerge ()
   cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
   # set up remote, forked repo
-  git remote add "${uniFut}" "${FRK_GIT}" || _errHndlr "_gitDtMerge" "Unable to add remote"
-  git remote update > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
+  git remote add "${uniFut}" "${FRK_GIT}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to add remote"
+  git remote update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
   # create, checkout and merge wanted (remote) branch
-  git branch "${FRK_BRNCH}" || _errHndlr "_gitDtMerge" "Unable to switch branch"
-  git checkout "${FRK_BRNCH}" > /dev/null 2>&1
-  git merge -m "merging" --allow-unrelated-histories "${uniFut}/${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
+  git branch "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git checkout >> "${bldLog}" 2>&1 "${FRK_BRNCH}" > /dev/null 2>&1
+  git merge -m "merging" --allow-unrelated-histories "${uniFut}/${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
   # merge into darktable master
-  git checkout master > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
-  git merge -m "future" "${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
+  git checkout master >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git merge -m "future" "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
   printf "\\r  merge   - merging fork %sOK%s\\n" "${clrGRN}" "${clrRST}"
 }
 
@@ -372,7 +368,7 @@ function _getDtGitVrsn ()
 # ------------------------------------------------------------------ #
 function _shwPrgrs ()
 {
-  spnPrts="-\|/" ; cntr="0" ; ccld="0"
+  spnPrts="-\\|/" ; cntr="0" ; ccld="0"
   while ${instToken} kill -0 $prcssPid 2>/dev/null
   do
     cntr=$(( (cntr+1) %4 ))
@@ -439,7 +435,8 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   : -i        Install darktable to ${CMAKE_PREFIX_PATH}
   : -C file   Use file as configuration
 
-  : -m [file] Merge an external branch
+  : -m        Merge branch using fixed dt.ext.branch.cfg
+  : -M file   Merge branch specifying input file
   : -t        Download the integration tests
 
   : -h/-?     Show this output
@@ -535,8 +532,8 @@ strRunTime=$(date +%s)
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 [ "$EUID" -eq "0" ] && _errHndlr "Main" "Do not run script as root user."
 
-scrptLog="${logDir}/dt.script."$UID".$(date '+%Y.%m.%d.%H%M').log"
-bldLog="${logDir}/dt.build."$UID".$(date '+%Y.%m.%d.%H%M').log"
+scrptLog="${logDir}/dt.script.$UID.$(date '+%Y.%m.%d.%H%M').log"
+bldLog="${logDir}/dt.build.$UID.$(date '+%Y.%m.%d.%H%M').log"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
 # -------------------------------------------------------------------------- #
@@ -547,10 +544,10 @@ echo " - options processing" >> "${scrptLog}"
 if [ "$#" -eq "0" ]
 then
 
-  # parse configuration file 
+  # No, parse configuration file(s)
   _parseCfgs
 
-  # set default options from cfg
+  # set default options from configuration file(s)
   echo " - no command line options are found" >> "${scrptLog}"
   optClone="${dfltClone}"
   optPull="${dfltPull}"
@@ -563,7 +560,7 @@ else
 
   echo " - options are found" >> "${scrptLog}"
   # process options
-  while getopts ":cpsbiC:m:th" OPTION
+  while getopts ":cpsbiC:mM:th" OPTION
   do
     case "${OPTION}" in
       c) optClone="1" ;;
@@ -573,22 +570,23 @@ else
       i) optInstall="1" ;;
       C) usrCfgFile=$OPTARG
          optBuild="1" ;;
-      m) optMerge="1"
-         usrMergeFile=$OPTARG ;;
+      m) optMerge="1" ;;
+      M) usrMergeFile=$OPTARG
+         optMerge="1" ;;
       t) optTest="1" ;;
       h) optHelp="1" ;;
-     \?) optHelp="1" ;;
+      ?) optHelp="1" ;;
     esac
   done
 fi
 
 # -------------------------------------------------------------------------- #
-# parse configuration file
+# parse configuration file(s)
 
 _parseCfgs
 
 # -------------------------------------------------------------------------- #
-# set extra variables based on configurations file
+# set variables based on configurations file
 # ------------------------------------------------------------------ #
 # sudo is needed when installing dt in: /usr, /opt or /bin
 [[ ${CMAKE_PREFIX_PATH} == /opt/* || \
