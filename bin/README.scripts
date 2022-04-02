@@ -90,9 +90,10 @@ There's is a hidden option you can set to make merging multiple branches
 possible: Look for *set preferred merge method* in dt.bldr.sh and set optClone
 and optPull to your preferred method.
 
-If the -m options is used a clone is being forced (-c is used no matter the
-configuration setting). So there is no need to set -c (or -p) when using -m.
-This is also the case when using the hidden option.
+If the -m options is used a clone is being forced. -c is used no matter the
+configuration setting. So there is no need to set -c (or -p) when using -m.
+When the hidden option is set a pull is being forced and this also means that
+setting -c or -p on the command line will be ignored when using -m.
 
 When multiple branches need to be integrated you need to merge these one at the
 time at the moment. There's no need to build and install for every external
@@ -100,7 +101,7 @@ branch, though. Use dt.bldr.sh -m for each branche untill all are merged and
 then run dt.bldr.sh -bi.
 
 To get rid of all the merged branches just run dt.bldr.sh -c, which will force
-a fresh clone.
+a fresh darktable clone.
 
 The -t option takes care of the integration tests that come with darktable. The
 main reason for this script is to be able to build an install one or more
