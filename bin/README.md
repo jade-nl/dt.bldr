@@ -1,4 +1,3 @@
----
 
 # Information about the scripts
 
@@ -24,15 +23,16 @@ option in the config file that creates verbose logging if need be.
 The following options can be used when running dt.bldr.sh:
 
 
-*  -c         Clone files from the darktable git repository
-*  -p         Pull updates from the darktable git repository
-*  -C file    Use file as configuration
-*  -s         Stop if versions are the same
-*  -b         Build darktable
-*  -i         Install darktable
-*  -m file    Merge one branch from a different remote repository
-*  -t         Download the integration tests
-*  -h/-?      Show help
+*  **-c**      Clone files from the darktable git repository
+*  **-p**      Pull updates from the darktable git repository
+*  **-C file** Use file as configuration
+*  **-s**      Stop if versions are the same
+*  **-b**      Build darktable
+*  **-i**      Install darktable
+*  **-m**      Merge one externalbranch using default merge configuration file
+*  **-M file** Merge one external branch using specified configuration file
+*  **-t**      Download the integration tests
+*  **-h/-?**   Show help
 
 If no options are given when running the script, the defaults that are in the
 global configuration file are being used.
@@ -112,10 +112,10 @@ are merged and then run *dt.bldr.sh -bi* to build and install.
 
 Safest way to integrate external branches:
 
-- dt.bldr.sh -m **or** dt.bldr.sh -M /path/to/merge.file.1.cfg
-- dt.bldr.sh -pM /path/to/merge.file.2.cfg
-- dt.bldr.sh -pM /path/to/merge.file.3.cfg
-- dt.bldr.sh -bi
+- **dt.bldr.sh -m** or **dt.bldr.sh -M /path/to/merge.file.1.cfg**
+- **dt.bldr.sh -pM /path/to/merge.file.2.cfg**
+- **dt.bldr.sh -pM /path/to/merge.file.3.cfg**
+- **dt.bldr.sh -bi**
 
 To get rid of all the merged branches just run *dt.bldr.sh -c*, which will force
 a fresh darktable clone.
@@ -171,5 +171,3 @@ be found in /opt/dt.bldr/cfg and, if present, overlay the local copy. So even
 if you use a local configuration file that has a limited amount of entries the
 complete set of options is used/shown.
 
-## -------------------------------------------------------------------------- #
-## End
