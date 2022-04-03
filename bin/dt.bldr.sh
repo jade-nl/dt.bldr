@@ -701,18 +701,16 @@ then
     # parse file
     source "${usrMergeFile}"
 
-    # set preferred merge method
-    # - optClone=1 / optPull=0 is safest, but only one PR can be merged
-    # - optClone=0 / optPull=1 makes merging multiple PRs possible (one at
-    #   the time)
-    optClone="1"
-    optPull="0"
-    # do not stop if versions are the same (do not change this one)
+    # check/set sane fetch method for darktable origin
+    # if only -m or -M file are given, set optClone to 1
+    [ "${optClone}" = "0" ] && [ "${optPull}" = "0" ] && optClone="1"
+
+    # force optStop to be off, initial versions are likely to be the same
     optStop="0"
+
   else
   # oops
-  echo "something went wrong."
-  exit 2
+   _errHndlr "Parsing merge configuration" "Cannot parse ${usrMergeFile}."
   fi
 fi
 
