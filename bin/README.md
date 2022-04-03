@@ -1,6 +1,6 @@
-# -------------------------------------------------------------------------- #
-# Information about the scripts
-# -------------------------------------------------------------------------- #
+---
+## Information about the scripts
+---
 # dt.bldr.sh - the main script
 
 This script is what this project is all about and was created to make fetching,
@@ -126,7 +126,7 @@ The integration tests are rather large and are not being downloaded by default.
 There's a configuration option that can be set in dt.bldr.cfg to change this
 behaviour. 
 
-# -------------------------------------------------------------------------- #
+---
 # dt.cfg.sh - the configuration checker
 
 It is advised to run this script after you changed ~/.local/cfg/dt.bldr.cfg
@@ -143,13 +143,13 @@ Two options determine the way this script runs:
 
 If dt.cfg.sh is called without any option it defaults to *-c*
 
-# dt.cfg.sh -c  (or dt.cfg.sh)
+i**dt.cfg.sh -c** or **dt.cfg.sh**
 
 Do a rough check of the combined configuration files that are being used.
 There's no real intelligence, but it will point out common problems and
 mistakes.
 
-# dt.cfg.sh -s
+**dt.cfg.sh -s**
 
 This will print all the options that are being used as well as some extra
 information relevant when building darktable.
