@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------- #
 # ~/.local/cfg/dt.bldr.cfg
 # ---------------------------------------------------------------------------- #
-# Example configuration file
+# Example configuration file (v2.0.0)
 # - all values are taken from the fall-back cfg file except for the
 #   default run options.
 # ---------------------------------------------------------------------------- #
