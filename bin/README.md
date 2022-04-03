@@ -26,7 +26,7 @@ The following options can be used when running dt.bldr.sh:
 *  **-s**      Stop if versions are the same
 *  **-b**      Build darktable
 *  **-i**      Install darktable
-*  **-m**      Merge one externalbranch using default merge configuration file
+*  **-m**      Merge one external branch using default merge configuration file
 *  **-M file** Merge one external branch using specified configuration file
 *  **-t**      Download the integration tests
 *  **-h**      Show help
@@ -90,22 +90,22 @@ repository and the name of the branch to be merged (the example directory has a
 sample).
 
 **Beware:** This merge option (*-mi/-M file*) is experimental. Merging might not
-work as intended depending on the branch that is being merged and the choosen
+work as intended depending on the branch that is being merged and the chosen
 method. Especially "old" PRs might introduce merging issues, the script is not
 intelligent enough to solve this.
 
-The safest way to merge an external branche is to clone darktable first instead
+The safest way to merge an external branch is to clone darktable first instead
 of pulling. If the *-m* or *-M file* option is used and no other options are
 given cloning is forced. *-c* and *-p* can be used in conjunction with *-m* or
 *-M file*.
 
-Clonig darktable has become more and more time consuming, so trying to pull and
-merge first is an option. If this fails cloning has to be done, even if it is
-decided that the external branch isn't worth it!
+Cloning darktable has become more and more time consuming, so trying to pull
+and merge first is an option. If this fails cloning has to be done, even if it
+is decided that the external branch isn't worth it!
 
 When multiple branches need to be integrated you need to merge these one at the
 time at the moment. There's no need to build and install for every external
-branch, though. Use dt.bldr.sh *-pM file* for each additional branch untill all
+branch, though. Use dt.bldr.sh *-pM file* for each additional branch until all
 are merged and then run *dt.bldr.sh -bi* to build and install.
 
 Safest way to integrate external branches:
