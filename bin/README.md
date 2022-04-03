@@ -1,10 +1,10 @@
 ---
 
-$$ Information about the scripts
+# Information about the scripts
 
 ---
 
-$$ dt.bldr.sh - the main script
+## dt.bldr.sh - the main script
 
 This script is what this project is all about and was created to make fetching,
 building and installing darktable easier and more flexible.
@@ -130,7 +130,7 @@ There's a configuration option that can be set in dt.bldr.cfg to change this
 behaviour. 
 
 ---
-$$ dt.cfg.sh - the configuration checker
+## dt.cfg.sh - the configuration checker
 
 It is advised to run this script after you changed ~/.local/cfg/dt.bldr.cfg
 
@@ -164,12 +164,12 @@ The extras:
 - if the colour management subsystem of your computer is correctly configured
 - if there is a usable OpenCL environment for darktable to use
 
-$$ General
+## General
 
 This script will always start with the system-wide configuration file that can
 be found in /opt/dt.bldr/cfg and, if present, overlay the local copy. So even
 if you use a local configuration file that has a limited amount of entries the
 complete set of options is used/shown.
 
-$$ -------------------------------------------------------------------------- #
-$$ End
+## -------------------------------------------------------------------------- #
+## End
