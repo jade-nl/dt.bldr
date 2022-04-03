@@ -26,7 +26,6 @@ build and install options. The following can also be specified:
 
 + The way the script connects with GitHub. Currently only 2 ways are
   defined: https:// or git@
-+ The location of the log file(s),
 + The location of the git repository directory,
 + The percentage of cores to use during the build,
 + The default run options (when no options are supplied at the command
