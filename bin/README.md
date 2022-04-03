@@ -144,7 +144,7 @@ Two options determine the way this script runs:
 
 If dt.cfg.sh is called without any option it defaults to *-c*
 
-i**dt.cfg.sh -c** or **dt.cfg.sh**
+**dt.cfg.sh -c** or **dt.cfg.sh**
 
 Do a rough check of the combined configuration files that are being used.
 There's no real intelligence, but it will point out common problems and
