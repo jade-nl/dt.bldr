@@ -6,9 +6,9 @@
 # Options      : -c          Clone files from git repository
 #              : -p          Pull update from git repository
 #              : -s          Stop if versions are the same
+#              : -C file     Use file as configuration
 #              : -b          Build darktable
 #              : -i          Install darktable
-#              : -C file     Use file as configuration
 #              : -m          Merge branch using fixed dt.ext.branch.cfg
 #              : -M file     Merge branch specifying input file
 #              : -t          Download the integration tests
@@ -431,9 +431,9 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   : -p        Pull updates from repository to ${dtGitDir}
   : -s        Stop processing if installed version and cloned
                or pulled versions are the same.
+  : -C file   Use file as configuration
   : -b        Build darktable (see General below)
   : -i        Install darktable to ${CMAKE_PREFIX_PATH}
-  : -C file   Use file as configuration
 
   : -m        Merge branch using fixed dt.ext.branch.cfg
   : -M file   Merge branch specifying input file
