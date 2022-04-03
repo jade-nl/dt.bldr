@@ -25,6 +25,7 @@
 #              : nov 14 2020 Added set compiler option                 1.7.0
 #              : nov 15 2020 Added latest option to check              1.7.1
 #              : mar 16 2022 Removed deprecated github option          1.7.2
+#              : apr 03 2022  CFG files can be given on command line   2.0.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -36,7 +37,7 @@ umask 026
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # script core
-scriptVersion="1.7.2"
+scriptVersion="2.0.0"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -116,13 +117,6 @@ function _doCheck ()
   # ---------------------------------------------------------------- #
   # directories
   echo " -------------------------------------------------------------- directories --- "
-  for ITEM in logDir
-  do
-    STATUS="${clrGRN}OK${clrRST}"
-    eval [ ! -d "${optsDRS[$ITEM]}" ] && \
-      { STATUS="${clrRED}ERROR${clrRST}" ; exitSTTS="245" ; }
-    printf "  %-28s%-18s%s\\n" "${ITEM}" "${STATUS}" "${optsDRS[$ITEM]}"
-  done
 
   # cmake install path options
   echo " ------------------------------------------------------------ cmake options --- "

@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------- #
 # ~/.local/cfg/dt.bldr.cfg
 # ---------------------------------------------------------------------------- #
-# Example configuration file
+# Example configuration file (v2.0.0)
 # - release       : latest development version
 # - source        : git, using http to connect to github 
 # - build options : defaults as used/set in ../git/darktable/DefineOptions.cmake
@@ -17,9 +17,6 @@ gitSRC="https://github.com/darktable-org/darktable.git"
 # -------------------------------------------------------------------------- #
 # git source base directory
 baseGitSrcDir="$HOME/.local/git"
-# ----------------------------------------------------------------------- #
-# directory to store logs
-logDir="$HOME/.local/log"
 # -------------------------------------------------------------------------- #
 # compiler to use
 # -------------------------------------------------------------------------- #

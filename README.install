@@ -11,11 +11,12 @@ simple installer that is supplied.
 If you want to do this by hand do the following as root or by using sudo from
 the location you cloned dt.bldr:
 
-- mkdir -pm 755 /opt/dt.bldr/{bin,cfg}
+- mkdir -pm 755 /opt/dt.bldr/{bin,cfg,log}
 - cp bin/*.sh /opt/dt.bldr/bin
 - chmod 755 /opt/dt.bldr/bin/*sh
 - cp cfg/dt.bldr.cfg /opt/dt.bldr/cfg/
 - chmod 444 /opt/dt.bldr/cfg/cfg/dt.bldr.cfg 
+- chmod 777 /opt/dt.bldr/log
 
 # -------------------------------------------------------- #
 # using the script
@@ -28,9 +29,12 @@ using sudo it can be run as follows:
 The installer script will, verbosely, do the following:
 
 - Remove, forcefully, the current content of /opt/dt.bldr,
+  If it notices that there are log files in /opt/dt.bldr/log it
+  will ask for confirmation to delete them.
 - Create /opt/dt.bldr/bin and copy both scripts to that location,
 - Create /opt/dt.bldr/cfg and copy the system-wide configuration file 
   to that location.
+- Create /opt/dt.bldr/log
 - Set the correct permissions for the created directories and copied files.
 
 # -------------------------------------------------------------------------- #

@@ -2,7 +2,8 @@
 # -------------------------------------------------------------------------- #
 # dt.bldr installer  
 # -------------------------------------------------------------------------- #
-# run as follows: sudo sh install.sh 
+# run as follows:
+#   sudo sh install.sh 
 # -------------------------------------------------------------------------- #
 #set -xv
 set -e
@@ -11,6 +12,20 @@ clear
 # -------------------------------------------------------------------------- #
 # Forcefully remove previously installed directories and files
 # ------------------------------------------------------------------ #
+echo ""
+if [ -d "/opt/dt.bldr/log" ]
+then
+  if [ -n "$(ls -A /opt/dt.bldr/log/ 2>/dev/null)" ]
+  then
+    echo "  !! /opt/dt.bldr/log contains log files !!"
+    echo ""
+    read -p "These will be deleted: Press Y to continue " REPLY
+    if [ "$REPLY" != "Y" ]
+    then
+      exit 128
+    fi
+  fi
+fi
 echo ""
 echo " - - - - -> removing previous version:"
 rm -r -f -v /opt/dt.bldr 2>/dev/null
@@ -22,6 +37,7 @@ echo " - - - - -> Creating directories:"
 mkdir -m 755 -v /opt/dt.bldr
 mkdir -m 755 -v /opt/dt.bldr/bin
 mkdir -m 755 -v /opt/dt.bldr/cfg
+mkdir -m 777 -v /opt/dt.bldr/log
 # -------------------------------------------------------------------------- #
 # Copy files
 # ------------------------------------------------------------------ #

@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------- #
 # ~/.local/cfg/dt.bldr.cfg
 # ---------------------------------------------------------------------------- #
-# Example configuration file
+# Example configuration file (v2.0.0)
 # - release       : latest stable version
 # - source        : local, using tarball
 # - build options : defaults except for CMAKE_BUILD_TYPE (-> Release)
@@ -14,7 +14,8 @@
 # -------------------------------------------------------------------------- #
 # - default source to use: git or local
 useSRC="local"
-lclSRC="darktable-3.0.0.tar.xz"
+#lclSRC="darktable-3.8.0.tar.xz"
+lclSRC="darktable-3.8.1.tar.xz"
 # -------------------------------------------------------------------------- #
 # directories
 # -------------------------------------------------------------------------- #

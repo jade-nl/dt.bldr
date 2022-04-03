@@ -6,9 +6,11 @@
 # Options      : -c          Clone files from git repository
 #              : -p          Pull update from git repository
 #              : -s          Stop if versions are the same
+#              : -C file     Use file as configuration
 #              : -b          Build darktable
 #              : -i          Install darktable
-#              : -m          Merge forked branch into darktable
+#              : -m          Merge branch using fixed dt.ext.branch.cfg
+#              : -M file     Merge branch specifying input file
 #              : -t          Download the integration tests
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
@@ -40,6 +42,7 @@
 #              : nov 16 2021  Removed obsolete CMake option            1.7.3
 #              : mar 16 2022  Removed obsolete github option           1.7.4
 #              : apr 01 2022  Made merging more flexible               1.7.5
+#              : apr 03 2022  CFG files can be given on command line   2.0.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -53,14 +56,14 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="1.7.5"
+scriptVersion="2.0.0"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
 binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
 usrBaseDir="$HOME/.local"
-logDir=""
+logDir="/opt/dt.bldr/log"
 baseGitSrcDir=""
 baseLclSrcDir=""
 # script files
@@ -76,6 +79,8 @@ clrBLU=$(tput setaf 4) # blue
 # input options
 optBuild="0"
 optClone="0"
+optHelp="0"
+optHelp="0"
 optInstall="0"
 optMerge="0"
 optPull="0"
@@ -105,6 +110,21 @@ lclSRC=""
 uniFut="$(date "+%N")"
 # -------------------------------------------------------------------------- #
 # --- Functions ---
+# ------------------------------------------------------------------ #
+# Function : Parse configuration files
+# Purpose  : Set default options to use based on default and personal
+#            configuration file(s)
+# ------------------------------------------------------------------ #
+function _parseCfgs ()
+{
+  # check config file(s)
+  ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
+              "Content not valid.  Run dt.cfg.sh -c for details"
+  # parse default system wide configuration file
+  source "${defCfgFile}"
+  # parse user defined configuration file
+  [ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
+}
 # ------------------------------------------------------------------ #
 # Function : Clone darktable
 # Purpose  : 1) Clone darktable remote repository into local directory
@@ -175,15 +195,15 @@ function _gitDtMerge ()
   cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
   # set up remote, forked repo
-  git remote add "${uniFut}" "${FRK_GIT}" || _errHndlr "_gitDtMerge" "Unable to add remote"
-  git remote update > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
+  git remote add "${uniFut}" "${FRK_GIT}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to add remote"
+  git remote update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
   # create, checkout and merge wanted (remote) branch
-  git branch "${FRK_BRNCH}" || _errHndlr "_gitDtMerge" "Unable to switch branch"
-  git checkout "${FRK_BRNCH}" > /dev/null 2>&1
-  git merge -m "merging" --allow-unrelated-histories "${uniFut}/${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
+  git branch "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git checkout >> "${bldLog}" 2>&1 "${FRK_BRNCH}" > /dev/null 2>&1
+  git merge -m "merging" --allow-unrelated-histories "${uniFut}/${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
   # merge into darktable master
-  git checkout master > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
-  git merge -m "future" "${FRK_BRNCH}" > /dev/null 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
+  git checkout master >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
+  git merge -m "future" "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
   printf "\\r  merge   - merging fork %sOK%s\\n" "${clrGRN}" "${clrRST}"
 }
 
@@ -348,7 +368,7 @@ function _getDtGitVrsn ()
 # ------------------------------------------------------------------ #
 function _shwPrgrs ()
 {
-  spnPrts="-\|/" ; cntr="0" ; ccld="0"
+  spnPrts="-\\|/" ; cntr="0" ; ccld="0"
   while ${instToken} kill -0 $prcssPid 2>/dev/null
   do
     cntr=$(( (cntr+1) %4 ))
@@ -407,17 +427,19 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
  Syntax    dt.bldr.sh <options>
  ------------------------------------------------------------------------------
  Options
-  : -c     Clone files from repository to ${baseSrcDir}
-  : -p     Pull updates from repository to ${dtGitDir}
-  : -s     Stop processing if installed version and cloned
-            or pulled versions are the same.
-  : -b     Build darktable (see General below)
-  : -i     Install darktable to ${CMAKE_PREFIX_PATH}
+  : -c        Clone files from repository to ${baseSrcDir}
+  : -p        Pull updates from repository to ${dtGitDir}
+  : -s        Stop processing if installed version and cloned
+               or pulled versions are the same.
+  : -C file   Use file as configuration
+  : -b        Build darktable (see General below)
+  : -i        Install darktable to ${CMAKE_PREFIX_PATH}
 
-  : -m     Merge an external branch
-  : -t     Download the integration tests
+  : -m        Merge branch using fixed dt.ext.branch.cfg
+  : -M file   Merge branch specifying input file
+  : -t        Download the integration tests
 
-  : -h/-?  Show this output
+  : -h/-?     Show this output
 
   Starting without any options set will trigger the default run options.
  ------------------------------------------------------------------------------
@@ -425,7 +447,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     Script base directory ....... ${scriptDir} 
     Default Cfg file ............ ${defCfgFile}
     USer Cfg file ............... ${usrCfgFile}
-    Script log file ............. ${logDir}
+    Script/Build log file ....... ${logDir}
 
   - Source
     Source used ................. ${useSRC}
@@ -510,26 +532,62 @@ strRunTime=$(date +%s)
 echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
 [ "$EUID" -eq "0" ] && _errHndlr "Main" "Do not run script as root user."
 
-# -------------------------------------------------------------------------- #
-# parse configuration file
-# ------------------------------------------------------------------ #
-# check config file(s)
-${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
-            "Content not valid.  Run dt.cfg.sh -c for details"
-# parse default system wide configuration file
-# shellcheck source=/opt/dt.bldr/cfg/dt.bldr.cfg
-source "${defCfgFile}"
-# parse user defined configuration file
-# shellcheck source=/home/jade/.local/cfg/dt.bldr.cfg
-[ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
-
-# -------------------------------------------------------------------------- #
-# set extra variables based on configurations file
-# ------------------------------------------------------------------ #
-scrptLog="${logDir}/dt.script.$(date '+%Y.%m.%d.%H%M').log"
-bldLog="${logDir}/dt.build.$(date '+%Y.%m.%d.%H%M').log"
+scrptLog="${logDir}/dt.script.$UID.$(date '+%Y.%m.%d.%H%M').log"
+bldLog="${logDir}/dt.build.$UID.$(date '+%Y.%m.%d.%H%M').log"
 echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 
+# -------------------------------------------------------------------------- #
+# process options
+# ------------------------------------------------------------------ #
+echo " - options processing" >> "${scrptLog}"
+# are any options given
+if [ "$#" -eq "0" ]
+then
+
+  # No, parse configuration file(s)
+  _parseCfgs
+
+  # set default options from configuration file(s)
+  echo " - no command line options are found" >> "${scrptLog}"
+  optClone="${dfltClone}"
+  optPull="${dfltPull}"
+  optStop="${dfltStop}"
+  optBuild="${dfltBuild}"
+  optInstall="${dfltInstall}"
+  optTest="${dfltTest}"
+
+else
+
+  echo " - options are found" >> "${scrptLog}"
+  # process options
+  while getopts ":cpsbiC:mM:th" OPTION
+  do
+    case "${OPTION}" in
+      c) optClone="1" ;;
+      p) optPull="1" ;;
+      s) optStop="1" ;;
+      b) optBuild="1" ;;
+      i) optInstall="1" ;;
+      C) usrCfgFile=$OPTARG
+         optBuild="1" ;;
+      m) optMerge="1" ;;
+      M) usrMergeFile=$OPTARG
+         optMerge="1" ;;
+      t) optTest="1" ;;
+      h) optHelp="1" ;;
+      ?) optHelp="1" ;;
+    esac
+  done
+fi
+
+# -------------------------------------------------------------------------- #
+# parse configuration file(s)
+
+_parseCfgs
+
+# -------------------------------------------------------------------------- #
+# set variables based on configurations file
+# ------------------------------------------------------------------ #
 # sudo is needed when installing dt in: /usr, /opt or /bin
 [[ ${CMAKE_PREFIX_PATH} == /opt/* || \
    ${CMAKE_PREFIX_PATH} == /usr/* || \
@@ -577,40 +635,6 @@ makeOpts="-j ${nmbrCores}"
   [ -x "${CMAKE_PREFIX_PATH}/bin/darktable" ] && \
     curVrsn="$("${CMAKE_PREFIX_PATH}/bin/darktable" --version | \
     sed 's/[~+]/-/g' | awk 'NR==1 { print $4 }')"
-
-# -------------------------------------------------------------------------- #
-# process options
-# ------------------------------------------------------------------ #
-echo " - options processing" >> "${scrptLog}"
-# are any options given
-if [ "$#" -eq "0" ]
-then
-  echo " - no options are found" >> "${scrptLog}"
-  # use default from cfg
-  optClone="${dfltClone}"
-  optPull="${dfltPull}"
-  optStop="${dfltStop}"
-  optBuild="${dfltBuild}"
-  optInstall="${dfltInstall}"
-  optTest="${dfltTest}"
-else
-  echo " - options are found" >> "${scrptLog}"
-  # process options
-  while getopts ":cpsmtbih" OPTION
-  do
-    case "${OPTION}" in
-      c) optClone="1" ;;
-      p) optPull="1" ;;
-      s) optStop="1" ;;
-      b) optBuild="1" ;;
-      i) optInstall="1" ;;
-      m) optMerge="1" ;;
-      t) optTest="1" ;;
-      h) _shwHelp ;;
-     \?) _shwHelp ;;
-    esac
-  done
-fi
 
 # -------------------------------------------------------------------------- #
 # set env for remote (git) or local (tarball) source
@@ -671,25 +695,22 @@ fi
 # load cfg file and set option when optMerge is requested
 if [[ "${optMerge}" -eq "1" ]]
 then
-  # check dt.ext.branch.cfg
+  # check dt.ext.branch.cfg/manually given cfg
   if test -r "${usrMergeFile}" -a -f "${usrMergeFile}"
   then
     # parse file
-    # shellcheck source=/home/jade/.local/cfg/dt.ext.branch.cfg
     source "${usrMergeFile}"
 
-    # set preferred merge method
-    # - optClone=1 / optPull=0 is safest, but only one PR can be merged
-    # - optClone=0 / optPull=1 makes merging multiple PRs possible (one at
-    #   the time)
-    optClone="1"
-    optPull="0"
-    # do not stop if versions are the same (do not change this one)
+    # check/set sane fetch method for darktable origin
+    # if only -m or -M file are given, set optClone to 1
+    [ "${optClone}" = "0" ] && [ "${optPull}" = "0" ] && optClone="1"
+
+    # force optStop to be off, initial versions are likely to be the same
     optStop="0"
+
   else
   # oops
-  echo "something went wrong."
-  exit 2
+   _errHndlr "Parsing merge configuration" "Cannot parse ${usrMergeFile}."
   fi
 fi
 
@@ -700,6 +721,7 @@ fi
 [ "${optMerge}"   = "1" ] && _gitDtMerge
 [ "${optBuild}"   = "1" ] && _gitDtBuild
 [ "${optInstall}" = "1" ] && _gitDtInstall
+[ "${optHelp}"    = "1" ] && _shwHelp
 
 # -------------------------------------------------------- #
 # show some information
