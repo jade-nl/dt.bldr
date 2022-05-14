@@ -136,7 +136,7 @@ function _gitDtClone ()
   [ -d "${dtGitDir}" ] && find "${dtGitDir}" -mindepth 1 -delete
   # clone dt
   cd ${baseSrcDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseSrcDir} No such directory."
-  git clone "${gitSRC}" >> "${bldLog}" 2>&1 &
+  git clone "${gitSRC}" "${gitDIR}" >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # enter repository
@@ -452,6 +452,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   - Source
     Source used ................. ${useSRC}
     GIT source .................. ${gitSRC}
+    GIT dir ..................... ${gitSRC}
     Local GIT directory ......... ${baseGitSrcDir}
     Tarball ..................... ${lclSRC}
     Local tarball directory ..... ${baseLclSrcDir}
@@ -645,7 +646,7 @@ if [[ "${useSRC}" == "git" ]]
 then
   # set dir names
   baseSrcDir="${baseGitSrcDir}"
-  dtGitDir="${baseSrcDir}/darktable"
+  dtGitDir="${baseSrcDir}/${gitDIR}"
 fi
 # source is local
 if [[ "${useSRC}" == "local" ]]
