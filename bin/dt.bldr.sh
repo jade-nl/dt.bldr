@@ -43,6 +43,7 @@
 #              : mar 16 2022  Removed obsolete github option           1.7.4
 #              : apr 01 2022  Made merging more flexible               1.7.5
 #              : apr 03 2022  CFG files can be given on command line   2.0.0
+#              : apr 08 2022  CFG files can be given on command line   2.0.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -56,7 +57,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.0.0"
+scriptVersion="2.0.1"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
