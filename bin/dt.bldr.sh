@@ -43,7 +43,6 @@
 #              : mar 16 2022  Removed obsolete github option           1.7.4
 #              : apr 01 2022  Made merging more flexible               1.7.5
 #              : apr 03 2022  CFG files can be given on command line   2.0.0
-#              : apr 08 2022  CFG files can be given on command line   2.0.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -57,7 +56,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.0.1"
+scriptVersion="2.0.0"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -137,7 +136,7 @@ function _gitDtClone ()
   [ -d "${dtGitDir}" ] && find "${dtGitDir}" -mindepth 1 -delete
   # clone dt
   cd ${baseSrcDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseSrcDir} No such directory."
-  git clone "${gitSRC}" "${gitDIR}" >> "${bldLog}" 2>&1 &
+  git clone "${gitSRC}" >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # enter repository
@@ -453,7 +452,6 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   - Source
     Source used ................. ${useSRC}
     GIT source .................. ${gitSRC}
-    GIT dir ..................... ${gitSRC}
     Local GIT directory ......... ${baseGitSrcDir}
     Tarball ..................... ${lclSRC}
     Local tarball directory ..... ${baseLclSrcDir}
@@ -647,7 +645,7 @@ if [[ "${useSRC}" == "git" ]]
 then
   # set dir names
   baseSrcDir="${baseGitSrcDir}"
-  dtGitDir="${baseSrcDir}/${gitDIR}"
+  dtGitDir="${baseSrcDir}/darktable"
 fi
 # source is local
 if [[ "${useSRC}" == "local" ]]
