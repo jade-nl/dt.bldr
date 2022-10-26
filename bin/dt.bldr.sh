@@ -45,6 +45,7 @@
 #              : apr 03 2022  CFG files can be given on command line   2.0.0
 #              : oct 26 2022  Include HEIF, ISOBMFF and JXL support    2.1.0
 #              : oct 26 2022  Include ICU, LIBRAW and PORTMIDI support 2.1.1
+#              : oct 26 2022  Fixed a deleted char in help section     2.1.2
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -510,7 +511,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_UNITY ................... ${USE_UNITY}
     USE_WEBP .................... ${USE_WEBP}
     USE_XCF ..................... ${USE_XCF}
-    USE_XMLLINT ................. ${USE_XMLLINT
+    USE_XMLLINT ................. ${USE_XMLLINT}
 
     BUILD_BATTERY_INDICATOR ..... ${BUILD_BATTERY_INDICATOR}
     BUILD_CMSTEST ............... ${BUILD_CMSTEST}
