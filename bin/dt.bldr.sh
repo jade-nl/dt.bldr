@@ -43,6 +43,7 @@
 #              : mar 16 2022  Removed obsolete github option           1.7.4
 #              : apr 01 2022  Made merging more flexible               1.7.5
 #              : apr 03 2022  CFG files can be given on command line   2.0.0
+#              : oct 26 2022  Include HEIF + ISOBMFF + JXL support     2.1.0
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -56,7 +57,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.0.0"
+scriptVersion="2.1.0"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -260,7 +261,10 @@ function _gitDtBuild ()
         -DUSE_GAME="${USE_GAME}" \
         -DUSE_GMIC="${USE_GMIC}" \
         -DUSE_GRAPHICSMAGICK="${USE_GRAPHICSMAGICK}" \
+        -DUSE_HEIF="${USE_HEIF}" \
         -DUSE_IMAGEMAGICK="${USE_IMAGEMAGICK}" \
+        -DUSE_ISOBMFF="${USE_ISOBMFF}" \
+        -DUSE_JXL="${USE_JXL}" \
         -DUSE_KWALLET="${USE_KWALLET}" \
         -DUSE_LENSFUN="${USE_LENSFUN}" \
         -DUSE_LIBSECRET="${USE_LIBSECRET}" \
@@ -481,7 +485,10 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_GAME .................... ${USE_GAME}
     USE_GMIC .................... ${USE_GMIC}
     USE_GRAPHICSMAGICK .......... ${USE_GRAPHICSMAGICK}
+    USE_HEIF .................... ${USE_HEIF}
     USE_IMAGEMAGICK ............. ${USE_IMAGEMAGICK}
+    USE_ISOBMFF ................. ${USE_ISOBMFF}
+    USE_JXL ..................... ${USE_JXL}
     USE_KWALLET ................. ${USE_KWALLET}
     USE_LENSFUN ................. ${USE_LENSFUN}
     USE_LIBSECRET ............... ${USE_LIBSECRET}
