@@ -43,7 +43,8 @@
 #              : mar 16 2022  Removed obsolete github option           1.7.4
 #              : apr 01 2022  Made merging more flexible               1.7.5
 #              : apr 03 2022  CFG files can be given on command line   2.0.0
-#              : oct 26 2022  Include HEIF + ISOBMFF + JXL support     2.1.0
+#              : oct 26 2022  Include HEIF, ISOBMFF and JXL support    2.1.0
+#              : oct 26 2022  Include ICU, LIBRAW and PORTMIDI support 2.1.1
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -253,33 +254,36 @@ function _gitDtBuild ()
         -DCMAKE_INSTALL_MANDIR="${CMAKE_INSTALL_MANDIR}" \
         -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" \
         -DCMAKE_VERBOSE_MAKEFILE:BOOL="${CMAKE_VERBOSE_MAKEFILE}" \
+        -DUSE_AVIF="${USE_AVIF}" \
         -DUSE_CAMERA_SUPPORT="${USE_CAMERA_SUPPORT}" \
         -DUSE_COLORD="${USE_COLORD}" \
-        -DUSE_AVIF="${USE_AVIF}" \
         -DUSE_DARKTABLE_PROFILING="${USE_DARKTABLE_PROFILING}" \
         -DUSE_FLICKR="${USE_FLICKR}" \
         -DUSE_GAME="${USE_GAME}" \
         -DUSE_GMIC="${USE_GMIC}" \
         -DUSE_GRAPHICSMAGICK="${USE_GRAPHICSMAGICK}" \
         -DUSE_HEIF="${USE_HEIF}" \
+        -DUSE_ICU="${USE_ICU}" \
         -DUSE_IMAGEMAGICK="${USE_IMAGEMAGICK}" \
         -DUSE_ISOBMFF="${USE_ISOBMFF}" \
         -DUSE_JXL="${USE_JXL}" \
         -DUSE_KWALLET="${USE_KWALLET}" \
         -DUSE_LENSFUN="${USE_LENSFUN}" \
+        -DUSE_LIBRAW="${USE_LIBRAW}" \
         -DUSE_LIBSECRET="${USE_LIBSECRET}" \
+        -DUSE_LUA="${USE_LUA}" \
         -DUSE_MAP="${USE_MAP}" \
         -DUSE_NLS="${USE_NLS}" \
+        -DUSE_OPENCL="${USE_OPENCL}" \
         -DUSE_OPENEXR="${USE_OPENEXR}" \
         -DUSE_OPENJPEG="${USE_OPENJPEG}" \
         -DUSE_OPENMP="${USE_OPENMP}" \
+        -DUSE_PORTMIDI="${USE_PORTMIDI}" \
         -DUSE_UNITY="${USE_UNITY}" \
         -DUSE_WEBP="${USE_WEBP}" \
         -DUSE_XCF="${USE_XCF}" \
         -DUSE_XMLLINT="${USE_XMLLINT}" \
-        -DUSE_LUA="${USE_LUA}" \
         -DDONT_USE_INTERNAL_LUA="${DONT_USE_INTERNAL_LUA}" \
-        -DUSE_OPENCL="${USE_OPENCL}" \
         -DCUSTOM_CFLAGS="${CUSTOM_CFLAGS}" \
         -DBUILD_BATTERY_INDICATOR="${BUILD_BATTERY_INDICATOR}" \
         -DBUILD_CMSTEST="${BUILD_CMSTEST}" \
@@ -486,12 +490,14 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_GMIC .................... ${USE_GMIC}
     USE_GRAPHICSMAGICK .......... ${USE_GRAPHICSMAGICK}
     USE_HEIF .................... ${USE_HEIF}
+    USE_ICU ..................... ${USE_ICU}
     USE_IMAGEMAGICK ............. ${USE_IMAGEMAGICK}
     USE_ISOBMFF ................. ${USE_ISOBMFF}
     USE_JXL ..................... ${USE_JXL}
     USE_KWALLET ................. ${USE_KWALLET}
     USE_LENSFUN ................. ${USE_LENSFUN}
     USE_LIBSECRET ............... ${USE_LIBSECRET}
+    USE_LIBRAW .................. ${USE_LIBRAW}
     USE_LUA ..................... ${USE_LUA}
     DONT_USE_INTERNAL_LUA ....... ${DONT_USE_INTERNAL_LUA}
     USE_MAP ..................... ${USE_MAP}
@@ -500,10 +506,11 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_OPENEXR ................. ${USE_OPENEXR}
     USE_OPENJPEG ................ ${USE_OPENJPEG}
     USE_OPENMP .................. ${USE_OPENMP}
+    USE_PORTMIDI ................ ${USE_PORTMIDI}
     USE_UNITY ................... ${USE_UNITY}
     USE_WEBP .................... ${USE_WEBP}
     USE_XCF ..................... ${USE_XCF}
-    USE_XMLLINT ................. ${USE_XMLLINT}
+    USE_XMLLINT ................. ${USE_XMLLINT
 
     BUILD_BATTERY_INDICATOR ..... ${BUILD_BATTERY_INDICATOR}
     BUILD_CMSTEST ............... ${BUILD_CMSTEST}
