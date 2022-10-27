@@ -10,34 +10,19 @@ set -e
 umask 022
 clear
 # -------------------------------------------------------------------------- #
-# Forcefully remove previously installed directories and files
+# Remove directories and files, leave logs alone
 # ------------------------------------------------------------------ #
-echo ""
-if [ -d "/opt/dt.bldr/log" ]
-then
-  if [ -n "$(ls -A /opt/dt.bldr/log/ 2>/dev/null)" ]
-  then
-    echo "  !! /opt/dt.bldr/log contains log files !!"
-    echo ""
-    read -p "These will be deleted: Press Y to continue " REPLY
-    if [ "$REPLY" != "Y" ]
-    then
-      exit 128
-    fi
-  fi
-fi
-echo ""
 echo " - - - - -> removing previous version:"
-rm -r -f -v /opt/dt.bldr 2>/dev/null
+rm -r -f -v /opt/dt.bldr/bin 2>/dev/null
+rm -r -f -v /opt/dt.bldr/cfg 2>/dev/null
 # -------------------------------------------------------------------------- #
 # Create directory structure
 # ------------------------------------------------------------------ #
 echo ""
 echo " - - - - -> Creating directories:"
-mkdir -m 755 -v /opt/dt.bldr
-mkdir -m 755 -v /opt/dt.bldr/bin
-mkdir -m 755 -v /opt/dt.bldr/cfg
-mkdir -m 777 -v /opt/dt.bldr/log
+# 2 steps in case bin or cfg already exist
+mkdir -v /opt/dt.bldr/bin ; chmod 755 /opt/dt.bldr/bin
+mkdir -v /opt/dt.bldr/cfg ; chmod 755 /opt/dt.bldr/cfg
 # -------------------------------------------------------------------------- #
 # Copy files
 # ------------------------------------------------------------------ #
@@ -51,8 +36,8 @@ cp -f -v cfg/dt.bldr.cfg /opt/dt.bldr/cfg/
 # ------------------------------------------------------------------ #
 echo ""
 echo " - - - - -> Setting permissions:"
-chmod -v 755 /opt/dt.bldr/bin/dt.*.sh
-chmod -v 750 /opt/dt.bldr/bin/uninstall.sh
+chmod -v 555 /opt/dt.bldr/bin/dt.*.sh
+chmod -v 500 /opt/dt.bldr/bin/uninstall.sh
 chmod -v 444 /opt/dt.bldr/cfg/dt.bldr.cfg
 # -------------------------------------------------------------------------- #
 # Done
