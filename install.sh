@@ -20,9 +20,8 @@ rm -r -f -v /opt/dt.bldr/cfg 2>/dev/null
 # ------------------------------------------------------------------ #
 echo ""
 echo " - - - - -> Creating directories:"
-# 2 steps in case bin or cfg already exist
-mkdir -v /opt/dt.bldr/bin ; chmod 755 /opt/dt.bldr/bin
-mkdir -v /opt/dt.bldr/cfg ; chmod 755 /opt/dt.bldr/cfg
+mkdir -v -m 755 /opt/dt.bldr/bin
+mkdir -v -m 755 /opt/dt.bldr/cfg
 # -------------------------------------------------------------------------- #
 # Copy files
 # ------------------------------------------------------------------ #
