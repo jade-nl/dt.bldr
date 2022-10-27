@@ -59,7 +59,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.0"
+scriptVersion="2.1.2"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
