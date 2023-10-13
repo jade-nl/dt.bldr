@@ -46,6 +46,7 @@
 #              : oct 26 2022  Include HEIF, ISOBMFF and JXL support    2.1.0
 #              : oct 26 2022  Include ICU, LIBRAW and PORTMIDI support 2.1.1
 #              : oct 26 2022  Fixed a deleted char in help section     2.1.2
+#              : oct 13 2023  Fixed versioning change issue            2.1.3
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -59,7 +60,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.2"
+scriptVersion="2.1.3"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -649,7 +650,7 @@ makeOpts="-j ${nmbrCores}"
 [ -e "${CMAKE_PREFIX_PATH}/bin/darktable" ] && \
   [ -x "${CMAKE_PREFIX_PATH}/bin/darktable" ] && \
     curVrsn="$("${CMAKE_PREFIX_PATH}/bin/darktable" --version | \
-    sed 's/[~+]/-/g' | awk 'NR==1 { print $4 }')"
+    sed -e 's/this is //' -e 's/\-dirty//' -e 's/[~+]/-/g' | awk 'NR==1 { print $2 }')"
 
 # -------------------------------------------------------------------------- #
 # set env for remote (git) or local (tarball) source
