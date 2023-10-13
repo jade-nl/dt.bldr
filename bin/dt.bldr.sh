@@ -47,6 +47,7 @@
 #              : oct 26 2022  Include ICU, LIBRAW and PORTMIDI support 2.1.1
 #              : oct 26 2022  Fixed a deleted char in help section     2.1.2
 #              : oct 13 2023  Fixed versioning change issue            2.1.3
+#              : oct 15 2023  Fixed "Ignore extra path.." issue        2.1.4
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -60,7 +61,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.3"
+scriptVersion="2.1.4"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -296,8 +297,8 @@ function _gitDtBuild ()
         -DBUILD_USERMANUAL="${BUILD_USERMANUAL}" \
         -DBINARY_PACKAGE_BUILD="${BINARY_PACKAGE_BUILD}" \
         -DTESTBUILD_OPENCL_PROGRAMS="${TESTBUILD_OPENCL_PROGRAMS}" \
-        CMAKE_C_FLAGS="${CMAKE_FLAGS}" \
-        CMAKE_CXX_FLAGS="${CMAKE_FLAGS}" \
+        -DCMAKE_C_FLAGS="${CMAKE_FLAGS}" \
+        -DCMAKE_CXX_FLAGS="${CMAKE_FLAGS}" \
         -G "${cmakeGen}" \
         .. >> "${bldLog}" 2>&1 &
   prcssPid="$!" ; txtStrng="build   - configuring darktable using cmake"
