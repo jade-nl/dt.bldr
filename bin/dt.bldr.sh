@@ -49,6 +49,7 @@
 #              : oct 13 2023  Fixed versioning change issue            2.1.3
 #              : oct 15 2023  Fixed "Ignore extra path.." issue        2.1.4
 #              : jun 07 2025  Git: added --recursive to submodule      2.1.5
+#              : jun 07 2025  Cleanup now unused options               2.1.6
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -62,7 +63,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.5"
+scriptVersion="2.1.6"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -262,8 +263,6 @@ function _gitDtBuild ()
         -DUSE_CAMERA_SUPPORT="${USE_CAMERA_SUPPORT}" \
         -DUSE_COLORD="${USE_COLORD}" \
         -DUSE_DARKTABLE_PROFILING="${USE_DARKTABLE_PROFILING}" \
-        -DUSE_FLICKR="${USE_FLICKR}" \
-        -DUSE_GAME="${USE_GAME}" \
         -DUSE_GMIC="${USE_GMIC}" \
         -DUSE_GRAPHICSMAGICK="${USE_GRAPHICSMAGICK}" \
         -DUSE_HEIF="${USE_HEIF}" \
@@ -272,12 +271,10 @@ function _gitDtBuild ()
         -DUSE_ISOBMFF="${USE_ISOBMFF}" \
         -DUSE_JXL="${USE_JXL}" \
         -DUSE_KWALLET="${USE_KWALLET}" \
-        -DUSE_LENSFUN="${USE_LENSFUN}" \
         -DUSE_LIBRAW="${USE_LIBRAW}" \
         -DUSE_LIBSECRET="${USE_LIBSECRET}" \
         -DUSE_LUA="${USE_LUA}" \
         -DUSE_MAP="${USE_MAP}" \
-        -DUSE_NLS="${USE_NLS}" \
         -DUSE_OPENCL="${USE_OPENCL}" \
         -DUSE_OPENEXR="${USE_OPENEXR}" \
         -DUSE_OPENJPEG="${USE_OPENJPEG}" \
@@ -289,13 +286,11 @@ function _gitDtBuild ()
         -DUSE_XMLLINT="${USE_XMLLINT}" \
         -DDONT_USE_INTERNAL_LUA="${DONT_USE_INTERNAL_LUA}" \
         -DCUSTOM_CFLAGS="${CUSTOM_CFLAGS}" \
-        -DBUILD_BATTERY_INDICATOR="${BUILD_BATTERY_INDICATOR}" \
         -DBUILD_CMSTEST="${BUILD_CMSTEST}" \
         -DBUILD_CURVE_TOOLS="${BUILD_CURVE_TOOLS}" \
         -DBUILD_NOISE_TOOLS="${BUILD_NOISE_TOOLS}" \
         -DBUILD_PRINT="${BUILD_PRINT}" \
         -DBUILD_RS_IDENTIFY="${BUILD_RS_IDENTIFY}" \
-        -DBUILD_USERMANUAL="${BUILD_USERMANUAL}" \
         -DBINARY_PACKAGE_BUILD="${BINARY_PACKAGE_BUILD}" \
         -DTESTBUILD_OPENCL_PROGRAMS="${TESTBUILD_OPENCL_PROGRAMS}" \
         -DCMAKE_C_FLAGS="${CMAKE_FLAGS}" \
@@ -489,8 +484,6 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_COLORD .................. ${USE_COLORD}
     USE_AVIF .................... ${USE_AVIF}
     USE_DARKTABLE_PROFILING ..... ${USE_DARKTABLE_PROFILING}
-    USE_FLICKR .................. ${USE_FLICKR}
-    USE_GAME .................... ${USE_GAME}
     USE_GMIC .................... ${USE_GMIC}
     USE_GRAPHICSMAGICK .......... ${USE_GRAPHICSMAGICK}
     USE_HEIF .................... ${USE_HEIF}
@@ -499,13 +492,11 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_ISOBMFF ................. ${USE_ISOBMFF}
     USE_JXL ..................... ${USE_JXL}
     USE_KWALLET ................. ${USE_KWALLET}
-    USE_LENSFUN ................. ${USE_LENSFUN}
     USE_LIBSECRET ............... ${USE_LIBSECRET}
     USE_LIBRAW .................. ${USE_LIBRAW}
     USE_LUA ..................... ${USE_LUA}
     DONT_USE_INTERNAL_LUA ....... ${DONT_USE_INTERNAL_LUA}
     USE_MAP ..................... ${USE_MAP}
-    USE_NLS ..................... ${USE_NLS}
     USE_OPENCL .................. ${USE_OPENCL}
     USE_OPENEXR ................. ${USE_OPENEXR}
     USE_OPENJPEG ................ ${USE_OPENJPEG}
@@ -516,13 +507,11 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_XCF ..................... ${USE_XCF}
     USE_XMLLINT ................. ${USE_XMLLINT}
 
-    BUILD_BATTERY_INDICATOR ..... ${BUILD_BATTERY_INDICATOR}
     BUILD_CMSTEST ............... ${BUILD_CMSTEST}
     BUILD_CURVE_TOOLS ........... ${BUILD_CURVE_TOOLS}
     BUILD_NOISE_TOOLS ........... ${BUILD_NOISE_TOOLS}
     BUILD_PRINT ................. ${BUILD_PRINT}
     BUILD_RS_IDENTIFY ........... ${BUILD_RS_IDENTIFY}
-    BUILD_USERMANUAL ............ ${BUILD_USERMANUAL}
 
     BINARY_PACKAGE_BUILD ........ ${BINARY_PACKAGE_BUILD}
     TESTBUILD_OPENCL_PROGRAMS.... ${TESTBUILD_OPENCL_PROGRAMS}

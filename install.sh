@@ -20,8 +20,10 @@ rm -r -f -v /opt/dt.bldr/cfg 2>/dev/null
 # ------------------------------------------------------------------ #
 echo ""
 echo " - - - - -> Creating directories:"
+mkdir -v -m 755 /opt/dt.bldr
 mkdir -v -m 755 /opt/dt.bldr/bin
 mkdir -v -m 755 /opt/dt.bldr/cfg
+mkdir -v -m 777 /opt/dt.bldr/log
 # -------------------------------------------------------------------------- #
 # Copy files
 # ------------------------------------------------------------------ #
