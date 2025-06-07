@@ -48,6 +48,7 @@
 #              : oct 26 2022  Fixed a deleted char in help section     2.1.2
 #              : oct 13 2023  Fixed versioning change issue            2.1.3
 #              : oct 15 2023  Fixed "Ignore extra path.." issue        2.1.4
+#              : jun 07 2025  Git: added --recursive to submodule      2.1.5
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -61,7 +62,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.4"
+scriptVersion="2.1.5"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -160,7 +161,7 @@ function _gitDtClone ()
   printf "\\r          - initializing and updating rawspeed"
   git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule init"
   # update rawspeed
-  git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule update"
+  git submodule update --recursive >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "submodule update"
   printf "\\r          - initializing and updating rawspeed %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
   _getDtGitVrsn
@@ -184,7 +185,7 @@ function _gitDtPull ()
   git submodule init >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule init"
   # update rawspeed
   printf "\\r          - updating rawspeed"
-  git submodule update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
+  git submodule update --recursive >> "${bldLog}" 2>&1 || _errHndlr "_gitDtPull" "submodule update"
   printf "\\r          - updating rawspeed %sOK%s\\n" "${clrGRN}" "${clrRST}"
   # get dt version from repo
   _getDtGitVrsn
@@ -201,7 +202,7 @@ function _gitDtMerge ()
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
   # set up remote, forked repo
   git remote add "${uniFut}" "${FRK_GIT}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to add remote"
-  git remote update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
+  git remote update --recursive >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
   # create, checkout and merge wanted (remote) branch
   git branch "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
   git checkout >> "${bldLog}" 2>&1 "${FRK_BRNCH}" > /dev/null 2>&1
