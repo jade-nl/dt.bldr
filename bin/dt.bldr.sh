@@ -202,7 +202,7 @@ function _gitDtMerge ()
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
   # set up remote, forked repo
   git remote add "${uniFut}" "${FRK_GIT}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to add remote"
-  git remote update --recursive >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
+  git remote update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
   # create, checkout and merge wanted (remote) branch
   git branch "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
   git checkout >> "${bldLog}" 2>&1 "${FRK_BRNCH}" > /dev/null 2>&1
