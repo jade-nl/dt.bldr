@@ -29,17 +29,13 @@ In its simplest form *dt.bldr.sh* will keep things local, everything will be
 placed in ~/.local to be precise. Have a good look at the configuration options
 and the README files before running the main script.
 
-### The scripts
+### The script
 
 The main script, *dt.bldr.sh*, can be used to clone, pull, build and install
 darktable. Each action can be done separately, all at once or in some
 combination. There's also an option to integrate one single outside branch,
 which can be used to check a bug fix that is still part of their personal
 repository.
-
-A companion script, *dt.cfg.sh*, can be used to check the configuration file(s)
-or show some relevant information. This script is also run automatically when
-the main script is used.
 
 After fetching this repo you can use the *installer.sh* script to put all the
 files and directories in their intended place: *sudo sh install.sh* There is
@@ -68,11 +64,6 @@ exception being the *CMAKE_BUILD_TYPE* setting, which is changed from
 
 The other options in the dt.bldr.cfg.system.wide file have settings that should
 be sane/safe. You can change these to your liking.
-
-Run *dt.cfg.sh -h* to check and get an overview of the options.
-
-Run *dt.cfg.sh -s* to see all the options and some darktable/build related
-information.
 
 Do not rely on the default run option the first time you use *dt.bldr.sh*. Use
 the following commands one at the time to make sure all is well:

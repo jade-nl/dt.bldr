@@ -6,7 +6,8 @@
 # Options      : -c          Clone files from git repository
 #              : -p          Pull update from git repository
 #              : -s          Stop if versions are the same
-#              : -C file     Use file as configuration
+#              : -C file     Use file as configuration. This forces the
+#                            -b and -i to be set also.
 #              : -b          Build darktable
 #              : -i          Install darktable
 #              : -m          Merge branch using fixed dt.ext.branch.cfg
@@ -19,7 +20,6 @@
 #              : 3) Install darktable
 # -------------------------------------------------------------------------- #
 # Dependencies : /opt/dt.bldr/cfg/dt.bldr.cfg             (default cfg file)
-#              : /opt/dt.bldr/bin/dt.cfg.sh               (cfg file checker)
 #              : git Version Control Systems
 #              : sudo, for non-local installations
 # -------------------------------------------------------------------------- #
@@ -49,9 +49,13 @@
 #              : oct 13 2023  Fixed versioning change issue            2.1.3
 #              : oct 15 2023  Fixed "Ignore extra path.." issue        2.1.4
 #              : jun 07 2025  Git: added --recursive to submodule      2.1.5
-#              : jun 07 2025  Cleanup now unused options               2.1.6
-#              : jun 09 2025  Added SDL2 and INTERNAL_LIBRAW
-#                                   FORCE_COLORED_OUTPUT               2.1.7
+#              : jun 07 2025  Cleanup now unused cmake options         2.1.6
+#              : jun 09 2025  Added SDL2, INTERNAL_LIBRAW
+#                                   and E_COLORED_OUTPUT               2.1.7
+#              : jun 09 2025  Added PATH check/warning
+#                             Removed dt.cfg.sh references
+#                             Force b and i options with -C option
+#                             Code cleanup                             2.1.8
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -65,11 +69,10 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.7"
+scriptVersion="2.1.8"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
-binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
 usrBaseDir="$HOME/.local"
 logDir="/opt/dt.bldr/log"
@@ -78,7 +81,6 @@ baseLclSrcDir=""
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="${usrBaseDir}/cfg/dt.bldr.cfg"
-cfgChkr="${binDir}/dt.cfg.sh -c"
 usrMergeFile="${usrBaseDir}/cfg/dt.ext.branch.cfg"
 # colours
 clrRST=$(tput sgr0)    # reset
@@ -126,9 +128,6 @@ uniFut="$(date "+%N")"
 # ------------------------------------------------------------------ #
 function _parseCfgs ()
 {
-  # check config file(s)
-  ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
-              "Content not valid.  Run dt.cfg.sh -c for details"
   # parse default system wide configuration file
   source "${defCfgFile}"
   # parse user defined configuration file
@@ -443,7 +442,8 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   : -p        Pull updates from repository to ${dtGitDir}
   : -s        Stop processing if installed version and cloned
                or pulled versions are the same.
-  : -C file   Use file as configuration
+  : -C file   Use file as configuration. This forces the
+  :           -b and -i to be set also.
   : -b        Build darktable (see General below)
   : -i        Install darktable to ${CMAKE_PREFIX_PATH}
 
@@ -583,10 +583,11 @@ else
       s) optStop="1" ;;
       b) optBuild="1" ;;
       i) optInstall="1" ;;
-      C) usrCfgFile=$OPTARG
-         optBuild="1" ;;
+      C) usrCfgFile=${OPTARG}
+         optBuild="1"
+         optInstall="1" ;;
       m) optMerge="1" ;;
-      M) usrMergeFile=$OPTARG
+      M) usrMergeFile=${OPTARG}
          optMerge="1" ;;
       t) optTest="1" ;;
       h) optHelp="1" ;;
@@ -754,6 +755,14 @@ else
   # source version is not installed
   echo "  installed version  ${curVrsn}"
   printf '  %-10s%-9s%-15s\n' "${useSRC}" "version" "${gitVrsn}"
+fi
+
+# -------------------------------------------------------------------------- #
+# is installed darktable part of PATH
+if [[ ! ":${PATH}:" == *":${CMAKE_PREFIX_PATH}/bin:"* ]]
+then
+  echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
+  echo "  ${CMAKE_PREFIX_PATH}/bin is not part of the current PATH environment"
 fi
 
 # -------------------------------------------------------------------------- #

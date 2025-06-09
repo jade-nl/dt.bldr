@@ -128,40 +128,6 @@ There's a configuration option that can be set in dt.bldr.cfg to change this
 behaviour. 
 
 ---
-## dt.cfg.sh - the configuration checker
-
-It is advised to run this script after you changed ~/.local/cfg/dt.bldr.cfg
-
-At the moment this script can do two things:
-
-- Check the configuration files,
-- Show the configuration files and darktable related system information
-
-Two options determine the way this script runs:
-
-  *-c* checks
-  *-s* shows
-
-If dt.cfg.sh is called without any option it defaults to *-c*
-
-**dt.cfg.sh -c** or **dt.cfg.sh**
-
-Do a rough check of the combined configuration files that are being used.
-There's no real intelligence, but it will point out common problems and
-mistakes.
-
-**dt.cfg.sh -s**
-
-This will print all the options that are being used as well as some extra
-information relevant when building darktable.
-
-The extras:
-
-- Version information for: bash, ccache, git, gcc, cmake, make, ninja
-- Kernel release and version
-- if the colour management subsystem of your computer is correctly configured
-- if there is a usable OpenCL environment for darktable to use
-
 ## General
 
 This script will always start with the system-wide configuration file that can
