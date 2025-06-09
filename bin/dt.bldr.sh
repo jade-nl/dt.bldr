@@ -49,12 +49,13 @@
 #              : oct 13 2023  Fixed versioning change issue            2.1.3
 #              : oct 15 2023  Fixed "Ignore extra path.." issue        2.1.4
 #              : jun 07 2025  Git: added --recursive to submodule      2.1.5
-#              : jun 07 2025  Cleanup now unused options               2.1.6
-#              : jun 09 2025  Added SDL2 and INTERNAL_LIBRAW
-#                                   FORCE_COLORED_OUTPUT               2.1.7
+#              : jun 07 2025  Cleanup now unused cmake options         2.1.6
+#              : jun 09 2025  Added SDL2, INTERNAL_LIBRAW
+#                                   and E_COLORED_OUTPUT               2.1.7
 #              : jun 09 2025  Added PATH check/warning
 #                             Removed dt.cfg.sh references
-#                             Force b and i options with -C option     2.1.8
+#                             Force b and i options with -C option
+#                             Code cleanup                             2.1.8
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -72,7 +73,6 @@ scriptVersion="2.1.8"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
-binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
 usrBaseDir="$HOME/.local"
 logDir="/opt/dt.bldr/log"
@@ -583,11 +583,11 @@ else
       s) optStop="1" ;;
       b) optBuild="1" ;;
       i) optInstall="1" ;;
-      C) usrCfgFile=$OPTARG
+      C) usrCfgFile=${OPTARG}
          optBuild="1"
          optInstall="1" ;;
       m) optMerge="1" ;;
-      M) usrMergeFile=$OPTARG
+      M) usrMergeFile=${OPTARG}
          optMerge="1" ;;
       t) optTest="1" ;;
       h) optHelp="1" ;;
@@ -759,7 +759,7 @@ fi
 
 # -------------------------------------------------------------------------- #
 # is installed darktable part of PATH
-if [[ ! ":$PATH:" == *":${CMAKE_PREFIX_PATH}/bin:"* ]]
+if [[ ! ":${PATH}:" == *":${CMAKE_PREFIX_PATH}/bin:"* ]]
 then
   echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
   echo "  ${CMAKE_PREFIX_PATH}/bin is not part of the current PATH environment"
