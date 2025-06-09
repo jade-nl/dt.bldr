@@ -6,7 +6,8 @@
 # Options      : -c          Clone files from git repository
 #              : -p          Pull update from git repository
 #              : -s          Stop if versions are the same
-#              : -C file     Use file as configuration
+#              : -C file     Use file as configuration. This forces the
+#                            -b and -i to be set also.
 #              : -b          Build darktable
 #              : -i          Install darktable
 #              : -m          Merge branch using fixed dt.ext.branch.cfg
@@ -52,7 +53,8 @@
 #              : jun 09 2025  Added SDL2 and INTERNAL_LIBRAW
 #                                   FORCE_COLORED_OUTPUT               2.1.7
 #              : jun 09 2025  Added PATH check/warning
-#                             Removed dt.cfg.sh references             2.1.8
+#                             Removed dt.cfg.sh references
+#                             Force b and i options with -C option     2.1.8
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -440,7 +442,8 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   : -p        Pull updates from repository to ${dtGitDir}
   : -s        Stop processing if installed version and cloned
                or pulled versions are the same.
-  : -C file   Use file as configuration
+  : -C file   Use file as configuration. This forces the
+  :           -b and -i to be set also.
   : -b        Build darktable (see General below)
   : -i        Install darktable to ${CMAKE_PREFIX_PATH}
 
@@ -581,7 +584,8 @@ else
       b) optBuild="1" ;;
       i) optInstall="1" ;;
       C) usrCfgFile=$OPTARG
-         optBuild="1" ;;
+         optBuild="1"
+         optInstall="1" ;;
       m) optMerge="1" ;;
       M) usrMergeFile=$OPTARG
          optMerge="1" ;;
