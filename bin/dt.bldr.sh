@@ -19,7 +19,6 @@
 #              : 3) Install darktable
 # -------------------------------------------------------------------------- #
 # Dependencies : /opt/dt.bldr/cfg/dt.bldr.cfg             (default cfg file)
-#              : /opt/dt.bldr/bin/dt.cfg.sh               (cfg file checker)
 #              : git Version Control Systems
 #              : sudo, for non-local installations
 # -------------------------------------------------------------------------- #
@@ -52,6 +51,8 @@
 #              : jun 07 2025  Cleanup now unused options               2.1.6
 #              : jun 09 2025  Added SDL2 and INTERNAL_LIBRAW
 #                                   FORCE_COLORED_OUTPUT               2.1.7
+#              : jun 09 2025  Added PATH check/warning
+#                             Removed dt.cfg.sh references             2.1.8
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -65,7 +66,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.7"
+scriptVersion="2.1.8"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -78,7 +79,6 @@ baseLclSrcDir=""
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="${usrBaseDir}/cfg/dt.bldr.cfg"
-cfgChkr="${binDir}/dt.cfg.sh -c"
 usrMergeFile="${usrBaseDir}/cfg/dt.ext.branch.cfg"
 # colours
 clrRST=$(tput sgr0)    # reset
@@ -126,9 +126,6 @@ uniFut="$(date "+%N")"
 # ------------------------------------------------------------------ #
 function _parseCfgs ()
 {
-  # check config file(s)
-  ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
-              "Content not valid.  Run dt.cfg.sh -c for details"
   # parse default system wide configuration file
   source "${defCfgFile}"
   # parse user defined configuration file
@@ -754,6 +751,14 @@ else
   # source version is not installed
   echo "  installed version  ${curVrsn}"
   printf '  %-10s%-9s%-15s\n' "${useSRC}" "version" "${gitVrsn}"
+fi
+
+# -------------------------------------------------------------------------- #
+# is installed darktable part of PATH
+if [[ ! ":$PATH:" == *":${CMAKE_PREFIX_PATH}/bin:"* ]]
+then
+  echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
+  echo "  ${CMAKE_PREFIX_PATH}/bin is not part of the current PATH environment"
 fi
 
 # -------------------------------------------------------------------------- #
