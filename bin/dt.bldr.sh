@@ -50,6 +50,7 @@
 #              : oct 15 2023  Fixed "Ignore extra path.." issue        2.1.4
 #              : jun 07 2025  Git: added --recursive to submodule      2.1.5
 #              : jun 07 2025  Cleanup now unused options               2.1.6
+#              : jun 09 2025  Added SDL2 and INTERNAL_LIBRAW           2.1.7
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -63,7 +64,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.6"
+scriptVersion="2.1.7"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -280,11 +281,13 @@ function _gitDtBuild ()
         -DUSE_OPENJPEG="${USE_OPENJPEG}" \
         -DUSE_OPENMP="${USE_OPENMP}" \
         -DUSE_PORTMIDI="${USE_PORTMIDI}" \
+        -DUSE_SDL2="${USE_SDL2}" \
         -DUSE_UNITY="${USE_UNITY}" \
         -DUSE_WEBP="${USE_WEBP}" \
         -DUSE_XCF="${USE_XCF}" \
         -DUSE_XMLLINT="${USE_XMLLINT}" \
         -DDONT_USE_INTERNAL_LUA="${DONT_USE_INTERNAL_LUA}" \
+        -DDONT_USE_INTERNAL_LIBRAW="${DONT_USE_INTERNAL_LIBRAW}" \
         -DCUSTOM_CFLAGS="${CUSTOM_CFLAGS}" \
         -DBUILD_CMSTEST="${BUILD_CMSTEST}" \
         -DBUILD_CURVE_TOOLS="${BUILD_CURVE_TOOLS}" \
@@ -496,12 +499,14 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     USE_LIBRAW .................. ${USE_LIBRAW}
     USE_LUA ..................... ${USE_LUA}
     DONT_USE_INTERNAL_LUA ....... ${DONT_USE_INTERNAL_LUA}
+    DONT_USE_INTERNAL_LIBRAW .... ${DONT_USE_INTERNAL_LIBRAW}
     USE_MAP ..................... ${USE_MAP}
     USE_OPENCL .................. ${USE_OPENCL}
     USE_OPENEXR ................. ${USE_OPENEXR}
     USE_OPENJPEG ................ ${USE_OPENJPEG}
     USE_OPENMP .................. ${USE_OPENMP}
     USE_PORTMIDI ................ ${USE_PORTMIDI}
+    USE_SDL2 .................... ${USE_SDL2}
     USE_UNITY ................... ${USE_UNITY}
     USE_WEBP .................... ${USE_WEBP}
     USE_XCF ..................... ${USE_XCF}
