@@ -50,7 +50,8 @@
 #              : oct 15 2023  Fixed "Ignore extra path.." issue        2.1.4
 #              : jun 07 2025  Git: added --recursive to submodule      2.1.5
 #              : jun 07 2025  Cleanup now unused options               2.1.6
-#              : jun 09 2025  Added SDL2 and INTERNAL_LIBRAW           2.1.7
+#              : jun 09 2025  Added SDL2 and INTERNAL_LIBRAW
+#                                   FORCE_COLORED_OUTPUT               2.1.7
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -289,6 +290,7 @@ function _gitDtBuild ()
         -DDONT_USE_INTERNAL_LUA="${DONT_USE_INTERNAL_LUA}" \
         -DDONT_USE_INTERNAL_LIBRAW="${DONT_USE_INTERNAL_LIBRAW}" \
         -DCUSTOM_CFLAGS="${CUSTOM_CFLAGS}" \
+        -DFORCE_COLORED_OUTPUT="${FORCE_COLORED_OUTPUT}" \
         -DBUILD_CMSTEST="${BUILD_CMSTEST}" \
         -DBUILD_CURVE_TOOLS="${BUILD_CURVE_TOOLS}" \
         -DBUILD_NOISE_TOOLS="${BUILD_NOISE_TOOLS}" \
@@ -517,6 +519,7 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
     BUILD_NOISE_TOOLS ........... ${BUILD_NOISE_TOOLS}
     BUILD_PRINT ................. ${BUILD_PRINT}
     BUILD_RS_IDENTIFY ........... ${BUILD_RS_IDENTIFY}
+    FORCE_COLORED_OUTPUT ........ ${FORCE_COLORED_OUTPUT}
 
     BINARY_PACKAGE_BUILD ........ ${BINARY_PACKAGE_BUILD}
     TESTBUILD_OPENCL_PROGRAMS.... ${TESTBUILD_OPENCL_PROGRAMS}
