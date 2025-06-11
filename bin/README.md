@@ -45,9 +45,9 @@ module.
 
 The *-C file* option can be used to point dt.bldr.sh to a different
 configuration file. When used it will replace the default
-~/.local/cfg/dt.bldr.cfg file. If *-C file* is used *-b* will also be assumed
-and set accordingly (*dt.bldr.sh -C file* and *dt.bldr.sh -bC file*are the
-same).
+~/.local/cfg/dt.bldr.cfg file.
+If *-C file* is used *-b* and *-i* will be set forced (*dt.bldr.sh -C file* and
+*dt.bldr.sh -biC file* do the same thing).
 
 The *-s* option checks if the latest cloned/pulled git version is the same as
 the darktable version that is already installed. If this is the case then the
@@ -71,13 +71,13 @@ starting with either of these three, making it a system wide install :
 
 I strongly discourage using /bin as prefix because the installation process
 installs more then just a few binaries. These would all end up in /bin when
-setting the global prefix to /bin. This can be fine-tuned on the configuration
+setting the global prefix to /bin. This can be fine-tuned in the configuration
 file though.
 
 The -t option takes care of the integration tests that come with darktable. The
 main reason for this script is to be able to build an install one or more
-personalized darktable versions and as such these integration tests are
-out-of-scope.
+personalized darktable versions and/or relatively easy build and test PRs. As
+such these integration tests are out-of-scope.
 
 The integration tests are rather large and are not being downloaded by default.
 There's a configuration option that can be set in dt.bldr.cfg to change this
@@ -90,9 +90,9 @@ repository and the name of the branch to be merged (the example directory has a
 sample).
 
 **Beware:** This merge option (*-mi/-M file*) is experimental. Merging might not
-work as intended depending on the branch that is being merged and the chosen
-method. Especially "old" PRs might introduce merging issues, the script is not
-intelligent enough to solve this.
+work as intended depending on the branch that is being merged, the chosen
+method and/or the state of darktable's master branch. Especially "old" PRs might
+introduce merging issues, the script is not intelligent enough to solve this.
 
 The safest way to merge an external branch is to clone darktable first instead
 of pulling. If the *-m* or *-M file* option is used and no other options are
@@ -118,20 +118,10 @@ Safest way to integrate external branches:
 To get rid of all the merged branches just run *dt.bldr.sh -c*, which will force
 a fresh darktable clone.
 
-The *-t* option takes care of the integration tests that come with darktable.
-The main reason for this script is to be able to build an install one or more
-personalized darktable versions and as such these integration tests are somewhat
-out-of-scope.
-
-The integration tests are rather large and are not being downloaded by default.
-There's a configuration option that can be set in dt.bldr.cfg to change this
-behaviour. 
-
 ---
 ## General
 
-This script will always start with the system-wide configuration file that can
-be found in /opt/dt.bldr/cfg and, if present, overlay the local copy. So even if
+This script will always start with parsing the system-wide configuration file that
+can be found in /opt/dt.bldr/cfg and, if present, overlay the local copy. So even if
 you use a local configuration file that has a limited amount of entries the
 complete set of options is used/shown.
-
