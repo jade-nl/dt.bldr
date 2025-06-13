@@ -11,7 +11,7 @@
 #              : -b          Build darktable
 #              : -i          Install darktable
 #              : -m          Merge branch using fixed dt.ext.branch.cfg
-#              : -M file/url Merge branch specifying input file or URL
+#              : -M file/URL Merge branch specifying input file or URL
 #              : -t          Download the integration tests
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
