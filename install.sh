@@ -13,17 +13,23 @@ clear
 # Remove directories and files, leave logs alone
 # ------------------------------------------------------------------ #
 echo " - - - - -> removing previous version:"
-mkdir -v -m 755 /opt/dt.bldr/bin 2>/dev/null
-mkdir -v -m 755 /opt/dt.bldr/cfg 2>/dev/null
+rm -r -f -v /opt/dt.bldr/bin 2>/dev/null
+rm -r -f -v /opt/dt.bldr/cfg 2>/dev/null
 # -------------------------------------------------------------------------- #
 # Create directory structure
 # ------------------------------------------------------------------ #
 echo ""
 echo " - - - - -> Creating directories:"
-mkdir -v -m 755 /opt/dt.bldr
+if [ ! -d  /opt/dt.bldr ]
+then
+  mkdir -v -m 755 /opt/dt.bldr
+fi
 mkdir -v -m 755 /opt/dt.bldr/bin
 mkdir -v -m 755 /opt/dt.bldr/cfg
-mkdir -v -m 777 /opt/dt.bldr/log
+if [ ! -d  /opt/dt.bldr/log ]
+then
+  mkdir -v -m 777 /opt/dt.bldr/log
+fi
 # -------------------------------------------------------------------------- #
 # Copy files
 # ------------------------------------------------------------------ #
