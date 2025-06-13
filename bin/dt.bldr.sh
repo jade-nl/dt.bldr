@@ -11,11 +11,12 @@
 #              : -b          Build darktable
 #              : -i          Install darktable
 #              : -m          Merge branch using fixed dt.ext.branch.cfg
-#              : -M file     Merge branch specifying input file
+#              : -M file/url Merge branch specifying input file or URL
 #              : -t          Download the integration tests
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
 # Purpose      : 1) Clone or pull darktable from git repository
+#              :    - Optionally merge external branch
 #              : 2) Build darktable
 #              : 3) Install darktable
 # -------------------------------------------------------------------------- #
@@ -56,6 +57,7 @@
 #                             Removed dt.cfg.sh references
 #                             Force b and i options with -C option
 #                             Code cleanup                             2.1.8
+#              : jun 13 2025  -M now excepts a file or URL             2.1.9
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -69,7 +71,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.8"
+scriptVersion="2.1.9"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -81,13 +83,14 @@ baseLclSrcDir=""
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="${usrBaseDir}/cfg/dt.bldr.cfg"
-usrMergeFile="${usrBaseDir}/cfg/dt.ext.branch.cfg"
+usrMergeInput="${usrBaseDir}/cfg/dt.ext.branch.cfg"
 # colours
 clrRST=$(tput sgr0)    # reset
 clrRED=$(tput setaf 1) # red
 clrGRN=$(tput setaf 2) # green
 clrBLU=$(tput setaf 4) # blue
 # input options
+urlRegex=""
 optBuild="0"
 optClone="0"
 optHelp="0"
@@ -438,20 +441,20 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
  Syntax    dt.bldr.sh <options>
  ------------------------------------------------------------------------------
  Options
-  : -c        Clone files from repository to ${baseSrcDir}
-  : -p        Pull updates from repository to ${dtGitDir}
-  : -s        Stop processing if installed version and cloned
-               or pulled versions are the same.
-  : -C file   Use file as configuration. This forces the
-  :           -b and -i to be set also.
-  : -b        Build darktable (see General below)
-  : -i        Install darktable to ${CMAKE_PREFIX_PATH}
+  : -c           Clone files from repository to ${baseSrcDir}
+  : -p           Pull updates from repository to ${dtGitDir}
+  : -s           Stop processing if installed version and cloned
+                  or pulled versions are the same.
+  : -C file      Use file as configuration. This forces the
+  :              -b and -i to be set also.
+  : -b           Build darktable (see General below)
+  : -i           Install darktable to ${CMAKE_PREFIX_PATH}
 
-  : -m        Merge branch using fixed dt.ext.branch.cfg
-  : -M file   Merge branch specifying input file
-  : -t        Download the integration tests
+  : -m           Merge branch using fixed dt.ext.branch.cfg
+  : -M file/URL  Merge branch specifying input file or URL
+  : -t           Download the integration tests
 
-  : -h/-?     Show this output
+  : -h/-?        Show this output
 
   Starting without any options set will trigger the default run options.
  ------------------------------------------------------------------------------
@@ -583,11 +586,11 @@ else
       s) optStop="1" ;;
       b) optBuild="1" ;;
       i) optInstall="1" ;;
-      C) usrCfgFile=${OPTARG}
+      C) usrCfgFile="${OPTARG}"
          optBuild="1"
          optInstall="1" ;;
       m) optMerge="1" ;;
-      M) usrMergeFile=${OPTARG}
+      M) usrMergeInput="${OPTARG}"
          optMerge="1" ;;
       t) optTest="1" ;;
       h) optHelp="1" ;;
@@ -708,26 +711,34 @@ fi
 [[ ${optClone="1"} -eq "1" && ${optPull} -eq "1" ]] && optPull="0"
 
 # -------------------------------------------------------- #
-# load cfg file and set option when optMerge is requested
+# load cfg file or URL and set option when optMerge is requested
 if [[ "${optMerge}" -eq "1" ]]
 then
-  # check dt.ext.branch.cfg/manually given cfg
-  if test -r "${usrMergeFile}" -a -f "${usrMergeFile}"
-  then
-    # parse file
-    source "${usrMergeFile}"
-
-    # check/set sane fetch method for darktable origin
-    # if only -m or -M file are given, set optClone to 1
-    [ "${optClone}" = "0" ] && [ "${optPull}" = "0" ] && optClone="1"
-
-    # force optStop to be off, initial versions are likely to be the same
-    optStop="0"
-
+  # URL or file
+  urlRegex='(https?|ftp|file)://[-[:alnum:]\+&@#/%?=~_|!:,.;]*[-[:alnum:]\+&@#/%=~_|]'
+  if [[ $usrMergeInput =~ $urlRegex ]]
+  then 
+  # URL
+    FRK_GIT="\"$(echo "${usrMergeInput}" | sed 's%/tree.*%.git%')\""
+    FRK_BRNCH="\"${usrMergeInput##*/}\""
   else
-  # oops
-   _errHndlr "Parsing merge configuration" "Cannot parse ${usrMergeFile}."
+  # file
+    if test -r "${usrMergeInput}" -a -f "${usrMergeInput}"
+    then
+      # parse file
+      source "${usrMergeInput}"
+    else
+    # oops
+     _errHndlr "Parsing merge configuration" "Cannot parse ${usrMergeInput}."
+    fi
+
+  # check/set sane fetch method for darktable origin
+  # if only -m or -M file are given, set optClone to 1
+  [ "${optClone}" = "0" ] && [ "${optPull}" = "0" ] && optClone="1"
+  # force optStop to be off, initial versions are likely to be the same
+  optStop="0"
   fi
+
 fi
 
 # -------------------------------------------------------- #

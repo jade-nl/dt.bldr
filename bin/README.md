@@ -28,6 +28,7 @@ The following options can be used when running dt.bldr.sh:
 *  **-i**      Install darktable
 *  **-m**      Merge one external branch using default merge configuration file
 *  **-M file** Merge one external branch using specified configuration file
+*  **-M URL**  Merge one external branch using specified URL
 *  **-t**      Download the integration tests
 *  **-h**      Show help
 
@@ -89,15 +90,15 @@ that looks like dt.ext.branch.cfg. This file holds the URL of the forked
 repository and the name of the branch to be merged (the example directory has a
 sample).
 
-**Beware:** This merge option (*-mi/-M file*) is experimental. Merging might not
-work as intended depending on the branch that is being merged, the chosen
-method and/or the state of darktable's master branch. Especially "old" PRs might
-introduce merging issues, the script is not intelligent enough to solve this.
+**Beware:** This merge option (*-m/-M <file|URL>*) might not work as intended
+depending on the branch that is being merged, the chosen method and/or the
+state of darktable's master branch. Especially "old" PRs might introduce
+merging issues, the script is not intelligent enough to solve this.
 
 The safest way to merge an external branch is to clone darktable first instead
-of pulling. If the *-m* or *-M file* option is used and no other options are
-given cloning is forced. *-c* and *-p* can be used in conjunction with *-m* or
-*-M file*.
+of pulling. If the *-m* or *-M <file|URL>* option is used and no other options
+are given cloning is forced. *-c* and *-p* can be used in conjunction with *-m*
+or *-M <file|URL>*.
 
 Cloning darktable has become more and more time consuming, so trying to pull
 and merge first is an option. If this fails cloning has to be done, even if it
@@ -110,10 +111,16 @@ are merged and then run *dt.bldr.sh -bi* to build and install.
 
 Safest way to integrate external branches:
 
-- **dt.bldr.sh -m** or **dt.bldr.sh -M /path/to/merge.file.1.cfg**
-- **dt.bldr.sh -pM /path/to/merge.file.2.cfg**
-- **dt.bldr.sh -pM /path/to/merge.file.3.cfg**
-- **dt.bldr.sh -bi**
+- **dt.bldr.sh -bim** 
+- **dt.bldr.sh -biM /path/to/merge.file.1.cfg**
+- **dt.bldr.sh -biM https://valid_url_goes_here**
+
+Either of those three will force cloning darktable, merge an external branch and then build and install darktable.
+
+Add other external branches on top of the previous step by doing either of the following:
+
+- **dt.bldr.sh -pbiM /path/to/merge.file.2.cfg**
+- **dt.bldr.sh -pbiM https://valid_url_goes_here**
 
 To get rid of all the merged branches just run *dt.bldr.sh -c*, which will force
 a fresh darktable clone.
