@@ -135,10 +135,10 @@ About the URL: This needs to be the URL that points to the repository and branch
 Assuming that you are looking at a specific PR on the official darktable repository you can get the URL by clicking on what *from* points to (on the same line as the *Open* icon. The browser now shows a URL that looks like:
 
 ```
-https://github.com/*user_name*/darktable/tree/*branch_name
+https://github.com/user_name/darktable/tree/branch_name
 ```
 
-https://github.com/user-attachments/assets/cf55c02d-c431-41ab-b8f2-5db5395a61dc
+https://github.com/user-attachments/assets/16db2925-972c-4a7b-8a8f-768b9e0c3ce7
 
 ---
 ## General
