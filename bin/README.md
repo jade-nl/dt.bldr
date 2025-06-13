@@ -134,7 +134,11 @@ a fresh darktable clone.
 About the URL: This needs to be the URL that points to the repository and branch of the user that created it.
 Assuming that you are looking at a specific PR on the official darktable repository you can get the URL by clicking on what *from* points to (on the same line as the *Open* icon. The browser now shows a URL that looks like:
 
-**https://github.com/*user_name*/darktable/tree/*branch_name***
+```
+https://github.com/user_name/darktable/tree/branch_name
+```
+
+https://github.com/user-attachments/assets/e54070b9-87e7-4ec2-bb8c-d3c3e1e93a16
 
 ---
 ## General
