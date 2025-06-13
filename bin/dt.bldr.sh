@@ -719,8 +719,8 @@ then
   if [[ $usrMergeInput =~ $urlRegex ]]
   then 
   # URL
-    FRK_GIT="\"$(echo "${usrMergeInput}" | sed 's%/tree.*%.git%')\""
-    FRK_BRNCH="\"${usrMergeInput##*/}\""
+    FRK_GIT="$(echo "${usrMergeInput}" | sed 's%/tree.*%.git%')"
+    FRK_BRNCH="${usrMergeInput##*/}"
   else
   # file
     if test -r "${usrMergeInput}" -a -f "${usrMergeInput}"
@@ -731,14 +731,12 @@ then
     # oops
      _errHndlr "Parsing merge configuration" "Cannot parse ${usrMergeInput}."
     fi
-
+  fi
   # check/set sane fetch method for darktable origin
   # if only -m or -M file are given, set optClone to 1
   [ "${optClone}" = "0" ] && [ "${optPull}" = "0" ] && optClone="1"
   # force optStop to be off, initial versions are likely to be the same
   optStop="0"
-  fi
-
 fi
 
 # -------------------------------------------------------- #
