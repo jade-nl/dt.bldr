@@ -138,7 +138,7 @@ Assuming that you are looking at a specific PR on the official darktable reposit
 https://github.com/user_name/darktable/tree/branch_name
 ```
 
-https://github.com/user-attachments/assets/16db2925-972c-4a7b-8a8f-768b9e0c3ce7
+https://github.com/user-attachments/assets/e54070b9-87e7-4ec2-bb8c-d3c3e1e93a16
 
 ---
 ## General
