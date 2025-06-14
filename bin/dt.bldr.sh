@@ -58,6 +58,7 @@
 #                             Force b and i options with -C option
 #                             Code cleanup                             2.1.8
 #              : jun 13 2025  -M now excepts a file or URL             2.1.9
+#              : jun 14 2025  Merging silently removes existing branch 2.1.10
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -71,7 +72,7 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.9"
+scriptVersion="2.1.10"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
@@ -121,7 +122,7 @@ vrbMsg=""
 gitSRC=""
 useSRC=""
 lclSRC=""
-uniFut="$(date "+%N")"
+tmpUniqID="$(date "+%N")"
 # -------------------------------------------------------------------------- #
 # --- Functions ---
 # ------------------------------------------------------------------ #
@@ -205,16 +206,18 @@ function _gitDtMerge ()
   printf "\\r  merge   - merging fork "
   cd "${dtGitDir}"  2>/dev/null || _errHndlr "_gitDtMerge" "${dtGitDir} No such directory."
   [ "$(ls -A)" ] || _errHndlr "_gitDtMerge" "git directory is empty"
+  # check if already merged into master: silently delete before re-merging
+  git branch --merged master | grep -q "${FRK_BRNCH}" && git branch -d "${FRK_BRNCH}" >> "${bldLog}"
   # set up remote, forked repo
-  git remote add "${uniFut}" "${FRK_GIT}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to add remote"
+  git remote add "${tmpUniqID}" "${FRK_GIT}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to add remote"
   git remote update >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to update remote"
   # create, checkout and merge wanted (remote) branch
   git branch "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
   git checkout >> "${bldLog}" 2>&1 "${FRK_BRNCH}" > /dev/null 2>&1
-  git merge -m "merging" --allow-unrelated-histories "${uniFut}/${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
+  git merge -m "merging" --allow-unrelated-histories "${tmpUniqID}/${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to temporarily merge"
   # merge into darktable master
   git checkout master >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to switch branch"
-  git merge -m "future" "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
+  git merge -m "${FRK_BRNCH}" "${FRK_BRNCH}" >> "${bldLog}" 2>&1 || _errHndlr "_gitDtMerge" "Unable to merge"
   printf "\\r  merge   - merging fork %sOK%s\\n" "${clrGRN}" "${clrRST}"
 }
 
