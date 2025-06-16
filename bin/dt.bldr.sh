@@ -771,12 +771,14 @@ fi
 
 # -------------------------------------------------------------------------- #
 # is installed darktable part of PATH
-if [[ ! ":${PATH}:" == *":${CMAKE_PREFIX_PATH}/bin:"* ]]
+if [[ "${optInstall}" -eq "1" ]]
 then
-  echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
-  echo "  ${CMAKE_PREFIX_PATH}/bin is not part of the current PATH environment"
+  if [[ ! ":${PATH}:" == *":${CMAKE_PREFIX_PATH}/bin:"* ]]
+  then
+    echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
+    echo "  ${CMAKE_PREFIX_PATH}/bin is not part of the current PATH environment"
+  fi
 fi
-
 # -------------------------------------------------------------------------- #
 # --- Exit ---
 # -------------------------------------------------------------------------- #
