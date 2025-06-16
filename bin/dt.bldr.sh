@@ -162,6 +162,8 @@ function _gitDtClone ()
     printf "\\r          - disabling integration tests"
     git config submodule.src/tests/integration.update none  >> "${bldLog}" 2>&1 || _errHndlr "_gitDtClone" "disable integration test"
     printf "\\r          - disabling integration tests %sOK%s\\n" "${clrGRN}" "${clrRST}"
+  else
+    printf "\\r          - integration tests are not disabled \\n"
   fi
   # initialize rawspeed
   printf "\\r          - initializing and updating rawspeed"
