@@ -12,7 +12,6 @@
 #              : -i          Install darktable
 #              : -m          Merge branch using fixed dt.ext.branch.cfg
 #              : -M file/URL Merge branch specifying input file or URL
-#              : -t          Download the integration tests
 #              : -h/-?       Show help
 # -------------------------------------------------------------------------- #
 # Purpose      : 1) Clone or pull darktable from git repository
@@ -59,6 +58,12 @@
 #                             Code cleanup                             2.1.8
 #              : jun 13 2025  -M now excepts a file or URL             2.1.9
 #              : jun 14 2025  Merging silently removes existing branch 2.1.10
+#              : jun 17 2025  - Partial configuration parser re-write
+#                             - Added possibility to exclude style
+#                               examples being installed. cfg only
+#                             - Removed -t, get integration tests, as
+#                               command line option. Now cfg only.
+#                             - Basics for multi version support (p1)
 # -------------------------------------------------------------------------- #
 # Copyright    : GNU General Public License v3.0
 #              : https://www.gnu.org/licenses/gpl-3.0.txt
@@ -72,18 +77,20 @@ LANG=POSIX; LC_ALL=POSIX; export LANG LC_ALL
 # --- Variables ---
 # ------------------------------------------------------------------ #
 # Script core related
-scriptVersion="2.1.10"
+scriptVersion="3.0.0"
 scriptName="$(basename "${0}")"
 # script directories
 scriptDir="/opt/dt.bldr"
+binDir="${scriptDir}/bin"
 cfgDir="${scriptDir}/cfg"
 usrBaseDir="$HOME/.local"
 logDir="/opt/dt.bldr/log"
-baseGitSrcDir=""
-baseLclSrcDir=""
+baseGitSRCDir=""
+baseLclSRCDir=""
 # script files
 defCfgFile="${cfgDir}/dt.bldr.cfg"
 usrCfgFile="${usrBaseDir}/cfg/dt.bldr.cfg"
+cfgChkr="${binDir}/dt.cfg.sh -c"
 usrMergeInput="${usrBaseDir}/cfg/dt.ext.branch.cfg"
 # colours
 clrRST=$(tput sgr0)    # reset
@@ -110,19 +117,22 @@ dfltStop=""
 dfltTest=""
 # script misc
 lrgDvdr=" ------------------------------------------------------------------ "
-sudoToken=""
-instToken=""
-gitVrsn="n/a"
-curVrsn="n/a"
-equVrsn="0"
-ttlBldTime="0"
 baseSrcDir=""
+curVrsn="n/a"
 dtGitDir=""
-vrbMsg=""
+equVrsn="0"
 gitSRC=""
-useSRC=""
+gitBrnchSRC=""
+gitBrnchSRCToken=""
+gitNameSRC=""
+gitVrsn="n/a"
+instToken=""
 lclSRC=""
+sudoToken=""
 tmpUniqID="$(date "+%N")"
+ttlBldTime="0"
+useSRC=""
+vrbMsg=""
 # -------------------------------------------------------------------------- #
 # --- Functions ---
 # ------------------------------------------------------------------ #
@@ -132,10 +142,19 @@ tmpUniqID="$(date "+%N")"
 # ------------------------------------------------------------------ #
 function _parseCfgs ()
 {
+  # check config files
+  ${cfgChkr} >/dev/null 2>&1 || _errHndlr "Configuration file(s)" \
+              "Content not valid.  Run dt.cfg.sh -c for details"
   # parse default system wide configuration file
   source "${defCfgFile}"
   # parse user defined configuration file
-  [ -f "${usrCfgFile}" ] && source "${usrCfgFile}"
+  if [ -f "${usrCfgFile}" ]
+  then
+    source "${usrCfgFile}"
+    # make sure some of the user set config options are sane
+
+
+  fi
 }
 # ------------------------------------------------------------------ #
 # Function : Clone darktable
@@ -148,7 +167,12 @@ function _gitDtClone ()
   [ -d "${dtGitDir}" ] && find "${dtGitDir}" -mindepth 1 -delete
   # clone dt
   cd ${baseSrcDir} 2>/dev/null || _errHndlr "_gitDtClone" "${baseSrcDir} No such directory."
-  git clone "${gitSRC}" >> "${bldLog}" 2>&1 &
+
+  [ ! -z "${gitBrnchSRC}" ] && gitBrnchSRCToken="-b ${gitBrnchSRC} --single-branch"
+
+  git clone ${gitBrnchSRCToken} "${gitSRC}" "${gitNameSRC}">> "${bldLog}" 2>&1 &
+#  git clone "${gitSRC}" >> "${bldLog}" 2>&1 &
+
   prcssPid="$!" ; txtStrng="clone   - cloning darktable"
   _shwPrgrs
   # enter repository
@@ -251,7 +275,13 @@ function _gitDtBuild ()
     export CC=gcc
     export CXX=g++
   fi
-
+  # include are example styles
+  if [ "${dfltStyles}" -eq "0" ]
+  then
+    cd "${dtGitDir}/data/styles/" 2>&1  || _errHndlr "_gitDtBuild" "${dtGitDir}/data/styles/ No such directory."
+    rm *.dtstyle 2>&1  || _errHndlr "_gitDtBuild" "*.dtstyle : No such files."
+    cd "${dtGitDir}" 2>/dev/null || _errHndlr "_gitDtBuild" "${dtGitDir} No such directory."
+  fi
   # create and enter clean build environment
   rm -rf build > /dev/null 2>&1
   mkdir build || _errHndlr "_gitDtBuild" "Cannot create build directory"
@@ -343,7 +373,8 @@ function _gitDtInstall ()
   cd "${dtGitDir}/build" 2>/dev/null || _errHndlr "_gitDtInstall" "${dtGitDir}/build No such directory"
   # remove previously installed version.
   tput sc
-  [ -d "${CMAKE_PREFIX_PATH}" ] && ${sudoToken} rm -rf "${CMAKE_PREFIX_PATH}"/*
+  # check for bin! an CMAKE_PREFIX_PATH check if empty could be disastrous
+  [ -d "${CMAKE_PREFIX_PATH}/bin" ] && ${sudoToken} rm -rf "${CMAKE_PREFIX_PATH}"/*
   # set env if it is a non-local install
   if [ ! -z ${sudoToken} ]
   then
@@ -457,7 +488,6 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
 
   : -m           Merge branch using fixed dt.ext.branch.cfg
   : -M file/URL  Merge branch specifying input file or URL
-  : -t           Download the integration tests
 
   : -h/-?        Show this output
 
@@ -472,15 +502,16 @@ ${lrgDvdr}${clrBLU}$(date '+%H:%M:%S') --${clrRST}
   - Source
     Source used ................. ${useSRC}
     GIT source .................. ${gitSRC}
-    Local GIT directory ......... ${baseGitSrcDir}
+    Local GIT directory ......... ${baseGitSRCDir}
     Tarball ..................... ${lclSRC}
-    Local tarball directory ..... ${baseLclSrcDir}
+    Local tarball directory ..... ${baseLclSRCDir}
 
   - Build and Install
     Compiler being used ......... ${compSRC}
     Prefix (install) path ....... ${CMAKE_PREFIX_PATH}
     Bindir path ................. ${CMAKE_INSTALL_BINDIR}
     Libdir path ................. ${CMAKE_INSTALL_LIBDIR}
+    Datarootdir path ............ ${CMAKE_INSTALL_DATAROOTDIR}
     Datarootdir path ............ ${CMAKE_INSTALL_DATAROOTDIR}
     Docdir path ................. ${CMAKE_INSTALL_DOCDIR}
     Localedir path .............. ${CMAKE_INSTALL_LOCALEDIR}
@@ -562,15 +593,11 @@ echo "$(date '+%H:%M:%S') - Script starts" >> "${scrptLog}"
 # -------------------------------------------------------------------------- #
 # process options
 # ------------------------------------------------------------------ #
-echo " - options processing" >> "${scrptLog}"
 # are any options given
+echo " - options processing" >> "${scrptLog}"
 if [ "$#" -eq "0" ]
 then
-
-  # No, parse configuration file(s)
-  _parseCfgs
-
-  # set default options from configuration file(s)
+  # no: set default options from configuration file(s)
   echo " - no command line options are found" >> "${scrptLog}"
   optClone="${dfltClone}"
   optPull="${dfltPull}"
@@ -578,11 +605,9 @@ then
   optBuild="${dfltBuild}"
   optInstall="${dfltInstall}"
   optTest="${dfltTest}"
-
 else
-
-  echo " - options are found" >> "${scrptLog}"
-  # process options
+  # yes: process options
+  echo " - command line options are found" >> "${scrptLog}"
   while getopts ":cpsbiC:mM:th" OPTION
   do
     case "${OPTION}" in
@@ -597,16 +622,14 @@ else
       m) optMerge="1" ;;
       M) usrMergeInput="${OPTARG}"
          optMerge="1" ;;
-      t) optTest="1" ;;
       h) optHelp="1" ;;
       ?) optHelp="1" ;;
     esac
   done
 fi
 
-# -------------------------------------------------------------------------- #
 # parse configuration file(s)
-
+echo " - parsing configuration file(s)" >> "${scrptLog}"
 _parseCfgs
 
 # -------------------------------------------------------------------------- #
@@ -668,8 +691,8 @@ echo " - source is: ${useSRC}" >> "${scrptLog}"
 if [[ "${useSRC}" == "git" ]]
 then
   # set dir names
-  baseSrcDir="${baseGitSrcDir}"
-  dtGitDir="${baseSrcDir}/darktable"
+  baseSrcDir="${baseGitSRCDir}"
+  dtGitDir="${baseSrcDir}/${gitNameSRC}"
 fi
 # source is local
 if [[ "${useSRC}" == "local" ]]
@@ -682,7 +705,7 @@ then
   fi
   fallThrough="1"
   # set dir names
-  baseSrcDir="${baseLclSrcDir}"
+  baseSrcDir="${baseLclSRCDir}"
   tempDir="darktable.temp"
   # no cloning or pulling
   optClone="0"
@@ -778,7 +801,7 @@ then
   if [[ ! ":${PATH}:" == *":${CMAKE_PREFIX_PATH}/bin:"* ]]
   then
     echo "${lrgDvdr}${clrBLU}$(date '+%H:%M:%S')${clrRST} -- "
-    echo "  ${CMAKE_PREFIX_PATH}/bin is not part of the current PATH environment"
+    echo "  ${CMAKE_PREFIX_PATH}/bin : not part of current PATH environment"
   fi
 fi
 # -------------------------------------------------------------------------- #
