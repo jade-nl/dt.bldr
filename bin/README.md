@@ -29,7 +29,6 @@ The following options can be used when running dt.bldr.sh:
 *  **-m**      Merge one external branch using default merge configuration file
 *  **-M file** Merge one external branch using specified configuration file
 *  **-M URL**  Merge one external branch using specified URL
-*  **-t**      Download the integration tests
 *  **-h**      Show help
 
 If no options are given when running the script, the defaults that are in the
@@ -75,14 +74,11 @@ installs more then just a few binaries. These would all end up in /bin when
 setting the global prefix to /bin. This can be fine-tuned in the configuration
 file though.
 
-The -t option takes care of the integration tests that come with darktable. The
-main reason for this script is to be able to build an install one or more
+The dfltTest option takes care of the integration tests that come with darktable. The main reason for this script is to be able to build an install one or more
 personalized darktable versions and/or relatively easy build and test PRs. As
-such these integration tests are out-of-scope.
+such these integration tests are out-of-scope. Set to 0 (dot not)nclude) by default.
 
-The integration tests are rather large and are not being downloaded by default.
-There's a configuration option that can be set in dt.bldr.cfg to change this
-behaviour. 
+The dfltStyles options makes it possible to not include the large amount of sample styles. This will, however, not take care of sample styles that are already in the database (data.db). Set to 1 (do include) by default.
 
 I decided to make it possible to merge a branch from a forked darktable
 repository into the current master. This is done using the -m options and a file
